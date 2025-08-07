@@ -204,6 +204,11 @@ export const createPackage: RequestHandler = async (req, res) => {
     // Get the created package with the ID
     const createdPackage = await db.collection("ad_packages").findOne({ _id: result.insertedId });
 
+    // Broadcast package creation to all connected clients
+    if (createdPackage) {
+      packageSyncService.broadcastPackageCreated(createdPackage);
+    }
+
     const response: ApiResponse<AdPackage> = {
       success: true,
       data: createdPackage as AdPackage,
@@ -244,6 +249,11 @@ export const updatePackage: RequestHandler = async (req, res) => {
 
     // Get the updated package
     const updatedPackage = await db.collection("ad_packages").findOne({ _id: new ObjectId(packageId) });
+
+    // Broadcast package update to all connected clients
+    if (updatedPackage) {
+      packageSyncService.broadcastPackageUpdated(updatedPackage);
+    }
 
     const response: ApiResponse<AdPackage> = {
       success: true,
@@ -291,6 +301,9 @@ export const deletePackage: RequestHandler = async (req, res) => {
         error: "Package not found",
       });
     }
+
+    // Broadcast package deletion to all connected clients
+    packageSyncService.broadcastPackageDeleted(packageId);
 
     const response: ApiResponse<{ message: string }> = {
       success: true,
