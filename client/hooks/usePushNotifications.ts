@@ -108,13 +108,23 @@ export const usePushNotifications = () => {
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('🔴 Push notification WebSocket error:', {
-          type: error.type,
-          target: error.target?.url || 'Unknown URL',
-          readyState: error.target?.readyState || 'Unknown state',
-          message: error.message || 'Connection failed'
-        });
+        const errorDetails = {
+          type: error.type || 'error',
+          url: error.target?.url || wsRef.current?.url || 'Unknown URL',
+          readyState: error.target?.readyState || wsRef.current?.readyState || 'Unknown state',
+          code: error.code || 'No code',
+          reason: error.reason || 'Unknown reason',
+          timestamp: new Date().toISOString()
+        };
+
+        console.error('🔴 Push notification WebSocket error:', errorDetails);
         setIsConnected(false);
+
+        // Attempt reconnection after error
+        if (isAuthenticated && user) {
+          console.log('🔄 Attempting to reconnect push notifications in 5 seconds...');
+          setTimeout(connectWebSocket, 5000);
+        }
       };
     } catch (error) {
       console.error('Failed to connect to push notification service:', error);
