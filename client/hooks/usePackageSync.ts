@@ -114,12 +114,22 @@ export const usePackageSync = () => {
         };
 
         wsRef.current.onerror = (error) => {
-          console.error('🔴 Package sync WebSocket error:', {
-            type: error.type,
-            target: error.target?.url || 'Unknown URL',
-            readyState: error.target?.readyState || 'Unknown state',
-            message: error.message || 'Connection failed'
-          });
+          const errorDetails = {
+            type: error.type || 'error',
+            url: error.target?.url || wsRef.current?.url || 'Unknown URL',
+            readyState: error.target?.readyState || wsRef.current?.readyState || 'Unknown state',
+            code: error.code || 'No code',
+            reason: error.reason || 'Unknown reason',
+            timestamp: new Date().toISOString()
+          };
+
+          console.error('🔴 Package sync WebSocket error:', errorDetails);
+
+          // Attempt reconnection after error
+          if (isAuthenticated && user && token) {
+            console.log('🔄 Attempting to reconnect package sync in 5 seconds...');
+            setTimeout(connectWebSocket, 5000);
+          }
         };
       } catch (error) {
         console.error('Failed to connect package sync WebSocket:', error);
