@@ -439,8 +439,23 @@ export default function Admin() {
         errors.push(`Properties API error: ${propertiesResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching properties:", error);
-      errors.push("Properties API unreachable");
+      const isAbortError = error.name === 'AbortError';
+      const isNetworkError = error.message?.includes('Failed to fetch');
+
+      console.error("Error fetching properties:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError
+      });
+
+      if (isAbortError) {
+        errors.push("Properties API timeout");
+      } else if (isNetworkError) {
+        errors.push("Properties API network error");
+      } else {
+        errors.push(`Properties API error: ${error.message || 'Unknown error'}`);
+      }
     }
 
     setApiErrors(errors);
