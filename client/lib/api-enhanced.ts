@@ -35,7 +35,8 @@ const getApiBaseUrl = () => {
 
   switch (environment) {
     case "development":
-      return "http://localhost:8080";
+      // In development, use the same origin to avoid CORS issues
+      return `${window.location.protocol}//${window.location.host}`;
     case "fly":
       return `${window.location.protocol}//${window.location.host}`;
     case "netlify":
