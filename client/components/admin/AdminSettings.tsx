@@ -197,7 +197,7 @@ export default function AdminSettings() {
               },
               body: JSON.stringify({
                 razorpayKeyId: settings.payment.paymentApiKey,
-                razorpayKeySecret: settings.payment.paymentApiKey, // In real implementation, have separate secret field
+                razorpayKeySecret: settings.payment.paymentSecretKey,
               }),
             });
 
