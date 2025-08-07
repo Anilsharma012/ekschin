@@ -414,7 +414,7 @@ export default function CustomFieldsManagement() {
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{fields.length}</div>
+            <div className="text-2xl font-bold">{fields?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Custom fields</p>
           </CardContent>
         </Card>
@@ -425,7 +425,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {fields.filter(f => f.active).length}
+              {fields?.filter(f => f && f.active).length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Currently enabled</p>
           </CardContent>
@@ -437,7 +437,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {fields.filter(f => f.required).length}
+              {fields?.filter(f => f && f.required).length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Mandatory fields</p>
           </CardContent>
@@ -449,7 +449,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(fields.map(f => f.type)).size}
+              {fields?.length ? new Set(fields.map(f => f?.type).filter(Boolean)).size : 0}
             </div>
             <p className="text-xs text-muted-foreground">Different types</p>
           </CardContent>
