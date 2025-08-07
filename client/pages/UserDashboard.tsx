@@ -785,7 +785,21 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
-      
+
+      {/* Package Checkout Modal */}
+      {showCheckoutModal && selectedPackage && (
+        <PackageCheckoutModal
+          package={selectedPackage}
+          isOpen={showCheckoutModal}
+          onClose={() => {
+            setShowCheckoutModal(false);
+            setSelectedPackage(null);
+          }}
+          onPurchase={handlePurchase}
+          isProcessing={false}
+        />
+      )}
+
       <BottomNavigation />
     </div>
   );
