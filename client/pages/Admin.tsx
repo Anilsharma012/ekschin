@@ -492,6 +492,15 @@ export default function Admin() {
     setLoading(false);
   };
 
+  // Manual retry function for user-triggered retries
+  const retryConnection = async () => {
+    console.log("🔄 Manual retry triggered by user");
+    setError("");
+    setApiErrors([]);
+    setOfflineMode(false);
+    await fetchAdminData();
+  };
+
   // Show loading while auth is being determined
   if (authLoading) {
     return (
