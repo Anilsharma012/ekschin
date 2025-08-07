@@ -1268,6 +1268,23 @@ export function createServer() {
     clearAllTransactions,
   );
 
+  // Push notification test routes (for debugging)
+  app.post(
+    "/api/test/push-notification",
+    authenticateToken,
+    testPushNotification,
+  );
+  app.get(
+    "/api/test/push-notification/stats",
+    authenticateToken,
+    getPushNotificationStats,
+  );
+  app.get(
+    "/api/test/push-notification/user/:userId",
+    authenticateToken,
+    testUserConnection,
+  );
+
   // Footer management routes
   app.get("/api/footer/links", getActiveFooterLinks);
   app.get(
