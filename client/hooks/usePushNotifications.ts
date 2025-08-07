@@ -14,6 +14,8 @@ export const usePushNotifications = () => {
   const [notifications, setNotifications] = useState<PushNotification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   // Request browser notification permission
   const requestNotificationPermission = async () => {
