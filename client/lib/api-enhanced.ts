@@ -51,9 +51,9 @@ const environment = detectEnvironment();
 
 export const API_CONFIG = {
   baseUrl: API_BASE_URL,
-  timeout: 8000, // Reduced timeout for faster fallback
-  retryAttempts: 2,
-  retryDelay: 1000,
+  timeout: 15000, // Increased timeout to handle database initialization
+  retryAttempts: 3,
+  retryDelay: 2000, // Increased delay to allow server to stabilize
   environment,
 };
 
