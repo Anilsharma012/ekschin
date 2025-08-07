@@ -463,10 +463,11 @@ const DashboardDemo: React.FC = () => {
         )}
 
         <Tabs defaultValue="realtime" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="realtime">Real-time Features</TabsTrigger>
             <TabsTrigger value="responsive">Responsive Design</TabsTrigger>
             <TabsTrigger value="features">Dashboard Features</TabsTrigger>
+            <TabsTrigger value="websocket">WebSocket Test</TabsTrigger>
           </TabsList>
 
           {/* Real-time Tests */}
