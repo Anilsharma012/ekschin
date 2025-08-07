@@ -62,7 +62,8 @@ export const usePushNotifications = () => {
       wsRef.current.onopen = () => {
         console.log('🔔 Connected to push notification service');
         setIsConnected(true);
-        
+        reconnectAttempts.current = 0; // Reset reconnection attempts on success
+
         // Authenticate with user ID
         if (wsRef.current && user) {
           wsRef.current.send(JSON.stringify({
