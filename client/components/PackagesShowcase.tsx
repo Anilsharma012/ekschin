@@ -52,10 +52,28 @@ export default function PackagesShowcase() {
       const data = response.data;
 
       if (data.success && Array.isArray(data.data)) {
-        // Limit to 3 for showcase
-        const showcasePackages = data.data.slice(0, 3);
+        // Filter for active advertisement listing packages
+        const advertisementPackages = data.data.filter((pkg: AdPackage) => {
+          return pkg.active &&
+                 pkg.category === "property" &&
+                 (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium" || pkg.type === "featured");
+        });
+
+        console.log("📦 Advertisement packages found:", advertisementPackages);
+
+        // Limit to 3 for showcase, prioritize premium/featured packages
+        const sortedPackages = advertisementPackages.sort((a, b) => {
+          const order = { premium: 3, featured: 2, standard: 1, basic: 0 };
+          return (order[b.type] || 0) - (order[a.type] || 0);
+        });
+
+        const showcasePackages = sortedPackages.slice(0, 3);
         setPackages(showcasePackages);
         setError(null);
+
+        if (showcasePackages.length === 0) {
+          console.warn("⚠️ No advertisement packages found to display");
+        }
       } else {
         console.warn("Invalid packages data received:", data);
         setError("Invalid data format received");
