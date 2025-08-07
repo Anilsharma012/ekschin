@@ -201,15 +201,25 @@ export default function Admin() {
       return;
     }
 
-    // Quick connectivity test
-    const testConnectivity = async () => {
+    // Enhanced connectivity test with better error handling
+    const testConnectivity = async (retryCount = 0) => {
+      const maxRetries = 3;
+      const retryDelay = 1000 * (retryCount + 1); // Progressive delay: 1s, 2s, 3s
+
       try {
-        // Try a simple fetch with a reasonable timeout
+        // Try a simple fetch with progressive timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeout = 5000 + (retryCount * 2000); // 5s, 7s, 9s
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        console.log(`🔍 Testing connectivity (attempt ${retryCount + 1}/${maxRetries + 1})...`);
 
         const response = await fetch("/api/admin/stats", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
           signal: controller.signal,
           cache: "no-cache",
         });
@@ -217,23 +227,43 @@ export default function Admin() {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
+          if (response.status === 503 && retryCount < maxRetries) {
+            console.log(`🔄 Server unavailable (503), retrying in ${retryDelay}ms...`);
+            setTimeout(() => testConnectivity(retryCount + 1), retryDelay);
+            return;
+          }
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
         // If we get here, connectivity is working
         console.log("✅ Connectivity test passed, loading admin data");
+        setOfflineMode(false);
         if (!skipDataLoading) {
           fetchAdminData();
         } else {
           setLoading(false);
-          setOfflineMode(true);
         }
       } catch (error) {
-        console.warn("⚠️ Connectivity test failed:", error.message || error);
-        console.log("🔄 Enabling graceful offline mode with retry capability");
+        const isAbortError = error.name === 'AbortError';
+        const isNetworkError = error.message.includes('Failed to fetch');
+
+        console.warn(`⚠️ Connectivity test failed (attempt ${retryCount + 1}):`, {
+          error: error.message,
+          type: error.name,
+          isAbort: isAbortError,
+          isNetwork: isNetworkError
+        });
+
+        if (retryCount < maxRetries && (isNetworkError || isAbortError)) {
+          console.log(`🔄 Retrying connectivity test in ${retryDelay}ms...`);
+          setTimeout(() => testConnectivity(retryCount + 1), retryDelay);
+          return;
+        }
+
+        console.log("🔄 Max retries reached, enabling offline mode with fallback");
         setOfflineMode(true);
 
-        // Try to load real data anyway, fallback to mock if it fails
+        // Try to load real data anyway as a last resort
         if (!skipDataLoading) {
           try {
             await fetchAdminData();
