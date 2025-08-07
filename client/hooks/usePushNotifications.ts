@@ -98,7 +98,11 @@ export const usePushNotifications = () => {
             console.log('✅ Authenticated for push notifications');
           }
         } catch (error) {
-          console.error('Error parsing notification message:', error);
+          console.error('Error parsing notification message:', {
+            error: error instanceof Error ? error.message : String(error),
+            data: event.data,
+            type: typeof event.data
+          });
         }
       };
 
