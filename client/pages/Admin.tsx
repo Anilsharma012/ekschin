@@ -343,8 +343,23 @@ export default function Admin() {
         errors.push(`Stats API error: ${statsResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
-      errors.push("Stats API unreachable");
+      const isAbortError = error.name === 'AbortError';
+      const isNetworkError = error.message?.includes('Failed to fetch');
+
+      console.error("Error fetching stats:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError
+      });
+
+      if (isAbortError) {
+        errors.push("Stats API timeout (server may be slow)");
+      } else if (isNetworkError) {
+        errors.push("Stats API network error (check connection)");
+      } else {
+        errors.push(`Stats API error: ${error.message || 'Unknown error'}`);
+      }
     }
 
     // Fetch users with individual error handling
