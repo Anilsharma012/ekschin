@@ -1313,6 +1313,11 @@ export function createServer() {
   app.put("/api/admin/custom-fields/reorder", authenticateToken, requireAdmin, reorderCustomFields);
   app.post("/api/custom-fields/initialize", initializeCustomFields);
 
+  // Admin notification and package management routes
+  app.post("/api/admin/send-notification", authenticateToken, requireAdmin, sendNotification);
+  app.get("/api/admin/packages", authenticateToken, requireAdmin, getAdminPackages);
+  app.get("/api/admin/user-packages", authenticateToken, requireAdmin, getAdminUserPackages);
+
   // Debug custom fields endpoints (for troubleshooting)
   app.get("/api/debug/custom-fields", testCustomFields);
   app.post("/api/debug/custom-fields/fix", fixCustomFields);
