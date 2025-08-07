@@ -139,6 +139,7 @@ const IntegratedSellerDashboard: React.FC = () => {
   const { notifications, unreadCount: notificationUnreadCount } = usePushNotifications();
   const {
     packages,
+    userPackages,
     availablePackages,
     activeUserPackages,
     loading: packagesLoading,
