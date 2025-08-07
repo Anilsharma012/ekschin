@@ -447,7 +447,7 @@ export function createServer() {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error("❌ Health check failed:", error.message);
+      console.error("��� Health check failed:", error.message);
 
       res.status(500).json({
         message: "pong",
@@ -485,13 +485,14 @@ export function createServer() {
     resendEmailVerification,
   );
 
-  // Property routes
-  app.get("/api/properties", getProperties);
-  app.get("/api/properties/featured", getFeaturedProperties);
-  app.get("/api/properties/:id", getPropertyById);
+  // Property routes (with database middleware)
+  app.get("/api/properties", ensureDatabase, getProperties);
+  app.get("/api/properties/featured", ensureDatabase, getFeaturedProperties);
+  app.get("/api/properties/:id", ensureDatabase, getPropertyById);
   app.post(
     "/api/properties",
     authenticateToken,
+    ensureDatabase,
     upload.array("images", 10),
     createProperty,
   );
