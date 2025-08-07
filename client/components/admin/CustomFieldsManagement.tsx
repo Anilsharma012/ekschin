@@ -496,7 +496,7 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      {field.categories.length > 0 ? (
+                      {field.categories && field.categories.length > 0 ? (
                         field.categories.slice(0, 2).map((cat, index) => (
                           <Badge key={index} variant="outline" className="mr-1">
                             {cat}
@@ -505,7 +505,7 @@ export default function CustomFieldsManagement() {
                       ) : (
                         <Badge variant="secondary">All Categories</Badge>
                       )}
-                      {field.categories.length > 2 && (
+                      {field.categories && field.categories.length > 2 && (
                         <Badge variant="outline">
                           +{field.categories.length - 2} more
                         </Badge>
