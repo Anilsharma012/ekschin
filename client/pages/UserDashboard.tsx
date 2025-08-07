@@ -88,6 +88,8 @@ export default function UserDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<any | null>(null);
   const [stats, setStats] = useState<UserStats>({
     totalFavorites: 0,
     recentViews: 0,
