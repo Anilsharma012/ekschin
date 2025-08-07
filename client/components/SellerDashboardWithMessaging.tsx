@@ -764,9 +764,10 @@ const SellerDashboardWithMessaging: React.FC = () => {
                               </li>
                             ))}
                           </ul>
-                          <Button 
-                            className="w-full" 
+                          <Button
+                            className="w-full"
                             variant={pkg.type === 'premium' ? 'default' : 'outline'}
+                            onClick={() => handlePurchaseClick(pkg)}
                           >
                             <Package className="h-4 w-4 mr-2" />
                             Purchase Package
