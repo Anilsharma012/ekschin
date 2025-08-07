@@ -5,6 +5,7 @@ import { connectToDatabase, getDatabase } from "./db/mongodb";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
 import { ChatWebSocketServer } from "./websocket";
 import { pushNotificationService } from "./services/pushNotificationService";
+import { packageSyncService } from "./services/packageSyncService";
 
 // Property routes
 import {
@@ -1298,6 +1299,12 @@ export function createServer() {
 export function initializePushNotifications(server: any) {
   pushNotificationService.initialize(server);
   console.log('📱 Push notification service initialized');
+}
+
+// Initialize package sync service
+export function initializePackageSync(server: any) {
+  packageSyncService.initialize(server);
+  console.log('📦 Package sync service initialized');
 }
 
 // For production

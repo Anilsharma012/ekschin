@@ -1,6 +1,6 @@
 // server/start-server.ts
 
-import { createServer, initializePushNotifications } from "./index";
+import { createServer, initializePushNotifications, initializePackageSync } from "./index";
 
 const app = createServer();
 const PORT = process.env.PORT || 8080;
@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 
-  // Initialize push notifications
+  // Initialize services
   initializePushNotifications(server);
+  initializePackageSync(server);
 });
