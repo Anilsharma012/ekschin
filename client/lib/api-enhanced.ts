@@ -115,7 +115,8 @@ export const safeApiRequest = async (
       `🔄 API Request [${retryCount + 1}/${API_CONFIG.retryAttempts + 1}]: ${url}`,
     );
 
-    const response = await fetch(url, {
+    // Use Promise.race to handle timeout more gracefully
+    const fetchPromise = fetch(url, {
       ...options,
       signal: controller.signal,
       headers: {
@@ -124,7 +125,12 @@ export const safeApiRequest = async (
       },
     });
 
-    clearTimeout(timeoutId);
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
 
     let responseData;
     try {
