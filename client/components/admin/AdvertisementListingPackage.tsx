@@ -130,7 +130,10 @@ export default function AdvertisementListingPackage() {
         ...newPackage,
         type: newPackage.listingType,
         features: newPackage.features.filter(f => f.trim() !== ""),
+        active: true, // Ensure package is active by default
       };
+
+      console.log("📦 Creating advertisement listing package:", packageData);
 
       const response = await fetch("/api/packages", {
         method: "POST",
