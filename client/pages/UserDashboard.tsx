@@ -143,22 +143,27 @@ export default function UserDashboard() {
     }
   };
 
-  const handlePurchase = async (packageId: string) => {
-    setPurchasing(packageId);
+  const handlePurchaseClick = (pkg: any) => {
+    setSelectedPackage(pkg);
+    setShowCheckoutModal(true);
+  };
+
+  const handlePurchase = async (packageId: string, paymentMethod: string, paymentDetails?: any) => {
     try {
-      const result = await purchasePackage(packageId);
+      const result = await purchasePackage(packageId, paymentMethod);
       if (result.success) {
         // Show success message
         alert('Package purchased successfully!');
         fetchDashboardData();
+        return { success: true };
       } else {
         alert(result.error || 'Purchase failed');
+        return { success: false, error: result.error };
       }
     } catch (error) {
       console.error('Purchase error:', error);
       alert('Purchase failed. Please try again.');
-    } finally {
-      setPurchasing(null);
+      return { success: false, error: 'Network error' };
     }
   };
 
