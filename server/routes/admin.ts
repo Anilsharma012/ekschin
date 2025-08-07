@@ -3,6 +3,7 @@ import { getDatabase } from "../db/mongodb";
 import { ApiResponse, Category } from "@shared/types";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
+import { pushNotificationService } from "../services/pushNotificationService";
 
 // Get all users (admin only)
 export const getAllUsers: RequestHandler = async (req, res) => {
