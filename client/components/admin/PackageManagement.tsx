@@ -632,9 +632,16 @@ export default function PackageManagement() {
               <Button
                 onClick={handleSubmitPackage}
                 disabled={saving || !formData.name || !formData.description}
-                className="bg-[#C70000] hover:bg-[#A50000]"
+                className="bg-[#C70000] hover:bg-[#A50000] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? "Saving..." : editingPackage ? "Update Package" : "Create Package"}
+                {saving ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  editingPackage ? "Update Package" : "Create Package"
+                )}
               </Button>
             </div>
           </div>
