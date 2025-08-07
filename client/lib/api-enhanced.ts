@@ -69,6 +69,20 @@ export const createApiUrl = (endpoint: string): string => {
   return `/api/${cleanEndpoint.replace("api/", "")}`;
 };
 
+// Check if server is ready by pinging health endpoint
+const checkServerReadiness = async (): Promise<boolean> => {
+  try {
+    const healthUrl = createApiUrl("health");
+    const response = await fetch(healthUrl, {
+      method: 'GET',
+      timeout: 3000 // Quick health check
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 // Enhanced fetch with retry and fallback
 export const safeApiRequest = async (
   endpoint: string,
