@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectToDatabase, getDatabase } from "./db/mongodb";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
 import { ChatWebSocketServer } from "./websocket";
+import { pushNotificationService } from "./services/pushNotificationService";
 
 // Property routes
 import {
@@ -1267,6 +1268,12 @@ export function createServer() {
   });
 
   return app;
+}
+
+// Initialize push notification service
+export function initializePushNotifications(server: any) {
+  pushNotificationService.initialize(server);
+  console.log('📱 Push notification service initialized');
 }
 
 // For production

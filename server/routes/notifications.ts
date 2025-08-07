@@ -198,12 +198,22 @@ export const sendNotification: RequestHandler = async (req, res) => {
               emailsSent++;
             }
 
-            // Simulate push notification sending
+            // Send real push notification
             if (type === "push" || type === "both") {
-              // In a real implementation, you would integrate with a push notification service
-              // For now, we'll just log it
-              console.log(`🔔 Push notification sent to ${recipient.name}: ${title}`);
-              pushNotificationsSent++;
+              try {
+                const { pushNotificationService } = await import("../services/pushNotificationService");
+                const result = await pushNotificationService.sendPushNotification(
+                  [recipient._id.toString()],
+                  title,
+                  message,
+                  'info'
+                );
+                pushNotificationsSent += result.sent;
+                console.log(`🔔 Push notification sent to ${recipient.name}: ${title}`);
+              } catch (pushError) {
+                console.error(`Failed to send push notification to ${recipient.name}:`, pushError);
+                failedDeliveries++;
+              }
             }
           } catch (recipientError) {
             console.error(`Failed to send to ${recipient.email}:`, recipientError);
