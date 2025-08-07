@@ -332,6 +332,12 @@ import {
   initializeCustomFields,
 } from "./routes/custom-fields";
 
+// Debug custom fields routes
+import {
+  testCustomFields,
+  fixCustomFields,
+} from "./routes/debug-custom-fields";
+
 export function createServer() {
   const app = express();
 
@@ -1303,6 +1309,10 @@ export function createServer() {
   app.put("/api/admin/custom-fields/:fieldId/status", authenticateToken, requireAdmin, updateCustomFieldStatus);
   app.put("/api/admin/custom-fields/reorder", authenticateToken, requireAdmin, reorderCustomFields);
   app.post("/api/custom-fields/initialize", initializeCustomFields);
+
+  // Debug custom fields endpoints (for troubleshooting)
+  app.get("/api/debug/custom-fields", testCustomFields);
+  app.post("/api/debug/custom-fields/fix", fixCustomFields);
 
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {
