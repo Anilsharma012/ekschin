@@ -828,6 +828,20 @@ const SellerDashboardWithMessaging: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Package Checkout Modal */}
+      {showCheckoutModal && selectedPackage && (
+        <PackageCheckoutModal
+          package={selectedPackage}
+          isOpen={showCheckoutModal}
+          onClose={() => {
+            setShowCheckoutModal(false);
+            setSelectedPackage(null);
+          }}
+          onPurchase={handlePurchase}
+          isProcessing={false}
+        />
+      )}
     </div>
   );
 };
