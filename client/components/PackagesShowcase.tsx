@@ -139,13 +139,41 @@ export default function PackagesShowcase() {
     );
   }
 
-  // Don't render if no packages and there was an error
+  // Don't render if no packages and there was an error (unless in development)
   if (packages.length === 0 && error) {
+    // Show debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <section className="bg-yellow-50 py-8 px-4 border-l-4 border-yellow-400">
+          <div className="max-w-7xl mx-auto text-center">
+            <h3 className="text-lg font-medium text-yellow-800 mb-2">PackagesShowcase Debug</h3>
+            <p className="text-yellow-700">❌ Error: {error}</p>
+            <p className="text-sm text-yellow-600 mt-2">
+              Check: Admin → Advertisement Listing Package → Create packages
+            </p>
+          </div>
+        </section>
+      );
+    }
     return null;
   }
 
-  // Don't render if no packages available
+  // Don't render if no packages available (unless in development)
   if (packages.length === 0) {
+    // Show debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <section className="bg-blue-50 py-8 px-4 border-l-4 border-blue-400">
+          <div className="max-w-7xl mx-auto text-center">
+            <h3 className="text-lg font-medium text-blue-800 mb-2">PackagesShowcase Debug</h3>
+            <p className="text-blue-700">📦 No advertisement packages found</p>
+            <p className="text-sm text-blue-600 mt-2">
+              Go to Admin → Advertisement Listing Package to create packages
+            </p>
+          </div>
+        </section>
+      );
+    }
     return null;
   }
 
