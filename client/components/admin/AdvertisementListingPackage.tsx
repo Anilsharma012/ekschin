@@ -101,11 +101,10 @@ export default function AdvertisementListingPackage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Filter for listing-type packages (basic, standard, premium that are not featured packages)
+          // Filter for listing-type packages (basic, standard, premium, featured)
           const listingPackages = data.data.filter((pkg: any) =>
             pkg.category === "property" &&
-            (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium") &&
-            !pkg.featureLevel // Exclude featured advertisement packages
+            (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium" || pkg.type === "featured")
           );
           setPackages(listingPackages);
         } else {
