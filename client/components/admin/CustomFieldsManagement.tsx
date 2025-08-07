@@ -560,7 +560,7 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                 </TableRow>
               ))}
-              {fields.length === 0 && (
+              {(!fields || fields.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                     No custom fields found. Create your first custom field to get started.
