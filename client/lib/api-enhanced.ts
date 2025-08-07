@@ -214,6 +214,9 @@ export const safeApiRequest = async (
       timeoutId = null;
     }
 
+    // Record failure for circuit breaker
+    circuitBreaker.recordFailure();
+
     // Better error serialization
     const errorDetails = {
       message: error.message || 'Unknown error',
