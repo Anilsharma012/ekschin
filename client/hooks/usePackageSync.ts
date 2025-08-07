@@ -259,7 +259,7 @@ export const usePackageSync = () => {
   };
 
   // Get active packages
-  const activePackages = packages.filter(pkg => pkg.isActive);
+  const activePackages = packages.filter(pkg => pkg.active);
 
   // Get user's active packages
   const activeUserPackages = userPackages.filter(up => up.status === 'active');
