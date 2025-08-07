@@ -56,6 +56,12 @@ const PackageDisplayWithSync: React.FC<PackageDisplayProps> = ({
   const [cancelling, setCancelling] = useState<string | null>(null);
 
   const handlePurchase = async (packageId: string) => {
+    // If this is for property posting (onPackageSelect provided), use that instead of direct purchase
+    if (onPackageSelect) {
+      onPackageSelect(packageId);
+      return;
+    }
+
     setPurchasing(packageId);
     try {
       const result = await purchasePackage(packageId);
