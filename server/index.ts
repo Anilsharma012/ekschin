@@ -320,6 +320,18 @@ import {
 } from "./routes/footer";
 import { testFooterData } from "./routes/footerTest";
 
+// Custom fields routes
+import {
+  getAllCustomFields,
+  getCustomFieldById,
+  createCustomField,
+  updateCustomField,
+  deleteCustomField,
+  updateCustomFieldStatus,
+  reorderCustomFields,
+  initializeCustomFields,
+} from "./routes/custom-fields";
+
 export function createServer() {
   const app = express();
 
@@ -1281,6 +1293,16 @@ export function createServer() {
 
   app.post("/api/footer/initialize", initializeFooterData);
   app.get("/api/footer/test", testFooterData);
+
+  // Custom fields routes
+  app.get("/api/admin/custom-fields", authenticateToken, requireAdmin, getAllCustomFields);
+  app.get("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, getCustomFieldById);
+  app.post("/api/admin/custom-fields", authenticateToken, requireAdmin, createCustomField);
+  app.put("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, updateCustomField);
+  app.delete("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, deleteCustomField);
+  app.put("/api/admin/custom-fields/:fieldId/status", authenticateToken, requireAdmin, updateCustomFieldStatus);
+  app.put("/api/admin/custom-fields/reorder", authenticateToken, requireAdmin, reorderCustomFields);
+  app.post("/api/custom-fields/initialize", initializeCustomFields);
 
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {
