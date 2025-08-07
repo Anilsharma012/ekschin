@@ -129,8 +129,12 @@ export default function PackageManagement() {
         setPackages(packages.filter(pkg => pkg._id !== packageId));
         alert("Package deleted successfully! Changes will be visible to users immediately.");
       } else {
-        const data = await response.json();
-        setError(data.error || "Failed to delete package");
+        try {
+          const data = await response.json();
+          setError(data.error || `Failed to delete package (${response.status})`);
+        } catch (parseError) {
+          setError(`Failed to delete package (${response.status})`);
+        }
       }
     } catch (error) {
       console.error("Error deleting package:", error);
