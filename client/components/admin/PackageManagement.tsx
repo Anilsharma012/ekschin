@@ -94,14 +94,19 @@ export default function PackageManagement() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPackages(data.data);
-        } else {
-          setError(data.error || "Failed to fetch packages");
+        try {
+          const data = await response.json();
+          if (data.success) {
+            setPackages(data.data || []);
+          } else {
+            setError(data.error || "Failed to fetch packages");
+          }
+        } catch (parseError) {
+          console.error("Failed to parse packages response:", parseError);
+          setError("Invalid response format from server");
         }
       } else {
-        setError("Failed to fetch packages");
+        setError(`Failed to fetch packages (${response.status})`);
       }
     } catch (error) {
       console.error("Error fetching packages:", error);
