@@ -67,11 +67,13 @@ export const usePushNotifications = () => {
 
         // Authenticate with user ID
         if (wsRef.current && user) {
-          wsRef.current.send(JSON.stringify({
+          const authMessage = {
             type: 'auth',
             userId: user.id || user._id,
             userType: user.userType || 'user'
-          }));
+          };
+          console.log('🔐 Sending auth message:', authMessage);
+          wsRef.current.send(JSON.stringify(authMessage));
         }
       };
 
