@@ -114,7 +114,12 @@ export const usePackageSync = () => {
         };
 
         wsRef.current.onerror = (error) => {
-          console.error('Package sync WebSocket error:', error);
+          console.error('🔴 Package sync WebSocket error:', {
+            type: error.type,
+            target: error.target?.url || 'Unknown URL',
+            readyState: error.target?.readyState || 'Unknown state',
+            message: error.message || 'Connection failed'
+          });
         };
       } catch (error) {
         console.error('Failed to connect package sync WebSocket:', error);
