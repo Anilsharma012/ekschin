@@ -610,18 +610,13 @@ export default function UserDashboard() {
                           )}
                         </ul>
 
-                        <Button 
-                          className="w-full" 
+                        <Button
+                          className="w-full"
                           variant={pkg.type === 'premium' ? 'default' : 'outline'}
-                          onClick={() => handlePurchase(pkg._id)}
-                          disabled={purchasing === pkg._id || hasPackage(pkg._id)}
+                          onClick={() => handlePurchaseClick(pkg)}
+                          disabled={hasPackage(pkg._id)}
                         >
-                          {purchasing === pkg._id ? (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                              Processing...
-                            </>
-                          ) : hasPackage(pkg._id) ? (
+                          {hasPackage(pkg._id) ? (
                             <>
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Already Purchased
