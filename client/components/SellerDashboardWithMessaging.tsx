@@ -31,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ChatConversation, ChatMessage } from '@shared/chat-types';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import PackageCheckoutModal from './PackageCheckoutModal';
 
 interface ConversationWithDetails extends ChatConversation {
   participantDetails: Array<{
