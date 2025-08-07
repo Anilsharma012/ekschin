@@ -94,6 +94,8 @@ const App = () => (
               <Route path="/footer-debug" element={<FooterDebugPage />} />
               {/* Debug Push Notifications */}
               <Route path="/debug-push-notifications" element={<DebugPushNotifications />} />
+              {/* Package System Test */}
+              <Route path="/test-packages" element={<div className="min-h-screen bg-gray-50 py-8"><div className="container mx-auto px-4"><PackageSystemTest /></div></div>} />
               {/* Dynamic Pages from Admin */}
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/:slug" element={<ContentPage />} />
