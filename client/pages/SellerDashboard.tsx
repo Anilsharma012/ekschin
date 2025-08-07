@@ -1,8 +1,8 @@
 import React from 'react';
-import SellerDashboardWithMessaging from '../components/SellerDashboardWithMessaging';
+import IntegratedSellerDashboard from '../components/IntegratedSellerDashboard';
 
 const SellerDashboard: React.FC = () => {
-  return <SellerDashboardWithMessaging />;
+  return <IntegratedSellerDashboard />;
 };
 
 export default SellerDashboard;
