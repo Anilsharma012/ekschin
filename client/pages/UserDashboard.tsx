@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import OLXStyleHeader from '../components/OLXStyleHeader';
 import BottomNavigation from '../components/BottomNavigation';
+import PackageCheckoutModal from '../components/PackageCheckoutModal';
 
 interface UserStats {
   totalFavorites: number;
