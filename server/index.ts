@@ -342,6 +342,13 @@ import {
   fixCustomFields,
 } from "./routes/debug-custom-fields";
 
+// Test push notification routes
+import {
+  testPushNotification,
+  getPushNotificationStats,
+  testUserConnection,
+} from "./routes/test-push-notifications";
+
 export function createServer() {
   const app = express();
 
