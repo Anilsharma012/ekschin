@@ -416,12 +416,10 @@ export default function Admin() {
       }
     }
 
-    // Fetch properties with individual error handling
+    // Fetch properties with enhanced error handling
     try {
       console.log("Fetching admin properties...");
-      const propertiesResponse = await fetch("/api/admin/properties?limit=10", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const propertiesResponse = await adminFetch("/api/admin/properties?limit=10", "properties");
 
       if (propertiesResponse.ok) {
         const propertiesData = await propertiesResponse.json();
