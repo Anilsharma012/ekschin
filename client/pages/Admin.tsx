@@ -639,17 +639,33 @@ export default function Admin() {
               <li key={index}>• {err}</li>
             ))}
           </ul>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setApiErrors([]);
-              fetchAdminData();
-            }}
-            className="mt-2"
-          >
-            Retry
-          </Button>
+          <div className="flex space-x-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={retryConnection}
+              disabled={loading}
+              className="flex items-center"
+            >
+              {loading ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Retry Connection
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setOfflineMode(true);
+                setApiErrors([]);
+                loadMockData();
+              }}
+            >
+              Continue Offline
+            </Button>
+          </div>
         </div>
       )}
       {loading ? (
