@@ -143,25 +143,43 @@ class PushNotificationService {
   }
 
   async sendToAllUsers(
-    title: string, 
-    message: string, 
-    userType?: string, 
+    title: string,
+    message: string,
+    userType?: string,
     type: 'info' | 'success' | 'warning' | 'error' = 'info'
   ): Promise<{ sent: number; failed: number }> {
     try {
       const db = getDatabase();
-      
+
       // Get all users or filtered by type
       const query = userType && userType !== 'all' ? { userType } : {};
       const users = await db.collection('users').find(query).toArray();
-      
+
       const userIds = users.map(user => user._id.toString());
-      
+
       return await this.sendPushNotification(userIds, title, message, type);
     } catch (error) {
       console.error('Error sending notification to all users:', error);
       return { sent: 0, failed: 1 };
     }
+  }
+
+  // Bulk notification sender for admin use
+  async sendBulkNotifications(
+    userIds: string[],
+    notification: {
+      title: string;
+      message: string;
+      type: 'info' | 'success' | 'warning' | 'error';
+      timestamp: Date;
+    }
+  ): Promise<{ sent: number; failed: number }> {
+    return await this.sendPushNotification(
+      userIds,
+      notification.title,
+      notification.message,
+      notification.type
+    );
   }
 
   async markNotificationAsRead(userId: string, notificationId: string): Promise<boolean> {
