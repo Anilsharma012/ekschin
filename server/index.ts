@@ -3,6 +3,7 @@ import cors from "cors";
 
 import { connectToDatabase, getDatabase } from "./db/mongodb";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
+import { ensureDatabase, databaseHealthCheck } from "./middleware/database";
 import { ChatWebSocketServer } from "./websocket";
 import { pushNotificationService } from "./services/pushNotificationService";
 import { packageSyncService } from "./services/packageSyncService";
