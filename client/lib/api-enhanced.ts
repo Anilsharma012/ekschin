@@ -153,13 +153,24 @@ export const safeApiRequest = async (
   } catch (error: any) {
     clearTimeout(timeoutId);
 
+    // Better error serialization
+    const errorDetails = {
+      message: error.message || 'Unknown error',
+      name: error.name || 'Error',
+      type: error.constructor?.name || 'UnknownError',
+      code: error.code,
+      status: error.status,
+      stack: error.stack?.split("\n")[0]
+    };
+
     const isRetryableError =
       error.name === "AbortError" ||
       error.message?.includes("Failed to fetch") ||
       error.message?.includes("NetworkError") ||
       error.message?.includes("timeout") ||
       error.message?.includes("Database not initialized") ||
-      error.message?.includes("ECONNREFUSED");
+      error.message?.includes("ECONNREFUSED") ||
+      error.code === "NETWORK_ERROR";
 
     // For database initialization errors, use longer delays
     const isDatabaseError = error.message?.includes("Database not initialized");
@@ -170,6 +181,7 @@ export const safeApiRequest = async (
       console.warn(
         `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${retryDelay * (retryCount + 1)}ms...`,
         isDatabaseError ? "(Database initializing)" : "",
+        errorDetails
       );
 
       await new Promise((resolve) =>
@@ -181,12 +193,8 @@ export const safeApiRequest = async (
     // Return fallback data after all retries failed
     console.error(
       `❌ API request failed after ${retryCount + 1} attempts for ${endpoint}:`,
-      {
-        error: error.message,
-        name: error.name,
-        stack: error.stack?.split("\n")[0],
-        url,
-      },
+      errorDetails,
+      `URL: ${url}`
     );
 
     return {
