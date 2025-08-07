@@ -313,66 +313,10 @@ import { testFooterData } from "./routes/footerTest";
 export function createServer() {
   const app = express();
 
-  // Comprehensive CORS configuration for all environments
-  const allowedOrigins = [
-    // Production domains
-    "https://aproperty.netlify.app",
-    "https://aproperty.com",
-    "https://www.aproperty.com",
-
-    // Development
-    "http://localhost:3000",
-    "http://localhost:5173", // Vite default
-    "http://localhost:8080", // This project's port
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8080",
-
-    // Platform previews (dynamic handling below)
-    // Netlify: *.netlify.app
-    // Vercel: *.vercel.app
-    // Railway: *.railway.app
-    // Render: *.render.com
-  ];
-
-  // Dynamic origin checker for platform deployments
-  const isAllowedOrigin = (origin: string | undefined): boolean => {
-    if (!origin) {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
-      return true;
-    }
-
-    // Check exact matches first
-    if (allowedOrigins.includes(origin)) {
-      return true;
-    }
-
-    // Check platform-specific patterns
-    const allowedPatterns = [
-      /^https:\/\/.*\.netlify\.app$/,
-      /^https:\/\/.*\.netlify\.com$/,
-      /^https:\/\/.*\.vercel\.app$/,
-      /^https:\/\/.*\.vercel\.com$/,
-      /^https:\/\/.*\.railway\.app$/,
-      /^https:\/\/.*\.render\.com$/,
-      /^https:\/\/.*\.fly\.dev$/,
-      /^https:\/\/.*\.fly\.io$/,
-      /^https:\/\/.*\.herokuapp\.com$/,
-    ];
-
-    return allowedPatterns.some(pattern => pattern.test(origin));
-  };
-
+  // Allow all origins for CORS (as requested)
   app.use(
     cors({
-      origin: function (origin, callback) {
-        if (isAllowedOrigin(origin)) {
-          callback(null, true);
-        } else {
-          console.log("❌ CORS blocked for origin:", origin);
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
+      origin: true, // Allow all origins
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: [
@@ -471,7 +415,7 @@ export function createServer() {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error("❌ Health check failed:", error.message);
+      console.error("��� Health check failed:", error.message);
 
       res.status(500).json({
         message: "pong",
