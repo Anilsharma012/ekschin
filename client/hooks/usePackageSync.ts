@@ -53,6 +53,8 @@ export const usePackageSync = () => {
 
         wsRef.current.onopen = () => {
           console.log('📦 Connected to package sync WebSocket');
+          reconnectAttempts.current = 0; // Reset reconnection attempts on success
+
           // Authenticate
           if (wsRef.current && user) {
             wsRef.current.send(JSON.stringify({
@@ -66,41 +68,41 @@ export const usePackageSync = () => {
         wsRef.current.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            
+
             switch (data.type) {
               case 'package_created':
                 setPackages(prev => [...prev, data.package]);
                 console.log('📦 New package added:', data.package.name);
                 break;
-                
+
               case 'package_updated':
-                setPackages(prev => prev.map(pkg => 
+                setPackages(prev => prev.map(pkg =>
                   pkg._id === data.package._id ? data.package : pkg
                 ));
                 console.log('📦 Package updated:', data.package.name);
                 break;
-                
+
               case 'package_deleted':
                 setPackages(prev => prev.filter(pkg => pkg._id !== data.packageId));
                 console.log('📦 Package removed:', data.packageId);
                 break;
-                
+
               case 'user_package_created':
                 if (data.userPackage.userId === (user?.id || user?._id)) {
                   setUserPackages(prev => [...prev, data.userPackage]);
                   console.log('🎯 New user package added');
                 }
                 break;
-                
+
               case 'user_package_updated':
                 if (data.userPackage.userId === (user?.id || user?._id)) {
-                  setUserPackages(prev => prev.map(up => 
+                  setUserPackages(prev => prev.map(up =>
                     up._id === data.userPackage._id ? data.userPackage : up
                   ));
                   console.log('🎯 User package updated');
                 }
                 break;
-                
+
               case 'sync_complete':
                 console.log('✅ Package sync completed');
                 break;
@@ -111,8 +113,20 @@ export const usePackageSync = () => {
         };
 
         wsRef.current.onclose = () => {
-          console.log('❌ Package sync WebSocket disconnected, reconnecting...');
-          setTimeout(connectWebSocket, 3000);
+          console.log('❌ Package sync WebSocket disconnected');
+
+          // Exponential backoff reconnection
+          if (isAuthenticated && user && token && reconnectAttempts.current < maxReconnectAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+            console.log(`🔄 Reconnecting to package sync in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
+
+            setTimeout(() => {
+              reconnectAttempts.current++;
+              connectWebSocket();
+            }, delay);
+          } else if (reconnectAttempts.current >= maxReconnectAttempts) {
+            console.warn('⚠️ Max reconnection attempts reached for package sync');
+          }
         };
 
         wsRef.current.onerror = (error) => {
