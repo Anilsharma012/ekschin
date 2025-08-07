@@ -1039,6 +1039,30 @@ export function createServer() {
     getNotificationById,
   );
 
+  // User notification routes
+  app.put(
+    "/api/notifications/:notificationId/read",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const { pushNotificationService } = await import("./services/pushNotificationService");
+        const userId = (req as any).userId;
+        const { notificationId } = req.params;
+
+        const success = await pushNotificationService.markNotificationAsRead(userId, notificationId);
+
+        if (success) {
+          res.json({ success: true, message: "Notification marked as read" });
+        } else {
+          res.status(404).json({ success: false, error: "Notification not found" });
+        }
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+        res.status(500).json({ success: false, error: "Failed to mark notification as read" });
+      }
+    }
+  );
+
   // Homepage slider management routes
   app.get(
     "/api/admin/homepage-sliders",
