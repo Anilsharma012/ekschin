@@ -73,10 +73,15 @@ export const createApiUrl = (endpoint: string): string => {
 const checkServerReadiness = async (): Promise<boolean> => {
   try {
     const healthUrl = createApiUrl("health");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     const response = await fetch(healthUrl, {
       method: 'GET',
-      timeout: 3000 // Quick health check
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
     return response.ok;
   } catch {
     return false;
