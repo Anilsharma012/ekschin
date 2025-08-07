@@ -111,7 +111,35 @@ export default function CustomFieldsManagement() {
         if (contentType && contentType.includes("application/json")) {
           const data = await response.json();
           if (data.success) {
-            setFields(data.data.sort((a: CustomField, b: CustomField) => a.order - b.order));
+            const fieldsData = data.data || [];
+
+            // If no fields exist, try to initialize default fields
+            if (fieldsData.length === 0) {
+              console.log("No custom fields found, initializing defaults...");
+              try {
+                const initResponse = await fetch("/api/custom-fields/initialize", {
+                  method: "POST",
+                  headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  },
+                });
+
+                if (initResponse.ok) {
+                  const initData = await initResponse.json();
+                  if (initData.success) {
+                    console.log("Default custom fields initialized, refetching...");
+                    // Refetch after initialization
+                    setTimeout(fetchFields, 1000);
+                    return;
+                  }
+                }
+              } catch (initError) {
+                console.warn("Failed to initialize default custom fields:", initError);
+              }
+            }
+
+            setFields(fieldsData.sort((a: CustomField, b: CustomField) => a.order - b.order));
           } else {
             setError(data.error || "Failed to fetch custom fields");
           }
