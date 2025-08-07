@@ -471,13 +471,13 @@ export default function CustomFieldsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fields.map((field) => (
+              {fields?.map((field) => field && (
                 <TableRow key={field._id}>
                   <TableCell className="font-medium">
                     <div>
-                      <p className="font-semibold">{field.label}</p>
-                      <p className="text-sm text-gray-500">{field.name}</p>
-                      <code className="text-xs bg-gray-100 px-1 rounded">{field.slug}</code>
+                      <p className="font-semibold">{field.label || "Untitled"}</p>
+                      <p className="text-sm text-gray-500">{field.name || "No name"}</p>
+                      <code className="text-xs bg-gray-100 px-1 rounded">{field.slug || "no-slug"}</code>
                       {field.description && (
                         <p className="text-xs text-gray-400 mt-1">{field.description}</p>
                       )}
