@@ -25,6 +25,7 @@ import {
   Shield,
   DollarSign
 } from 'lucide-react';
+import WebSocketTest from './WebSocketTest';
 
 interface TestResult {
   name: string;
