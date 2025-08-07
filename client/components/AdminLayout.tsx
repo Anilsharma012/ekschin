@@ -215,7 +215,6 @@ const menuItems: MenuItem[] = [
     icon: Wrench,
     children: [
       { id: "system-status", label: "System Status", icon: Activity },
-      { id: "login-test", label: "Login Test Suite", icon: Users },
       { id: "settings", label: "Settings", icon: Settings },
       { id: "system-update", label: "System Update", icon: RefreshCw },
       { id: "auth-debug", label: "Auth Debug", icon: Shield },
