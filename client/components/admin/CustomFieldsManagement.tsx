@@ -100,22 +100,37 @@ export default function CustomFieldsManagement() {
       setError("");
 
       const response = await fetch("/api/admin/custom-fields", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setFields(data.data.sort((a: CustomField, b: CustomField) => a.order - b.order));
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.success) {
+            setFields(data.data.sort((a: CustomField, b: CustomField) => a.order - b.order));
+          } else {
+            setError(data.error || "Failed to fetch custom fields");
+          }
         } else {
-          setError(data.error || "Failed to fetch custom fields");
+          console.error("API returned non-JSON response:", await response.text());
+          setError("Server returned invalid response format");
         }
       } else {
-        setError("Failed to fetch custom fields");
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        setError(`Failed to fetch custom fields (${response.status})`);
       }
     } catch (error) {
       console.error("Error fetching custom fields:", error);
-      setError("Failed to fetch custom fields");
+      if (error instanceof SyntaxError && error.message.includes("Unexpected token")) {
+        setError("Server returned HTML instead of JSON. Check if API endpoints are properly configured.");
+      } else {
+        setError("Network error while fetching custom fields");
+      }
     } finally {
       setLoading(false);
     }
