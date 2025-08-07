@@ -96,6 +96,8 @@ const SellerDashboardWithMessaging: React.FC = () => {
   // Package state
   const [packages, setPackages] = useState<Package[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   // Real-time messaging with WebSocket
   const wsRef = useRef<WebSocket | null>(null);
