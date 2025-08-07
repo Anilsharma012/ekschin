@@ -1181,6 +1181,132 @@ const IntegratedSellerDashboard: React.FC = () => {
               </Card>
             )}
 
+            {/* Package History and Summary */}
+            {userPackages.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-blue-500" />
+                    My Package History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Package Summary Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <Card className="bg-blue-50 border-blue-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">Total Packages</p>
+                            <p className="text-2xl font-bold text-blue-900">{userPackages.length}</p>
+                          </div>
+                          <Package className="h-8 w-8 text-blue-500" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-green-50 border-green-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-green-600 font-medium">Active</p>
+                            <p className="text-2xl font-bold text-green-900">
+                              {userPackages.filter(p => p.status === 'active').length}
+                            </p>
+                          </div>
+                          <CheckCircle className="h-8 w-8 text-green-500" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-yellow-50 border-yellow-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-yellow-600 font-medium">Expired</p>
+                            <p className="text-2xl font-bold text-yellow-900">
+                              {userPackages.filter(p => p.status === 'expired').length}
+                            </p>
+                          </div>
+                          <Clock className="h-8 w-8 text-yellow-500" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gray-50 border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-600 font-medium">Total Spent</p>
+                            <p className="text-2xl font-bold text-gray-900">
+                              ₹{userPackages.reduce((sum, p) => sum + (p.package?.price || 0), 0)}
+                            </p>
+                          </div>
+                          <DollarSign className="h-8 w-8 text-gray-500" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Recent Package Transactions */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Recent Transactions</h4>
+                    <div className="space-y-2">
+                      {userPackages.slice(0, 5).map((userPackage) => (
+                        <div key={userPackage._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            {getPackageIcon(userPackage.package?.type || 'basic')}
+                            <div>
+                              <p className="font-medium">{userPackage.package?.name || 'Unknown Package'}</p>
+                              <p className="text-sm text-gray-500">
+                                Purchased: {new Date(userPackage.purchaseDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">₹{userPackage.package?.price || 0}</p>
+                            <Badge
+                              variant={
+                                userPackage.status === 'active' ? 'default' :
+                                userPackage.status === 'expired' ? 'secondary' :
+                                'destructive'
+                              }
+                              className={
+                                userPackage.status === 'active' ? 'bg-green-100 text-green-800' :
+                                userPackage.status === 'expired' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }
+                            >
+                              {userPackage.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {userPackages.length > 5 && (
+                      <Button variant="outline" size="sm" className="w-full">
+                        View All Transactions
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Show message if no packages */}
+            {userPackages.length === 0 && !packagesLoading && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Packages Yet</h3>
+                  <p className="text-gray-500 mb-6">
+                    You haven't purchased any packages yet. Explore our available packages below to boost your property listings.
+                  </p>
+                  <Button onClick={() => refreshPackages()}>
+                    <Package className="h-4 w-4 mr-2" />
+                    Browse Packages
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Available Packages */}
             <Card>
               <CardHeader>
