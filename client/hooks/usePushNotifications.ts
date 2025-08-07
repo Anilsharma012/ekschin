@@ -119,15 +119,38 @@ export const usePushNotifications = () => {
       };
 
       wsRef.current.onerror = (error) => {
-        const errorDetails = {
-          type: error.type || 'error',
-          url: error.target?.url || wsRef.current?.url || 'Unknown URL',
-          readyState: error.target?.readyState || wsRef.current?.readyState || 'Unknown state',
-          code: error.code || 'No code',
-          reason: error.reason || 'Unknown reason',
-          timestamp: new Date().toISOString()
+        // Enhanced error serialization to avoid [object Object] logging
+        const getErrorDetails = (err: any) => {
+          if (err instanceof Event) {
+            return {
+              type: err.type || 'WebSocket Error',
+              target: err.target ? {
+                url: (err.target as any).url || 'Unknown URL',
+                readyState: (err.target as any).readyState || 'Unknown state',
+                protocol: (err.target as any).protocol || 'Unknown protocol'
+              } : 'No target',
+              timestamp: new Date().toISOString(),
+              message: 'WebSocket connection error occurred'
+            };
+          } else if (err instanceof Error) {
+            return {
+              type: 'Error',
+              message: err.message,
+              name: err.name,
+              stack: err.stack,
+              timestamp: new Date().toISOString()
+            };
+          } else {
+            return {
+              type: 'Unknown Error',
+              message: typeof err === 'string' ? err : 'Unknown WebSocket error',
+              raw: err && typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err),
+              timestamp: new Date().toISOString()
+            };
+          }
         };
 
+        const errorDetails = getErrorDetails(error);
         console.error('🔴 Push notification WebSocket error:', errorDetails);
         setIsConnected(false);
 
