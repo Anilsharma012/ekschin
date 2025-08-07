@@ -591,6 +591,11 @@ const DashboardDemo: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* WebSocket Test Tab */}
+          <TabsContent value="websocket" className="space-y-4">
+            <WebSocketTest />
+          </TabsContent>
         </Tabs>
 
         {/* Feature Showcase */}
