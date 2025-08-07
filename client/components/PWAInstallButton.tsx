@@ -196,6 +196,9 @@ const PWAInstallButton = () => {
     return null;
   }
 
+  // Get device info for dynamic button text
+  const device = detectDevice();
+
   // Show install button if browser supports PWA installation
   if (showInstallButton || deferredPrompt) {
     return (
@@ -235,7 +238,7 @@ const PWAInstallButton = () => {
               variant="outline"
             >
               <FileDown className="h-4 w-4 mr-1" />
-              APK
+              {device.isIOS ? 'App Store' : device.isAndroid ? 'APK' : 'Download'}
             </Button>
             <Button
               onClick={handleDismiss}
@@ -273,7 +276,7 @@ const PWAInstallButton = () => {
               variant="outline"
             >
               <FileDown className="h-3 w-3 mr-1" />
-              APK
+              {device.isIOS ? 'App Store' : device.isAndroid ? 'Get APK' : 'Download'}
             </Button>
             <button
               onClick={handleDismiss}
