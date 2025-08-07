@@ -37,8 +37,20 @@ export default function OLXStyleListings() {
       const response = await enhancedApi.get("properties?limit=20");
       const data = response.data;
 
-      if (data.success && data.data.properties && data.data.properties.length > 0) {
+      // Handle service unavailable (database initializing)
+      if (response.status === 503) {
+        console.log("🔄 Service initializing, will retry...");
+        // Retry after suggested delay
+        const retryAfter = data.retryAfter || 5;
+        setTimeout(fetchProperties, retryAfter * 1000);
+        return;
+      }
+
+      if (data.success && data.data && data.data.properties && data.data.properties.length > 0) {
         setProperties(data.data.properties);
+      } else if (data.success && data.data && Array.isArray(data.data)) {
+        // Handle direct array response
+        setProperties(data.data);
       } else {
         // Mock data with real property images
         const mockProperties: Property[] = [
