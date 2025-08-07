@@ -397,8 +397,23 @@ export default function Admin() {
         errors.push(`Users API error: ${usersResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
-      errors.push("Users API unreachable");
+      const isAbortError = error.name === 'AbortError';
+      const isNetworkError = error.message?.includes('Failed to fetch');
+
+      console.error("Error fetching users:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError
+      });
+
+      if (isAbortError) {
+        errors.push("Users API timeout");
+      } else if (isNetworkError) {
+        errors.push("Users API network error");
+      } else {
+        errors.push(`Users API error: ${error.message || 'Unknown error'}`);
+      }
     }
 
     // Fetch properties with individual error handling
