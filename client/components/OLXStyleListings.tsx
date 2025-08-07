@@ -27,8 +27,13 @@ export default function OLXStyleListings() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchProperties();
-    loadFavorites();
+    // Add small delay on initial load to allow server to fully initialize
+    const timer = setTimeout(() => {
+      fetchProperties();
+      loadFavorites();
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const fetchProperties = async () => {
