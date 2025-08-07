@@ -109,6 +109,7 @@ export default function AdminSettings() {
       enablePayments: false,
       paymentGateway: 'razorpay',
       paymentApiKey: '',
+      paymentSecretKey: '',
       commissionRate: 5,
     },
   });
@@ -142,6 +143,7 @@ export default function AdminSettings() {
               enablePayments: paymentData.data.enablePayments || false,
               paymentGateway: paymentData.data.paymentGateway || 'razorpay',
               paymentApiKey: paymentData.data.paymentApiKey || '',
+              paymentSecretKey: paymentData.data.paymentSecretKey || '',
               commissionRate: paymentData.data.commissionRate || 5,
             }
           }));
@@ -569,15 +571,36 @@ export default function AdminSettings() {
                   </div>
 
                   <div>
-                    <Label htmlFor="paymentApiKey">Payment API Key</Label>
+                    <Label htmlFor="paymentApiKey">
+                      {settings.payment.paymentGateway === 'razorpay' ? 'Razorpay Key ID' : 'Payment API Key'}
+                    </Label>
                     <Input
                       id="paymentApiKey"
                       type="password"
                       value={settings.payment.paymentApiKey}
                       onChange={(e) => updatePaymentSetting('paymentApiKey', e.target.value)}
-                      placeholder="Your payment gateway API key"
+                      placeholder={settings.payment.paymentGateway === 'razorpay' ? 'rzp_test_... or rzp_live_...' : 'Your payment gateway API key'}
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {settings.payment.paymentGateway === 'razorpay' && 'Get this from Razorpay Dashboard > Settings > API Keys'}
+                    </p>
                   </div>
+
+                  {settings.payment.paymentGateway === 'razorpay' && (
+                    <div>
+                      <Label htmlFor="paymentSecretKey">Razorpay Key Secret</Label>
+                      <Input
+                        id="paymentSecretKey"
+                        type="password"
+                        value={settings.payment.paymentSecretKey}
+                        onChange={(e) => updatePaymentSetting('paymentSecretKey', e.target.value)}
+                        placeholder="Your Razorpay key secret"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Keep this secret and never share it publicly
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
             </CardContent>
