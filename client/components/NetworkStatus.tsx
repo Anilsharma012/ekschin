@@ -181,7 +181,8 @@ const NetworkStatusComponent: React.FC = () => {
     return 'bg-green-100 border-green-200 text-green-800';
   };
 
-  if (!isVisible) {
+  // Only show status for poor connections or offline - hide for good/excellent connections
+  if (!isVisible || status.connectionQuality === 'excellent' || status.connectionQuality === 'good') {
     return null;
   }
 
@@ -198,7 +199,7 @@ const NetworkStatusComponent: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-1">
             <Button
               size="sm"
@@ -209,7 +210,7 @@ const NetworkStatusComponent: React.FC = () => {
             >
               <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
             </Button>
-            
+
             <Button
               size="sm"
               variant="ghost"
