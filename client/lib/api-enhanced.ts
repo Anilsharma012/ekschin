@@ -152,16 +152,23 @@ export const safeApiRequest = async (
       error.name === "AbortError" ||
       error.message?.includes("Failed to fetch") ||
       error.message?.includes("NetworkError") ||
-      error.message?.includes("timeout");
+      error.message?.includes("timeout") ||
+      error.message?.includes("Database not initialized") ||
+      error.message?.includes("ECONNREFUSED");
+
+    // For database initialization errors, use longer delays
+    const isDatabaseError = error.message?.includes("Database not initialized");
+    const retryDelay = isDatabaseError ? API_CONFIG.retryDelay * 2 : API_CONFIG.retryDelay;
 
     // Retry logic
     if (isRetryableError && retryCount < API_CONFIG.retryAttempts) {
       console.warn(
-        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${API_CONFIG.retryDelay}ms...`,
+        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${retryDelay * (retryCount + 1)}ms...`,
+        isDatabaseError ? "(Database initializing)" : "",
       );
 
       await new Promise((resolve) =>
-        setTimeout(resolve, API_CONFIG.retryDelay * (retryCount + 1)),
+        setTimeout(resolve, retryDelay * (retryCount + 1)),
       );
       return safeApiRequest(endpoint, options, retryCount + 1);
     }
