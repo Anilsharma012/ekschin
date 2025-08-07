@@ -147,6 +147,7 @@ export default function AdvertisementListingPackage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          console.log("✅ Advertisement listing package created successfully:", data.data);
           fetchPackages();
           setNewPackage({
             name: "",
@@ -160,6 +161,9 @@ export default function AdvertisementListingPackage() {
             features: [""],
           });
           setIsCreateDialogOpen(false);
+
+          // Show success message
+          alert("📦 Advertisement package created successfully! It should now appear on the website.");
         } else {
           setError(data.error || "Failed to create package");
         }
