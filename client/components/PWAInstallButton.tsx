@@ -91,8 +91,49 @@ const PWAInstallButton = () => {
     localStorage.setItem('pwa-install-dismissed', Date.now().toString());
   };
 
+  // Device detection utility
+  const detectDevice = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+
+    const isAndroid = /android/i.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+
+    return {
+      isAndroid,
+      isIOS,
+      isMobile,
+      isDesktop: !isMobile
+    };
+  };
+
   const handleAPKDownload = async () => {
+    const device = detectDevice();
+
     try {
+      if (device.isIOS) {
+        // For iOS devices, show App Store message or redirect
+        const appStoreUrl = 'https://apps.apple.com/app/ashish-properties/idXXXXXXXXX'; // Replace with actual App Store URL when available
+
+        const shouldOpenAppStore = confirm(
+          'For iOS devices, please visit the App Store to download our app. Would you like to open the App Store now?'
+        );
+
+        if (shouldOpenAppStore) {
+          // Try to open App Store URL, fallback to general App Store search
+          try {
+            window.open(appStoreUrl, '_blank');
+          } catch {
+            // Fallback to App Store search if specific URL fails
+            window.open('https://apps.apple.com/search?term=ashish+properties', '_blank');
+          }
+        }
+        return;
+      }
+
+      // For Android and other devices, proceed with APK download
+      console.log('Device detected:', device);
+
       // Check if APK is available
       const infoResponse = await fetch('/api/app/info');
       const infoData = await infoResponse.json();
@@ -102,19 +143,51 @@ const PWAInstallButton = () => {
         return;
       }
 
-      // Create a download link for the APK file
-      const link = document.createElement('a');
-      link.href = '/api/app/download';
-      link.download = 'AashishProperty.apk';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (device.isAndroid) {
+        // Android device: Direct download and show installation instructions
+        console.log('Initiating APK download for Android device...');
 
-      // Track the download
-      console.log('APK download initiated');
+        // Create download link
+        const link = document.createElement('a');
+        link.href = '/api/app/download';
+        link.download = 'AashishProperty.apk';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Show installation instructions for Android
+        setTimeout(() => {
+          alert(
+            'APK download started!\n\nInstallation Instructions:\n' +
+            '1. Once downloaded, tap on the APK file\n' +
+            '2. If prompted, enable "Install from unknown sources"\n' +
+            '3. Follow the installation prompts\n' +
+            '4. Launch the app once installed'
+          );
+        }, 1000);
+
+      } else {
+        // Desktop or other devices: Still allow download but show message
+        const shouldDownload = confirm(
+          'This APK is designed for Android devices. Do you want to download it anyway?'
+        );
+
+        if (shouldDownload) {
+          const link = document.createElement('a');
+          link.href = '/api/app/download';
+          link.download = 'AashishProperty.apk';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+
+      // Track the download attempt
+      console.log('APK download initiated for device:', device);
+
     } catch (error) {
       console.error('Error downloading APK:', error);
-      alert('Failed to download APK. Please try again.');
+      alert('Failed to download APK. Please try again or contact support.');
     }
   };
 
