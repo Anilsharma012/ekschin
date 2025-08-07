@@ -57,6 +57,36 @@ export const API_CONFIG = {
   environment,
 };
 
+// Circuit breaker to prevent excessive requests when server is down
+class CircuitBreaker {
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private readonly threshold = 5;
+  private readonly timeout = 30000; // 30 seconds
+
+  isOpen(): boolean {
+    return this.failureCount >= this.threshold &&
+           (Date.now() - this.lastFailureTime) < this.timeout;
+  }
+
+  recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+  }
+
+  recordSuccess(): void {
+    this.failureCount = 0;
+    this.lastFailureTime = 0;
+  }
+
+  getRemainingTime(): number {
+    if (!this.isOpen()) return 0;
+    return this.timeout - (Date.now() - this.lastFailureTime);
+  }
+}
+
+const circuitBreaker = new CircuitBreaker();
+
 // Helper function to create API URLs
 export const createApiUrl = (endpoint: string): string => {
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
