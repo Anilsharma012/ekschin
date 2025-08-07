@@ -175,6 +175,9 @@ export const safeApiRequest = async (
       timeoutId = null;
     }
 
+    // Record success for circuit breaker
+    circuitBreaker.recordSuccess();
+
     let responseData;
     try {
       if (response.headers.get("content-type")?.includes("application/json")) {
