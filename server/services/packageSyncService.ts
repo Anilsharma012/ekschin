@@ -44,7 +44,8 @@ class PackageSyncService {
         }
       });
 
-      ws.on('close', () => {
+      ws.on('close', (code, reason) => {
+        console.log(`🚪 Package sync WebSocket closed: ${code} ${reason?.toString() || ''}`);
         // Remove client from connected clients
         for (const [userId, client] of this.clients.entries()) {
           if (client.ws === ws) {
@@ -56,7 +57,20 @@ class PackageSyncService {
       });
 
       ws.on('error', (error) => {
-        console.error('Package sync WebSocket error:', error);
+        console.error('🔴 Package sync WebSocket error:', {
+          message: error.message,
+          stack: error.stack,
+          type: error.constructor.name
+        });
+
+        // Remove client on error
+        for (const [userId, client] of this.clients.entries()) {
+          if (client.ws === ws) {
+            this.clients.delete(userId);
+            console.log(`❌ User ${userId} removed due to package sync WebSocket error`);
+            break;
+          }
+        }
       });
     });
   }
