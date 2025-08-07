@@ -498,7 +498,29 @@ export default function Admin() {
     setError("");
     setApiErrors([]);
     setOfflineMode(false);
-    await fetchAdminData();
+    setLoading(true);
+
+    try {
+      // First test basic connectivity
+      const testResponse = await fetch("/api/ping", {
+        headers: { 'Cache-Control': 'no-cache' },
+        cache: "no-cache"
+      });
+
+      if (testResponse.ok) {
+        console.log("✅ Basic connectivity restored");
+        await fetchAdminData();
+      } else {
+        throw new Error(`Server responded with ${testResponse.status}`);
+      }
+    } catch (error) {
+      console.error("❌ Connectivity test failed:", error);
+      setError("Cannot connect to server. Please check your internet connection.");
+      setLoading(false);
+
+      // Still try to load data as fallback
+      setTimeout(() => fetchAdminData(), 2000);
+    }
   };
 
   // Show loading while auth is being determined
