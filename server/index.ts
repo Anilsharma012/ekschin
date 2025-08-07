@@ -447,7 +447,7 @@ export function createServer() {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error("��� Health check failed:", error.message);
+      console.error("❌ Health check failed:", error.message);
 
       res.status(500).json({
         message: "pong",
@@ -1330,12 +1330,19 @@ export function createServer() {
   app.post("/api/debug/custom-fields/fix", fixCustomFields);
 
   // Health check endpoint for network monitoring
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", databaseHealthCheck, (req, res) => {
+    const dbStatus = req.databaseStatus || { connected: false, responsive: false };
+
     res.json({
-      status: "ok",
+      status: dbStatus.connected && dbStatus.responsive ? "ok" : "degraded",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || "development",
+      database: {
+        connected: dbStatus.connected,
+        responsive: dbStatus.responsive,
+        error: dbStatus.error
+      }
     });
   });
 
