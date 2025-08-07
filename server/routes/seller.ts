@@ -583,6 +583,14 @@ export const purchasePackage: RequestHandler = async (req, res) => {
       createdAt: new Date(),
     });
 
+    // Get the created user package with ID for broadcast
+    const createdUserPackage = await db.collection("user_packages").findOne({ _id: userPackageResult.insertedId });
+
+    // Broadcast user package creation to the user for real-time updates
+    if (createdUserPackage) {
+      packageSyncService.broadcastUserPackageCreated(createdUserPackage);
+    }
+
     res.json({
       success: true,
       message: "Package purchased successfully",
