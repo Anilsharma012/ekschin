@@ -653,9 +653,23 @@ export default function Admin() {
           <div className="flex items-center space-x-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-yellow-500" />
             <p className="text-yellow-700 font-medium">
-              Some services are unavailable
+              {apiErrors.some(err => err.includes('network')) ?
+                'Network Connection Issues Detected' :
+                'Some Services Are Unavailable'}
             </p>
           </div>
+          {apiErrors.some(err => err.includes('network')) && (
+            <div className="bg-yellow-100 rounded p-3 mb-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Troubleshooting:</strong>
+              </p>
+              <ul className="text-xs text-yellow-600 mt-1 ml-4">
+                <li>• Check your internet connection</li>
+                <li>• Server may be temporarily unavailable</li>
+                <li>• Try refreshing the page or wait a moment</li>
+              </ul>
+            </div>
+          )}
           <ul className="text-sm text-yellow-600 ml-7">
             {apiErrors.map((err, index) => (
               <li key={index}>• {err}</li>
