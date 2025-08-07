@@ -164,32 +164,57 @@ export default function AdminSettings() {
       setError('');
       setSuccess('');
 
-      const response = await fetch('/api/admin/settings', {
+      // Save payment settings
+      const paymentResponse = await fetch('/api/admin/payment-settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(settings.payment),
       });
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.success) {
-            setSuccess('Settings saved successfully!');
-            setTimeout(() => setSuccess(''), 3000);
-          } else {
-            setError(data.error || 'Failed to save settings');
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        if (paymentData.success) {
+          setSuccess('Payment settings saved successfully!');
+          setTimeout(() => setSuccess(''), 3000);
+
+          // Test Razorpay connection if enabled
+          if (settings.payment.enablePayments &&
+              settings.payment.paymentGateway === 'razorpay' &&
+              settings.payment.paymentApiKey) {
+
+            const testResponse = await fetch('/api/admin/payment-settings/test-razorpay', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                razorpayKeyId: settings.payment.paymentApiKey,
+                razorpayKeySecret: settings.payment.paymentApiKey, // In real implementation, have separate secret field
+              }),
+            });
+
+            if (testResponse.ok) {
+              const testData = await testResponse.json();
+              if (testData.success) {
+                setSuccess('Payment settings saved and Razorpay connection verified!');
+              } else {
+                setError(`Payment settings saved, but Razorpay test failed: ${testData.error}`);
+              }
+            }
           }
         } else {
-          setError('Settings API not implemented yet');
+          setError(paymentData.error || 'Failed to save payment settings');
         }
       } else {
-        setError('Settings API not implemented yet');
+        const errorData = await paymentResponse.json();
+        setError(errorData.error || 'Failed to save payment settings');
       }
     } catch (err) {
+      console.error('Save settings error:', err);
       setError('Network error while saving settings');
     } finally {
       setSaving(false);
