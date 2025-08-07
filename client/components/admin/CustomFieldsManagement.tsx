@@ -180,20 +180,33 @@ export default function CustomFieldsManagement() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          fetchFields();
-          resetForm();
-          setShowCreateDialog(false);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.success) {
+            fetchFields();
+            resetForm();
+            setShowCreateDialog(false);
+          } else {
+            setError(data.error || "Failed to create custom field");
+          }
         } else {
-          setError(data.error || "Failed to create custom field");
+          const errorText = await response.text();
+          console.error("Create API returned non-JSON response:", errorText);
+          setError("Server returned invalid response format");
         }
       } else {
-        setError("Failed to create custom field");
+        const errorText = await response.text();
+        console.error("Create API error response:", errorText);
+        setError(`Failed to create custom field (${response.status})`);
       }
     } catch (error) {
       console.error("Error creating custom field:", error);
-      setError("Failed to create custom field");
+      if (error instanceof SyntaxError && error.message.includes("Unexpected token")) {
+        setError("Server returned HTML instead of JSON. Check if API endpoints are properly configured.");
+      } else {
+        setError("Network error while creating custom field");
+      }
     } finally {
       setSaving(false);
     }
