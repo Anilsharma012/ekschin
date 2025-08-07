@@ -22,7 +22,10 @@ class PushNotificationService {
   private wss: WebSocketServer | null = null;
 
   initialize(server: any) {
-    this.wss = new WebSocketServer({ server });
+    this.wss = new WebSocketServer({
+      server,
+      path: '/ws/notifications'
+    });
 
     this.wss.on('connection', (ws, req) => {
       console.log('📱 WebSocket client connected for push notifications');
@@ -30,16 +33,16 @@ class PushNotificationService {
       ws.on('message', (message) => {
         try {
           const data = JSON.parse(message.toString());
-          
+
           if (data.type === 'auth' && data.userId) {
             this.clients.set(data.userId, {
               ws,
               userId: data.userId,
               userType: data.userType || 'user'
             });
-            
+
             console.log(`🔐 User ${data.userId} authenticated for push notifications`);
-            
+
             // Send confirmation
             ws.send(JSON.stringify({
               type: 'auth_success',
@@ -47,11 +50,12 @@ class PushNotificationService {
             }));
           }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error('Error parsing push notification WebSocket message:', error);
         }
       });
 
-      ws.on('close', () => {
+      ws.on('close', (code, reason) => {
+        console.log(`🚪 Push notification WebSocket closed: ${code} ${reason?.toString() || ''}`);
         // Remove client from connected clients
         for (const [userId, client] of this.clients.entries()) {
           if (client.ws === ws) {
@@ -63,7 +67,20 @@ class PushNotificationService {
       });
 
       ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        console.error('🔴 Push notification WebSocket error:', {
+          message: error.message,
+          stack: error.stack,
+          type: error.constructor.name
+        });
+
+        // Remove client on error
+        for (const [userId, client] of this.clients.entries()) {
+          if (client.ws === ws) {
+            this.clients.delete(userId);
+            console.log(`❌ User ${userId} removed due to WebSocket error`);
+            break;
+          }
+        }
       });
     });
   }
