@@ -56,7 +56,8 @@ export const usePushNotifications = () => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
-      
+
+      console.log('🔄 Connecting to push notification service at:', wsUrl);
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
