@@ -537,14 +537,27 @@ export const purchasePackage: RequestHandler = async (req, res) => {
 // Get seller dashboard stats
 export const getSellerStats: RequestHandler = async (req, res) => {
   try {
-    const db = getDatabase();
+    // Ensure database is connected
+    let db;
+    try {
+      db = getDatabase();
+    } catch (dbError) {
+      console.log("📊 Database not ready for seller stats, attempting to connect...");
+      const { connectToDatabase } = await import("../db/mongodb");
+      await connectToDatabase();
+      db = getDatabase();
+    }
+
     const sellerId = (req as any).userId;
+    console.log("📊 Fetching seller stats for:", sellerId);
 
     // Get properties stats
     const properties = await db
       .collection("properties")
       .find({ userId: new ObjectId(sellerId) })
       .toArray();
+
+    console.log("📊 Found properties:", properties.length);
 
     // Get notifications stats
     const unreadNotifications = await db
@@ -556,17 +569,27 @@ export const getSellerStats: RequestHandler = async (req, res) => {
         ]
       });
 
-    // Get messages stats
+    // Get messages stats from chat conversations
     const unreadMessages = await db
-      .collection("property_inquiries")
+      .collection("chat_conversations")
       .countDocuments({
-        sellerId: new ObjectId(sellerId),
-        isRead: false,
+        participants: sellerId,
+        unreadCount: { $gt: 0 }
       });
+
+    // Get seller's package purchases
+    const userPackages = await db
+      .collection("user_packages")
+      .find({ userId: new ObjectId(sellerId) })
+      .toArray();
+
+    // Calculate revenue from package purchases
+    const revenue = userPackages.reduce((sum, pkg) => sum + (pkg.totalAmount || 0), 0);
 
     // Calculate stats
     const stats = {
       totalProperties: properties.length,
+      activeProperties: properties.filter(p => p.approvalStatus === 'approved').length,
       pendingApproval: properties.filter(p => p.approvalStatus === 'pending').length,
       approved: properties.filter(p => p.approvalStatus === 'approved').length,
       rejected: properties.filter(p => p.approvalStatus === 'rejected').length,
@@ -574,9 +597,12 @@ export const getSellerStats: RequestHandler = async (req, res) => {
       totalInquiries: properties.reduce((sum, prop) => sum + (prop.inquiries || 0), 0),
       unreadNotifications,
       unreadMessages,
-      premiumListings: properties.filter(p => p.isPremium).length,
-      profileViews: Math.floor(Math.random() * 500) + 100, // Mock data
+      premiumListings: properties.filter(p => p.isPremium || p.featured).length,
+      revenue,
+      profileViews: Math.floor(Math.random() * 500) + 100, // Mock data - could be tracked separately
     };
+
+    console.log("📊 Seller stats calculated:", stats);
 
     res.json({
       success: true,
