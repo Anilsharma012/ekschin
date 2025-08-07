@@ -326,24 +326,10 @@ export default function Admin() {
       token.substring(0, 20) + "...",
     );
 
-    // Fetch stats with enhanced error handling and timeout
+    // Fetch stats with enhanced error handling
     try {
       console.log("Fetching admin stats...");
-
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const statsResponse = await fetch("/api/admin/stats", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
+      const statsResponse = await adminFetch("/api/admin/stats", "stats");
 
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
