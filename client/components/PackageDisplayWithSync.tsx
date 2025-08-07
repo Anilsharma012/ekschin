@@ -21,13 +21,19 @@ import { Alert, AlertDescription } from './ui/alert';
 import { Progress } from './ui/progress';
 
 interface PackageDisplayProps {
+  propertyId?: string;
+  onPackageSelect?: (packageId: string) => void;
   showUserPackages?: boolean;
+  showAvailablePackages?: boolean;
   title?: string;
   className?: string;
 }
 
 const PackageDisplayWithSync: React.FC<PackageDisplayProps> = ({
+  propertyId,
+  onPackageSelect,
   showUserPackages = false,
+  showAvailablePackages = true,
   title = "Available Packages",
   className = ""
 }) => {
