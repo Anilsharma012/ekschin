@@ -667,11 +667,11 @@ export default function CustomFieldsManagement() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {formData.options.map((option, index) => (
+                  {(formData.options || []).map((option, index) => (
                     <div key={index} className="flex space-x-2">
                       <Input
                         placeholder={`Option ${index + 1}`}
-                        value={option}
+                        value={option || ""}
                         onChange={(e) => updateOption(index, e.target.value)}
                         className="flex-1"
                       />
