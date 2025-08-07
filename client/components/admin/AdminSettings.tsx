@@ -128,28 +128,30 @@ export default function AdminSettings() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/admin/settings', {
-        headers: { Authorization: `Bearer ${token}` },
+      // Fetch payment settings
+      const paymentResponse = await fetch('/api/admin/payment-settings', {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.success) {
-            setSettings({ ...settings, ...data.data });
-          } else {
-            setError(data.error || 'Failed to fetch settings');
-          }
-        } else {
-          // API endpoint doesn't exist, use default settings
-          console.log('Settings API not implemented, using default settings');
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        if (paymentData.success) {
+          setSettings(prev => ({
+            ...prev,
+            payment: {
+              enablePayments: paymentData.data.enablePayments || false,
+              paymentGateway: paymentData.data.paymentGateway || 'razorpay',
+              paymentApiKey: paymentData.data.paymentApiKey || '',
+              commissionRate: paymentData.data.commissionRate || 5,
+            }
+          }));
         }
       } else {
-        // API endpoint doesn't exist, use default settings
-        console.log('Settings API not implemented, using default settings');
+        console.log('Using default payment settings');
       }
+
     } catch (err) {
+      console.error('Error fetching settings:', err);
       setError('Network error while fetching settings');
     } finally {
       setLoading(false);
