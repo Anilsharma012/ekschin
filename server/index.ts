@@ -103,6 +103,14 @@ import {
   getPaymentMethods,
 } from "./routes/payments";
 
+// Payment settings routes
+import {
+  getPaymentSettings,
+  updatePaymentSettings,
+  testRazorpayConnection,
+  getActivePaymentMethods,
+} from "./routes/payment-settings";
+
 // Banner routes
 import {
   getBannersByPosition,
@@ -415,7 +423,7 @@ export function createServer() {
       }
     } catch (error: any) {
       const responseTime = Date.now() - startTime;
-      console.error("��� Health check failed:", error.message);
+      console.error("❌ Health check failed:", error.message);
 
       res.status(500).json({
         message: "pong",
@@ -711,6 +719,27 @@ export function createServer() {
   );
   app.post("/api/payments/verify", verifyPayment);
   app.get("/api/payments/methods", getPaymentMethods);
+
+  // Payment settings routes (admin only)
+  app.get(
+    "/api/admin/payment-settings",
+    authenticateToken,
+    requireAdmin,
+    getPaymentSettings
+  );
+  app.put(
+    "/api/admin/payment-settings",
+    authenticateToken,
+    requireAdmin,
+    updatePaymentSettings
+  );
+  app.post(
+    "/api/admin/payment-settings/test-razorpay",
+    authenticateToken,
+    requireAdmin,
+    testRazorpayConnection
+  );
+  app.get("/api/payments/active-methods", getActivePaymentMethods);
 
   // Banner routes
   app.get("/api/banners/:position", getBannersByPosition);
