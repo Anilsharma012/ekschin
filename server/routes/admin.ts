@@ -1352,15 +1352,17 @@ export const sendNotification: RequestHandler = async (req, res) => {
     }
 
     // Send real-time notifications via WebSocket
-    pushNotificationService.sendBulkNotifications(
-      targetUsers.map(user => user._id.toString()),
-      {
-        title,
-        message,
-        type,
-        timestamp: new Date()
-      }
-    );
+    if (targetUsers.length > 0) {
+      await pushNotificationService.sendBulkNotifications(
+        targetUsers.map(user => user._id.toString()),
+        {
+          title,
+          message,
+          type,
+          timestamp: new Date()
+        }
+      );
+    }
 
     console.log(`📢 Sent notification to ${targetUsers.length} users (${userType}): ${title}`);
 
