@@ -22,13 +22,16 @@ class PushNotificationService {
   private wss: WebSocketServer | null = null;
 
   initialize(server: any) {
-    this.wss = new WebSocketServer({
-      server,
-      path: '/ws/notifications'
-    });
+    try {
+      this.wss = new WebSocketServer({
+        server,
+        path: '/ws/notifications'
+      });
 
-    this.wss.on('connection', (ws, req) => {
-      console.log('📱 WebSocket client connected for push notifications');
+      console.log('📱 Push notification WebSocket server created at /ws/notifications');
+
+      this.wss.on('connection', (ws, req) => {
+        console.log('📱 WebSocket client connected for push notifications from:', req.socket.remoteAddress);
 
       ws.on('message', (message) => {
         try {
@@ -112,6 +115,10 @@ class PushNotificationService {
         }
       });
     });
+    } catch (error) {
+      console.error('❌ Failed to initialize push notification WebSocket server:', error);
+      throw error;
+    }
   }
 
   async sendPushNotification(
