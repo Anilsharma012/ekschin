@@ -163,7 +163,10 @@ export const safeApiRequest = async (
       ok: response.ok,
     };
   } catch (error: any) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
 
     // Better error serialization
     const errorDetails = {
