@@ -67,17 +67,46 @@ class PushNotificationService {
       });
 
       ws.on('error', (error) => {
-        console.error('🔴 Push notification WebSocket error:', {
-          message: error.message,
-          stack: error.stack,
-          type: error.constructor.name
-        });
+        // Enhanced error logging to avoid [object Object] errors
+        const getErrorInfo = (err: any) => {
+          try {
+            if (err instanceof Error) {
+              return {
+                message: err.message || 'No message',
+                name: err.name || 'Unknown Error',
+                stack: err.stack || 'No stack trace',
+                type: err.constructor?.name || 'Error'
+              };
+            } else if (typeof err === 'object' && err !== null) {
+              return {
+                message: err.message || err.toString() || 'Object error',
+                type: err.constructor?.name || 'Object',
+                stringified: JSON.stringify(err, null, 2)
+              };
+            } else {
+              return {
+                message: String(err),
+                type: typeof err,
+                raw: err
+              };
+            }
+          } catch (stringifyError) {
+            return {
+              message: 'Error serialization failed',
+              type: 'SerializationError',
+              originalError: String(err)
+            };
+          }
+        };
+
+        const errorInfo = getErrorInfo(error);
+        console.error('🔴 Push notification WebSocket error:', errorInfo);
 
         // Remove client on error
         for (const [userId, client] of this.clients.entries()) {
           if (client.ws === ws) {
             this.clients.delete(userId);
-            console.log(`❌ User ${userId} removed due to WebSocket error`);
+            console.log(`❌ User ${userId} removed due to WebSocket error: ${errorInfo.message}`);
             break;
           }
         }
