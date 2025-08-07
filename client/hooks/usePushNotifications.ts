@@ -108,7 +108,12 @@ export const usePushNotifications = () => {
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('🔴 WebSocket error:', error);
+        console.error('🔴 Push notification WebSocket error:', {
+          type: error.type,
+          target: error.target?.url || 'Unknown URL',
+          readyState: error.target?.readyState || 'Unknown state',
+          message: error.message || 'Connection failed'
+        });
         setIsConnected(false);
       };
     } catch (error) {
