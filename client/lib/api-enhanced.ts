@@ -146,9 +146,10 @@ export const safeApiRequest = async (
   const controller = new AbortController();
   let timeoutId: NodeJS.Timeout | null = null;
 
-  // Create a promise that resolves to timeout error
-  const timeoutPromise = new Promise((_, reject) => {
+  // Create a promise that rejects on timeout
+  const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
+      controller.abort();
       reject(new Error(`Request timeout after ${API_CONFIG.timeout}ms`));
     }, API_CONFIG.timeout);
   });
