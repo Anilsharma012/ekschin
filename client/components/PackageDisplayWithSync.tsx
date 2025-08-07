@@ -288,11 +288,12 @@ const PackageDisplayWithSync: React.FC<PackageDisplayProps> = ({
       )}
 
       {/* Available Packages Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center">
-          <Package className="h-5 w-5 mr-2 text-blue-500" />
-          {showUserPackages ? 'Available Packages' : 'All Packages'}
-        </h3>
+      {showAvailablePackages && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center">
+            <Package className="h-5 w-5 mr-2 text-blue-500" />
+            {onPackageSelect ? 'Choose Package for Your Property' : showUserPackages ? 'Available Packages' : 'All Packages'}
+          </h3>
         
         {availablePackages.length === 0 ? (
           <Card>
@@ -371,7 +372,8 @@ const PackageDisplayWithSync: React.FC<PackageDisplayProps> = ({
             ))}
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
