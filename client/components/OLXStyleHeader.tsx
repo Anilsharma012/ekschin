@@ -55,8 +55,8 @@ export default function OLXStyleHeader() {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="text-2xl font-bold">
-              <span className="text-white">AASHISH</span>
-              <span className="text-white"> PROPERTY</span>
+              <span className="text-white">Ashish</span>
+              <span className="text-white"> Properties</span>
             </div>
           </div>
 
