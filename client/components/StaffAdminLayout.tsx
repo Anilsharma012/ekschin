@@ -196,7 +196,6 @@ const fullMenuItems: MenuItem[] = [
     permissions: ["system.manage"],
     children: [
       { id: "system-status", label: "System Status", icon: Activity, permissions: ["system.view"] },
-      { id: "login-test", label: "Login Test Suite", icon: Users, permissions: ["system.test"] },
       { id: "settings", label: "Settings", icon: Settings, permissions: ["system.manage"] },
       { id: "system-update", label: "System Update", icon: RefreshCw, permissions: ["system.update"] },
       { id: "auth-debug", label: "Auth Debug", icon: Shield, permissions: ["system.debug"] },
