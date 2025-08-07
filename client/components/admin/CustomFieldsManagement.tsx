@@ -333,12 +333,12 @@ export default function CustomFieldsManagement() {
   const addOption = () => {
     setFormData({
       ...formData,
-      options: [...formData.options, ""]
+      options: [...(formData.options || []), ""]
     });
   };
 
   const updateOption = (index: number, value: string) => {
-    const updatedOptions = [...formData.options];
+    const updatedOptions = [...(formData.options || [])];
     updatedOptions[index] = value;
     setFormData({ ...formData, options: updatedOptions });
   };
@@ -346,7 +346,7 @@ export default function CustomFieldsManagement() {
   const removeOption = (index: number) => {
     setFormData({
       ...formData,
-      options: formData.options.filter((_, i) => i !== index)
+      options: (formData.options || []).filter((_, i) => i !== index)
     });
   };
 
