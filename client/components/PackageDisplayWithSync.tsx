@@ -338,16 +338,21 @@ const PackageDisplayWithSync: React.FC<PackageDisplayProps> = ({
                     ))}
                   </ul>
 
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     variant={pkg.type === 'premium' ? 'default' : 'outline'}
                     onClick={() => handlePurchase(pkg._id)}
-                    disabled={purchasing === pkg._id || hasPackage(pkg._id)}
+                    disabled={purchasing === pkg._id || (!onPackageSelect && hasPackage(pkg._id))}
                   >
                     {purchasing === pkg._id ? (
                       <>
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                         Processing...
+                      </>
+                    ) : onPackageSelect ? (
+                      <>
+                        <Package className="h-4 w-4 mr-2" />
+                        Select Package
                       </>
                     ) : hasPackage(pkg._id) ? (
                       <>
