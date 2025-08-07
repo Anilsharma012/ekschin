@@ -129,6 +129,19 @@ export const safeApiRequest = async (
   ok: boolean;
   fromFallback?: boolean;
 }> => {
+  // Check circuit breaker
+  if (circuitBreaker.isOpen()) {
+    const remainingTime = Math.ceil(circuitBreaker.getRemainingTime() / 1000);
+    console.warn(`🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`);
+
+    return {
+      data: getFallbackData(endpoint),
+      status: 503,
+      ok: false,
+      fromFallback: true,
+    };
+  }
+
   const url = createApiUrl(endpoint);
   const controller = new AbortController();
   let timeoutId: NodeJS.Timeout | null = null;
