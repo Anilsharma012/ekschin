@@ -1318,6 +1318,11 @@ export function createServer() {
   app.get("/api/admin/packages", authenticateToken, requireAdmin, getAdminPackages);
   app.get("/api/admin/user-packages", authenticateToken, requireAdmin, getAdminUserPackages);
 
+  // WebSocket debug routes
+  const { getWebSocketStatus, testWebSocketConnection } = require("./routes/websocket-debug");
+  app.get("/api/debug/websocket-status", getWebSocketStatus);
+  app.post("/api/debug/websocket-test", testWebSocketConnection);
+
   // Debug custom fields endpoints (for troubleshooting)
   app.get("/api/debug/custom-fields", testCustomFields);
   app.post("/api/debug/custom-fields/fix", fixCustomFields);
