@@ -37,6 +37,8 @@ export const usePackageSync = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   // Initialize WebSocket for real-time package updates
   useEffect(() => {
