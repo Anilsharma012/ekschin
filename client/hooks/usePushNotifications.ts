@@ -102,10 +102,18 @@ export const usePushNotifications = () => {
         console.log('🚪 Disconnected from push notification service');
         setIsConnected(false);
         wsRef.current = null;
-        
-        // Attempt to reconnect after 3 seconds
-        if (isAuthenticated && user) {
-          setTimeout(connectWebSocket, 3000);
+
+        // Exponential backoff reconnection
+        if (isAuthenticated && user && reconnectAttempts.current < maxReconnectAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+          console.log(`🔄 Reconnecting to push notifications in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
+
+          setTimeout(() => {
+            reconnectAttempts.current++;
+            connectWebSocket();
+          }, delay);
+        } else if (reconnectAttempts.current >= maxReconnectAttempts) {
+          console.warn('⚠️ Max reconnection attempts reached for push notifications');
         }
       };
 
