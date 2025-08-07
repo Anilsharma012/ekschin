@@ -316,16 +316,16 @@ export default function CustomFieldsManagement() {
 
   const populateForm = (field: CustomField) => {
     setFormData({
-      name: field.name,
-      slug: field.slug,
-      type: field.type,
-      label: field.label,
+      name: field.name || "",
+      slug: field.slug || "",
+      type: field.type || "text",
+      label: field.label || "",
       placeholder: field.placeholder || "",
-      required: field.required,
-      active: field.active,
-      order: field.order,
+      required: field.required || false,
+      active: field.active !== undefined ? field.active : true,
+      order: field.order || 999,
       options: field.options || [],
-      categories: field.categories,
+      categories: field.categories || [],
       description: field.description || "",
     });
   };
