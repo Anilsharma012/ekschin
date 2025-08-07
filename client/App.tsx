@@ -37,6 +37,7 @@ import EnhancedSellerDashboard from "./pages/EnhancedSellerDashboard";
 import NotFound from "./pages/NotFound";
 import FooterTest from "./pages/FooterTest";
 import FooterDebugPage from "./pages/FooterDebugPage";
+import DebugPushNotifications from "./pages/DebugPushNotifications";
 import NetworkStatus from "./components/NetworkStatus";
 
 const queryClient = new QueryClient();
