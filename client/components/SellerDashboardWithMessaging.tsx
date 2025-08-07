@@ -353,6 +353,39 @@ const SellerDashboardWithMessaging: React.FC = () => {
     }
   };
 
+  const handlePurchaseClick = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setShowCheckoutModal(true);
+  };
+
+  const handlePurchase = async (packageId: string, paymentMethod: string, paymentDetails?: any) => {
+    try {
+      const response = await fetch('/api/seller/purchase-package', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ packageId, paymentMethod, paymentDetails })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Package purchased successfully!');
+        fetchPackages(); // Refresh packages
+        return { success: true, data: data.data };
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Purchase failed');
+        return { success: false, error: errorData.error };
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      alert('Purchase failed. Please try again.');
+      return { success: false, error: 'Network error' };
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
