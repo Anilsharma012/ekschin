@@ -80,8 +80,15 @@ export default function PackagesShowcase() {
         setPackages([]);
       }
     } catch (error: any) {
-      console.error("Error fetching packages:", error);
+      console.error("❌ PackagesShowcase fetch error:", error);
       setError(`Failed to load packages: ${error.message}`);
+
+      // Show debug info
+      console.log("🔍 PackagesShowcase debug info:");
+      console.log("- API endpoint: packages?activeOnly=true");
+      console.log("- Current packages length:", packages.length);
+      console.log("- Error details:", error);
+
       // Don't clear packages on error to avoid hiding the component
       if (packages.length === 0) {
         setPackages([]);
