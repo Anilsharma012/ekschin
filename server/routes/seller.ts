@@ -3,6 +3,7 @@ import { getDatabase } from "../db/mongodb";
 import { ApiResponse } from "@shared/types";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
+import { packageSyncService } from "../services/packageSyncService";
 
 // Get seller's properties
 export const getSellerProperties: RequestHandler = async (req, res) => {
