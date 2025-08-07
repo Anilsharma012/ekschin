@@ -287,6 +287,29 @@ export default function Admin() {
     skipDataLoading,
   ]);
 
+  // Helper function for consistent fetch with error handling
+  const adminFetch = async (url: string, label: string, timeout = 15000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  };
+
   const fetchAdminData = async () => {
     if (!token) {
       console.log("No token available for admin data fetch");
