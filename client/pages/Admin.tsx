@@ -371,12 +371,10 @@ export default function Admin() {
       }
     }
 
-    // Fetch users with individual error handling
+    // Fetch users with enhanced error handling
     try {
       console.log("Fetching admin users...");
-      const usersResponse = await fetch("/api/admin/users?limit=10", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const usersResponse = await adminFetch("/api/admin/users?limit=10", "users");
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
