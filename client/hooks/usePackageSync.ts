@@ -180,8 +180,10 @@ export const usePackageSync = () => {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('📦 Fetched packages in usePackageSync:', data.data);
         setPackages(data.data || []);
       } else {
+        console.error('❌ Failed to fetch packages:', response.status, response.statusText);
         setError('Failed to fetch packages');
       }
     } catch (error) {
