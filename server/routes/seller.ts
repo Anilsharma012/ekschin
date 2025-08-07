@@ -454,9 +454,21 @@ export const changeSellerPassword: RequestHandler = async (req, res) => {
 // Purchase package
 export const purchasePackage: RequestHandler = async (req, res) => {
   try {
-    const db = getDatabase();
+    // Ensure database is connected
+    let db;
+    try {
+      db = getDatabase();
+    } catch (dbError) {
+      console.log("💳 Database not ready for package purchase, attempting to connect...");
+      const { connectToDatabase } = await import("../db/mongodb");
+      await connectToDatabase();
+      db = getDatabase();
+    }
+
     const sellerId = (req as any).userId;
-    const { packageId, paymentMethod } = req.body;
+    const { packageId, paymentMethod, paymentDetails } = req.body;
+
+    console.log("💳 Package purchase request:", { sellerId, packageId, paymentMethod });
 
     if (!ObjectId.isValid(packageId)) {
       return res.status(400).json({
@@ -465,34 +477,88 @@ export const purchasePackage: RequestHandler = async (req, res) => {
       });
     }
 
-    // Get package details from unified collection
-    const packageDetails = await db.collection("packages").findOne({
+    // Get package details from ad_packages collection
+    const packageDetails = await db.collection("ad_packages").findOne({
       _id: new ObjectId(packageId),
+      active: true // Only allow purchasing active packages
     });
 
     if (!packageDetails) {
       return res.status(404).json({
         success: false,
-        error: "Package not found",
+        error: "Package not found or unavailable",
       });
     }
 
+    console.log("💳 Found package:", packageDetails.name, "Price:", packageDetails.price);
+
+    // Check if user already has this package active
+    const existingUserPackage = await db.collection("user_packages").findOne({
+      userId: new ObjectId(sellerId),
+      packageId: new ObjectId(packageId),
+      status: 'active'
+    });
+
+    if (existingUserPackage) {
+      return res.status(400).json({
+        success: false,
+        error: "You already have an active subscription for this package",
+      });
+    }
+
+    // Create user package record
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + packageDetails.duration);
+
+    const userPackage = {
+      userId: new ObjectId(sellerId),
+      packageId: new ObjectId(packageId),
+      package: {
+        _id: packageDetails._id,
+        name: packageDetails.name,
+        description: packageDetails.description,
+        price: packageDetails.price,
+        duration: packageDetails.duration,
+        type: packageDetails.type,
+        features: packageDetails.features
+      },
+      status: 'active',
+      purchaseDate: new Date(),
+      expiryDate: expiryDate,
+      paymentMethod: paymentMethod || "online",
+      totalAmount: packageDetails.price,
+      usageStats: {
+        propertiesPosted: 0,
+        featuredListings: 0,
+        premiumBoosts: 0
+      },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const userPackageResult = await db.collection("user_packages").insertOne(userPackage);
+    console.log("💳 Created user package:", userPackageResult.insertedId);
+
     // Create payment record
     const payment = {
-      sellerId: new ObjectId(sellerId),
+      userId: new ObjectId(sellerId),
+      sellerId: new ObjectId(sellerId), // For backward compatibility
       packageId: new ObjectId(packageId),
-      package: packageDetails.name,
+      userPackageId: userPackageResult.insertedId,
+      packageName: packageDetails.name,
       amount: packageDetails.price,
       paymentMethod: paymentMethod || "online",
+      paymentDetails: paymentDetails || {},
       status: "completed", // In real implementation, this would be pending until payment gateway confirms
       transactionId: `TXN${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
       date: new Date(),
       createdAt: new Date(),
     };
 
-    await db.collection("payments").insertOne(payment);
+    const paymentResult = await db.collection("payments").insertOne(payment);
+    console.log("💳 Created payment record:", paymentResult.insertedId);
 
-    // Update seller's package status
+    // Update seller's current package status
     await db.collection("users").updateOne(
       { _id: new ObjectId(sellerId) },
       {
