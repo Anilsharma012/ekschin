@@ -214,7 +214,7 @@ export const usePushNotifications = () => {
             }
           }
 
-          console.error('Complete error analysis:', errorAnalysis);
+          console.error('Complete error analysis:', JSON.stringify(errorAnalysis, null, 2));
 
           // Check for specific error patterns
           if (error.target?.readyState === WebSocket.CLOSED) {
