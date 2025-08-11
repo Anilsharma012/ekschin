@@ -91,11 +91,25 @@ export default function AdminLogin() {
         setError(data.error || "Login failed - invalid credentials");
       }
     } catch (error: any) {
-      console.error("❌ Admin login error:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
+      // Enhanced error analysis to prevent [object Object] errors
+      const safeErrorLog = (error: any) => {
+        try {
+          const errorInfo = {
+            name: error?.name || 'Unknown',
+            message: error?.message || 'No message available',
+            stack: error?.stack || 'No stack trace',
+            type: typeof error,
+            constructor: error?.constructor?.name || 'Unknown',
+            isError: error instanceof Error,
+            toString: error?.toString?.() || String(error)
+          };
+          return JSON.stringify(errorInfo, null, 2);
+        } catch (e) {
+          return `Error serialization failed: ${String(error)}`;
+        }
+      };
+
+      console.error("❌ Admin login error:", safeErrorLog(error));
 
       if (error.name === 'AbortError') {
         setError("Request timed out. Please check your connection and try again.");
