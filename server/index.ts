@@ -365,69 +365,28 @@ import {
 export function createServer() {
   const app = express();
 
-  // Allow all origins for CORS (as requested)
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true);
+  // CORS configuration - MUST be at the very top
+  const ALLOWED_ORIGINS = [
+    "https://ashishproperty.netlify.app",
+    "http://localhost:5173", // dev
+    "http://localhost:3000", // dev
+    "http://localhost:8080", // dev
+  ];
 
-        // Allow all origins for development and production
-        const allowedOrigins = [
-          'http://localhost:3000',
-          'http://localhost:5173',
-          'http://localhost:8080',
-          'https://ashishproperty.netlify.app',
-          'https://myproperty-production-a104.up.railway.app',
-          /\.netlify\.app$/,
-          /\.railway\.app$/,
-          /localhost:\d+$/
-        ];
+  app.use(cors({
+    origin(origin, cb) {
+      // allow no-origin (curl/healthchecks) + allowed list
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      console.log(`🔴 CORS blocked origin: ${origin}`);
+      return cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allowedHeaders: ["Content-Type","Authorization","X-Requested-With"],
+  }));
 
-        const isAllowed = allowedOrigins.some(allowed => {
-          if (typeof allowed === 'string') {
-            return origin === allowed;
-          } else if (allowed instanceof RegExp) {
-            return allowed.test(origin);
-          }
-          return false;
-        });
-
-        if (isAllowed || process.env.NODE_ENV === 'development') {
-          callback(null, true);
-        } else {
-          console.log(`🔴 CORS blocked origin: ${origin}`);
-          callback(null, true); // Allow all for now, can be restricted later
-        }
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "Accept",
-        "Origin",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers",
-        "Cache-Control",
-        "Pragma"
-      ],
-      exposedHeaders: ["Content-Length", "Content-Type", "Set-Cookie"],
-      optionsSuccessStatus: 200,
-      preflightContinue: false,
-      maxAge: 86400, // 24 hours
-    })
-  );
-
-  // Handle preflight requests explicitly
-  app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.sendStatus(200);
-  });
+  // Important: respond to preflight for all routes
+  app.options("*", cors());
 
 
   app.use(express.json({ limit: "1gb" }));
