@@ -77,8 +77,24 @@ export default function AdminLogin() {
         console.error("❌ Login failed:", data.error);
         setError(data.error || "Login failed - invalid credentials");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    } catch (error: any) {
+      console.error("❌ Admin login error:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+
+      if (error.name === 'AbortError') {
+        setError("Request timed out. Please check your connection and try again.");
+      } else if (error.message.includes('Failed to fetch')) {
+        setError("Network error. Please check your internet connection and try again.");
+      } else if (error.message.includes('CORS')) {
+        setError("Server configuration error. Please contact support.");
+      } else if (error.message.includes('Server error')) {
+        setError(error.message);
+      } else {
+        setError("Login failed. Please check your credentials and try again.");
+      }
     } finally {
       setLoading(false);
     }
