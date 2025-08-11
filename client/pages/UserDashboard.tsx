@@ -101,7 +101,7 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/simple-login');
+      navigate('/login');
       return;
     }
     
