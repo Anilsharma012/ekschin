@@ -398,6 +398,16 @@ export function createServer() {
   app.use(express.json({ limit: "1gb" }));
   app.use(express.urlencoded({ extended: true, limit: "1gb" }));
 
+  // CORS test endpoint
+  app.get("/api/cors-test", (req, res) => {
+    res.json({
+      success: true,
+      message: "CORS test successful",
+      origin: req.headers.origin,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Initialize MongoDB connection
   connectToDatabase()
     .then(() => {
