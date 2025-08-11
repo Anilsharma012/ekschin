@@ -133,7 +133,7 @@ export const verifyEmail: RequestHandler = async (req, res) => {
             <h1 class="success">✅ Email Verified Successfully!</h1>
             <p>Your email address <strong>${user.email}</strong> has been verified.</p>
             <p>You can now log in to your account with full access.</p>
-            <a href="/simple-login" class="button">Go to Login</a>
+            <a href="/login" class="button">Go to Login</a>
           </div>
         </body>
       </html>
