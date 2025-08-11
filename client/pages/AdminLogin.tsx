@@ -46,12 +46,12 @@ export default function AdminLogin() {
         loginData.phone = phone;
       }
 
-      console.log("🔐 Attempting admin login...", {
+      console.log("🔐 Attempting admin login...", JSON.stringify({
         method: loginMethod,
         email: loginMethod === 'email' ? email : undefined,
         phone: loginMethod === 'phone' ? phone : undefined,
         hasPassword: !!password
-      });
+      }, null, 2));
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
