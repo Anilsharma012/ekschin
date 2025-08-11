@@ -272,11 +272,19 @@ export const loginUser: RequestHandler = async (req, res) => {
     const user = await db.collection("users").findOne(query);
 
     if (!user) {
+      console.log("❌ User not found for login:", { query, email, phone, username });
       return res.status(401).json({
         success: false,
-        error: "Invalid credentials",
+        error: "Invalid credentials - user not found",
       });
     }
+
+    console.log("✅ User found for login:", {
+      userId: user._id,
+      userType: user.userType,
+      email: user.email,
+      role: user.role
+    });
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
