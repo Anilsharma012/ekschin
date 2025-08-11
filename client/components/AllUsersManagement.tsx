@@ -718,6 +718,7 @@ export default function AllUsersManagement() {
               <div className="flex space-x-2">
                 <Button
                   variant="outline"
+                  disabled={updatingUserId === selectedUser._id}
                   onClick={() =>
                     updateUserStatus(
                       selectedUser._id,
@@ -725,14 +726,29 @@ export default function AllUsersManagement() {
                     )
                   }
                 >
-                  {selectedUser.status === 'active' ? 'Deactivate' : 'Activate'}
+                  {updatingUserId === selectedUser._id ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                      <span>Updating...</span>
+                    </div>
+                  ) : (
+                    selectedUser.status === 'active' ? 'Deactivate' : 'Activate'
+                  )}
                 </Button>
                 <Button
                   variant="outline"
                   className="text-red-600"
+                  disabled={updatingUserId === selectedUser._id}
                   onClick={() => updateUserStatus(selectedUser._id, 'suspended')}
                 >
-                  Suspend User
+                  {updatingUserId === selectedUser._id ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full"></div>
+                      <span>Suspending...</span>
+                    </div>
+                  ) : (
+                    'Suspend User'
+                  )}
                 </Button>
               </div>
             </div>
