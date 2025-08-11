@@ -239,6 +239,8 @@ export default function AllUsersManagement() {
       }
     } catch (err) {
       setError('Network error while updating user status');
+    } finally {
+      setUpdatingUserId(null);
     }
   };
 
