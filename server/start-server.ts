@@ -3,7 +3,7 @@
 import { createServer, initializePushNotifications, initializePackageSync } from "./index";
 import { ChatWebSocketServer } from "./websocket";
 import { connectToDatabase } from "./db/mongodb";
-import { createDefaultAdmin } from "./scripts/createDefaultAdmin";
+// import { createDefaultAdmin } from "./scripts/createDefaultAdmin";
 
 const PORT = process.env.PORT || 8080;
 
