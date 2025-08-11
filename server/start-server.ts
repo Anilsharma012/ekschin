@@ -14,6 +14,13 @@ async function startServer() {
     await connectToDatabase();
     console.log("✅ Database connection established");
 
+    // Create default admin users if they don't exist
+    try {
+      await createDefaultAdmin();
+    } catch (error) {
+      console.warn("⚠️ Failed to create default admin, continuing...", error.message);
+    }
+
     // Create and start the server
     const app = createServer();
     const server = app.listen(PORT, () => {
