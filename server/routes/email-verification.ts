@@ -161,7 +161,7 @@ export const verifyEmail: RequestHandler = async (req, res) => {
             <h1 class="error">❌ Verification Failed</h1>
             <p>There was an error verifying your email address.</p>
             <p>Please try again or contact support if the problem persists.</p>
-            <a href="/simple-login" class="button">Back to Login</a>
+            <a href="/login" class="button">Back to Login</a>
           </div>
         </body>
       </html>
