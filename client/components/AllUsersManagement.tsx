@@ -87,6 +87,7 @@ export default function AllUsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserType, setSelectedUserType] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
