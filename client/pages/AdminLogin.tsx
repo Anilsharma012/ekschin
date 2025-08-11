@@ -71,11 +71,11 @@ export default function AdminLogin() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Login request failed:", {
+        console.error("❌ Login request failed:", JSON.stringify({
           status: response.status,
           statusText: response.statusText,
           body: errorText
-        });
+        }, null, 2));
         throw new Error(`Server error (${response.status}): ${response.statusText}`);
       }
 
