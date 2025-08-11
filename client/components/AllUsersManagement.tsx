@@ -215,6 +215,8 @@ export default function AllUsersManagement() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // Clear any previous error
+          setError('');
           // Update selectedUser if it's the same user being updated
           if (selectedUser && selectedUser._id === userId) {
             setSelectedUser({ ...selectedUser, status: newStatus });
