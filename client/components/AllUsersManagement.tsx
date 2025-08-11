@@ -204,6 +204,9 @@ export default function AllUsersManagement() {
     if (!token) return;
 
     try {
+      setUpdatingUserId(userId);
+      setError('');
+      setSuccessMessage('');
       const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
