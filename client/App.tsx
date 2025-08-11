@@ -103,6 +103,8 @@ const App = () => (
               <Route path="/debug-packages" element={<div className="min-h-screen bg-gray-50 py-8"><PackageDebugTest /></div>} />
               {/* Admin Login Test */}
               <Route path="/test-admin-login" element={<div className="min-h-screen bg-gray-50 py-8"><AdminLoginTest /></div>} />
+              {/* WebSocket Debug */}
+              <Route path="/debug-websocket" element={<div className="min-h-screen bg-gray-50 py-8"><WebSocketDebug /></div>} />
               {/* Dynamic Pages from Admin */}
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/:slug" element={<ContentPage />} />
