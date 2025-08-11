@@ -373,8 +373,21 @@ export function createServer() {
 
   app.use(cors({
     origin(origin, cb) {
+      console.log(`🔍 CORS origin check: ${origin || 'no-origin'}`);
+
       // allow no-origin (curl/healthchecks) + allowed list
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        console.log(`✅ CORS allowed: ${origin || 'no-origin'}`);
+        return cb(null, true);
+      }
+
+      // Allow all localhost for development
+      if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('.fly.dev'))) {
+        console.log(`✅ CORS allowed (dev): ${origin}`);
+        return cb(null, true);
+      }
+
+      console.log(`🔴 CORS blocked: ${origin}`);
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
