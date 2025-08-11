@@ -1337,9 +1337,9 @@ export function createServer() {
   );
 
   // Admin test routes (for debugging admin login issues)
-  app.get("/api/test/admin/connectivity", testAdminConnectivity);
-  app.post("/api/test/admin/create-default", createDefaultAdminUsers);
-  app.get("/api/test/admin/users", getAdminUsers);
+  // app.get("/api/test/admin/connectivity", testAdminConnectivity);
+  // app.post("/api/test/admin/create-default", createDefaultAdminUsers);
+  // app.get("/api/test/admin/users", getAdminUsers);
 
   // Footer management routes
   app.get("/api/footer/links", getActiveFooterLinks);
