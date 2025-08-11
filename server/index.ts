@@ -349,6 +349,13 @@ import {
   testUserConnection,
 } from "./routes/test-push-notifications";
 
+// Admin test routes
+import {
+  testAdminConnectivity,
+  createDefaultAdminUsers,
+  getAdminUsers,
+} from "./routes/admin-test";
+
 export function createServer() {
   const app = express();
 
