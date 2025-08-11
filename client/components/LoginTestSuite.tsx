@@ -344,7 +344,7 @@ export default function LoginTestSuite() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
-              onClick={() => navigate('/simple-login')}
+              onClick={() => navigate('/login')}
               variant="outline"
               className="w-full"
             >
