@@ -404,6 +404,7 @@ export function createServer() {
       success: true,
       message: "CORS test successful",
       origin: req.headers.origin,
+      allowedOrigins: ALLOWED_ORIGINS,
       timestamp: new Date().toISOString()
     });
   });
