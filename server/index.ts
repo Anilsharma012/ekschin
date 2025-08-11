@@ -350,10 +350,10 @@ import {
 } from "./routes/test-push-notifications";
 
 // WebSocket debug routes
-import {
-  getWebSocketStatus,
-  testWebSocketConnection,
-} from "./routes/websocket-debug";
+// import {
+//   getWebSocketStatus,
+//   testWebSocketConnection,
+// } from "./routes/websocket-debug";
 
 // Admin test routes
 // import {
