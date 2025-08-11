@@ -80,7 +80,7 @@ export default function AdminLogin() {
       }
 
       const data: ApiResponse<any> = await response.json();
-      console.log("📋 Login response:", { success: data.success, hasToken: !!data.data?.token });
+      console.log("📋 Login response:", JSON.stringify({ success: data.success, hasToken: !!data.data?.token }, null, 2));
 
       if (data.success && data.data?.token) {
         console.log("✅ Admin login successful");
