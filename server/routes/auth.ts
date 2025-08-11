@@ -13,12 +13,12 @@ const SALT_ROUNDS = 10;
 // Register new user (seller, agent, or buyer)
 export const registerUser: RequestHandler = async (req, res) => {
   try {
-    console.log("🔍 Registration request received:", {
+    console.log("🔍 Registration request received:", JSON.stringify({
       body: req.body,
       headers: req.headers,
       method: req.method,
       url: req.url
-    });
+    }, null, 2));
 
     const db = getDatabase();
     const {
