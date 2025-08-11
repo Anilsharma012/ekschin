@@ -149,45 +149,92 @@ export const usePushNotifications = () => {
       };
 
       wsRef.current.onerror = (error) => {
-        // Enhanced error serialization to avoid [object Object] logging
-        const getErrorDetails = (err: any) => {
-          if (err instanceof Event) {
-            return {
-              type: err.type || 'WebSocket Error',
-              target: err.target ? {
-                url: (err.target as any).url || 'Unknown URL',
-                readyState: (err.target as any).readyState || 'Unknown state',
-                protocol: (err.target as any).protocol || 'Unknown protocol'
-              } : 'No target',
-              timestamp: new Date().toISOString(),
-              message: 'WebSocket connection error occurred'
-            };
-          } else if (err instanceof Error) {
-            return {
-              type: 'Error',
-              message: err.message,
-              name: err.name,
-              stack: err.stack,
-              timestamp: new Date().toISOString()
-            };
-          } else {
-            return {
-              type: 'Unknown Error',
-              message: typeof err === 'string' ? err : 'Unknown WebSocket error',
-              raw: err && typeof err === 'object' ? JSON.stringify(err, null, 2) : String(err),
-              timestamp: new Date().toISOString()
-            };
-          }
-        };
+        // Comprehensive error analysis and logging
+        console.group('🔴 Push Notification WebSocket Error Analysis');
 
-        const errorDetails = getErrorDetails(error);
-        console.error('🔴 Push notification WebSocket error:', errorDetails);
+        try {
+          // Log the raw error object
+          console.error('Raw error object:', error);
+          console.error('Error type:', typeof error);
+          console.error('Error constructor:', error.constructor.name);
+
+          // Try to extract all possible error information
+          const errorAnalysis = {
+            timestamp: new Date().toISOString(),
+            errorType: typeof error,
+            constructorName: error.constructor?.name,
+            isEvent: error instanceof Event,
+            isError: error instanceof Error,
+            wsUrl: wsRef.current?.url,
+            wsReadyState: wsRef.current?.readyState,
+            wsProtocol: wsRef.current?.protocol,
+            connectionAttempt: reconnectAttempts.current,
+            userContext: {
+              isAuthenticated,
+              userId: user?.id || user?._id,
+              userType: user?.userType
+            }
+          };
+
+          // Enhanced error serialization
+          if (error instanceof Event) {
+            errorAnalysis.eventDetails = {
+              type: error.type,
+              timeStamp: error.timeStamp,
+              isTrusted: error.isTrusted,
+              bubbles: error.bubbles,
+              cancelable: error.cancelable,
+              target: error.target ? {
+                url: (error.target as any).url,
+                readyState: (error.target as any).readyState,
+                protocol: (error.target as any).protocol,
+                bufferedAmount: (error.target as any).bufferedAmount,
+                extensions: (error.target as any).extensions
+              } : null
+            };
+          } else if (error instanceof Error) {
+            errorAnalysis.errorDetails = {
+              name: error.name,
+              message: error.message,
+              stack: error.stack
+            };
+          } else if (error && typeof error === 'object') {
+            try {
+              errorAnalysis.objectDetails = JSON.parse(JSON.stringify(error));
+            } catch (e) {
+              errorAnalysis.objectDetails = 'Failed to serialize object';
+            }
+          }
+
+          console.error('Complete error analysis:', errorAnalysis);
+
+          // Check for specific error patterns
+          if (error.target?.readyState === WebSocket.CLOSED) {
+            console.warn('WebSocket was already closed');
+          } else if (error.target?.readyState === WebSocket.CLOSING) {
+            console.warn('WebSocket is closing');
+          } else if (error.target?.readyState === WebSocket.CONNECTING) {
+            console.warn('WebSocket failed during connection');
+          }
+
+        } catch (analysisError) {
+          console.error('Failed to analyze WebSocket error:', analysisError);
+        } finally {
+          console.groupEnd();
+        }
+
         setIsConnected(false);
 
-        // Attempt reconnection after error
-        if (isAuthenticated && user) {
-          console.log('🔄 Attempting to reconnect push notifications in 5 seconds...');
-          setTimeout(connectWebSocket, 5000);
+        // Attempt reconnection after error with backoff
+        if (isAuthenticated && user && reconnectAttempts.current < maxReconnectAttempts) {
+          const delay = Math.min(5000 * (reconnectAttempts.current + 1), 30000);
+          console.log(`🔄 Attempting to reconnect push notifications in ${delay}ms...`);
+          setTimeout(() => {
+            reconnectAttempts.current++;
+            connectWebSocket();
+          }, delay);
+        } else {
+          console.warn('⚠️ Max reconnection attempts reached or user not authenticated');
         }
       };
     } catch (error) {
