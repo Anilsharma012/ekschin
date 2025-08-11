@@ -33,22 +33,49 @@ export default function AdminLogin() {
         loginData.phone = phone;
       }
 
-    const response = await fetch(createApiUrl("auth/login"), {
+      console.log("🔐 Attempting admin login...", {
+        method: loginMethod,
+        email: loginMethod === 'email' ? email : undefined,
+        phone: loginMethod === 'phone' ? phone : undefined,
+        hasPassword: !!password
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const response = await fetch(createApiUrl("auth/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
         },
-         credentials: "include",
+        credentials: "include",
+        signal: controller.signal,
         body: JSON.stringify(loginData),
       });
 
-      const data: ApiResponse<any> = await response.json();
+      clearTimeout(timeoutId);
 
-      if (data.success) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Login request failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`Server error (${response.status}): ${response.statusText}`);
+      }
+
+      const data: ApiResponse<any> = await response.json();
+      console.log("📋 Login response:", { success: data.success, hasToken: !!data.data?.token });
+
+      if (data.success && data.data?.token) {
+        console.log("✅ Admin login successful");
         login(data.data.token, data.data.user);
         window.location.href = "/admin";
       } else {
-        setError(data.error || "Login failed");
+        console.error("❌ Login failed:", data.error);
+        setError(data.error || "Login failed - invalid credentials");
       }
     } catch (error) {
       setError("Network error. Please try again.");
