@@ -389,7 +389,10 @@ export function createServer() {
   }));
 
   // Important: respond to preflight for all routes
-  app.options("*", cors());
+  app.options("*", (req, res, next) => {
+    console.log(`🔄 OPTIONS request from origin: ${req.headers.origin} to path: ${req.path}`);
+    cors()(req, res, next);
+  });
 
 
   app.use(express.json({ limit: "1gb" }));
