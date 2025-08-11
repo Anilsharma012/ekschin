@@ -71,16 +71,16 @@ export const usePushNotifications = () => {
 
       // Add additional logging for WebSocket state changes
       wsRef.current.addEventListener('error', (event) => {
-        console.error('📡 Raw WebSocket error event:', {
+        console.error('📡 Raw WebSocket error event:', JSON.stringify({
           type: event.type,
           timeStamp: event.timeStamp,
           isTrusted: event.isTrusted,
-          target: {
-            url: event.target?.url,
-            readyState: event.target?.readyState,
-            protocol: event.target?.protocol
-          }
-        });
+          target: event.target ? {
+            url: (event.target as any)?.url || 'unknown',
+            readyState: (event.target as any)?.readyState || 'unknown',
+            protocol: (event.target as any)?.protocol || 'unknown'
+          } : null
+        }, null, 2));
       });
 
       wsRef.current.onopen = () => {
