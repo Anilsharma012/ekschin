@@ -335,7 +335,7 @@ export default function PostProperty() {
           alert("Your session has expired. Please login again.");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          window.location.href = "/user-login";
+          window.location.href = "/login?type=seller";
           return;
         }
         throw new Error(`HTTP ${response.status}: Failed to create property`);
