@@ -43,6 +43,7 @@ import PackageDebugTest from "./components/PackageDebugTest";
 import AdminLoginTest from "./components/AdminLoginTest";
 import WebSocketDebug from "./components/WebSocketDebug";
 import WebSocketErrorTest from "./components/WebSocketErrorTest";
+import AdminLoginErrorTest from "./components/AdminLoginErrorTest";
 import NetworkStatus from "./components/NetworkStatus";
 
 const queryClient = new QueryClient();
