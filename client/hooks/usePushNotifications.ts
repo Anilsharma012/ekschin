@@ -17,6 +17,19 @@ export const usePushNotifications = () => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
+  // Safe logging utility to prevent [object Object] errors
+  const safeLog = (level: 'log' | 'error' | 'warn', message: string, data?: any) => {
+    try {
+      if (data && typeof data === 'object') {
+        console[level](message, JSON.stringify(data, null, 2));
+      } else {
+        console[level](message, data);
+      }
+    } catch (e) {
+      console[level](message, `[Serialization failed: ${String(data)}]`);
+    }
+  };
+
   // Request browser notification permission
   const requestNotificationPermission = async () => {
     if ('Notification' in window) {
