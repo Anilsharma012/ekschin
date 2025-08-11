@@ -350,6 +350,12 @@ export const loginUser: RequestHandler = async (req, res) => {
       userResponse.roleInfo = roleInfo[user.role] || { displayName: user.role, color: "gray" };
     }
 
+    console.log("✅ Login successful for user:", {
+      email: user.email,
+      userType: user.userType,
+      role: user.role || 'none'
+    });
+
     const response: ApiResponse<{ token: string; user: any }> = {
       success: true,
       data: {
@@ -359,12 +365,26 @@ export const loginUser: RequestHandler = async (req, res) => {
       message: user.isFirstLogin ? "First login successful - please change your password" : "Login successful",
     };
 
+    // Add security headers for admin users
+    if (user.userType === 'admin' || user.role === 'super_admin') {
+      res.header('X-Admin-Login', 'true');
+      res.header('X-User-Role', user.role || user.userType);
+    }
+
     res.json(response);
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("❌ Login error:", {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+      origin: req.headers.origin,
+      timestamp: new Date().toISOString()
+    });
+
     res.status(500).json({
       success: false,
-      error: "Failed to login",
+      error: "Server error during login",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
