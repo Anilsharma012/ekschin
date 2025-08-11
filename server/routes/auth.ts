@@ -232,6 +232,14 @@ export const registerUser: RequestHandler = async (req, res) => {
 // Login user
 export const loginUser: RequestHandler = async (req, res) => {
   try {
+    console.log("🔐 Login attempt:", {
+      body: req.body,
+      headers: req.headers.origin,
+      method: req.method,
+      url: req.url,
+      timestamp: new Date().toISOString()
+    });
+
     const db = getDatabase();
     const { email, phone, password, userType } = req.body;
 
