@@ -752,7 +752,7 @@ export function createServer() {
     try {
       console.log("🧪 TEST: Property approval request received:");
       console.log("📋 URL path:", req.path);
-      console.log("📋 Route params:", req.params);
+      console.log("��� Route params:", req.params);
       console.log("📋 Property ID:", req.params.propertyId);
       console.log("📋 Request body:", req.body);
 
@@ -1343,8 +1343,8 @@ export function createServer() {
   );
 
   // WebSocket debug routes
-  app.get("/api/debug/websocket/status", getWebSocketStatus);
-  app.post("/api/debug/websocket/test", testWebSocketConnection);
+  // app.get("/api/debug/websocket/status", getWebSocketStatus);
+  // app.post("/api/debug/websocket/test", testWebSocketConnection);
 
   // Admin test routes (for debugging admin login issues)
   // app.get("/api/test/admin/connectivity", testAdminConnectivity);
