@@ -1342,6 +1342,10 @@ export function createServer() {
     testUserConnection,
   );
 
+  // WebSocket debug routes
+  app.get("/api/debug/websocket/status", getWebSocketStatus);
+  app.post("/api/debug/websocket/test", testWebSocketConnection);
+
   // Admin test routes (for debugging admin login issues)
   // app.get("/api/test/admin/connectivity", testAdminConnectivity);
   // app.post("/api/test/admin/create-default", createDefaultAdminUsers);
