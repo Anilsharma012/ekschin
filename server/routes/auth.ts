@@ -289,11 +289,14 @@ export const loginUser: RequestHandler = async (req, res) => {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      console.log("❌ Invalid password for user:", user.email);
       return res.status(401).json({
         success: false,
-        error: "Invalid credentials",
+        error: "Invalid credentials - password mismatch",
       });
     }
+
+    console.log("✅ Password verified for user:", user.email);
 
     // Update last login time
     await db.collection("users").updateOne(
