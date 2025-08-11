@@ -46,7 +46,7 @@ export default function BuyerDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/simple-login');
+      navigate('/login');
       return;
     }
     
@@ -72,7 +72,7 @@ export default function BuyerDashboard() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/simple-login');
+        navigate('/login');
         return;
       }
 
