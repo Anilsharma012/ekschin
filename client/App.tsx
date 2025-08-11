@@ -40,6 +40,7 @@ import FooterDebugPage from "./pages/FooterDebugPage";
 import DebugPushNotifications from "./pages/DebugPushNotifications";
 import PackageSystemTest from "./components/PackageSystemTest";
 import PackageDebugTest from "./components/PackageDebugTest";
+import AdminLoginTest from "./components/AdminLoginTest";
 import NetworkStatus from "./components/NetworkStatus";
 
 const queryClient = new QueryClient();
