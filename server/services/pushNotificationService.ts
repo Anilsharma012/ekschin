@@ -31,7 +31,14 @@ class PushNotificationService {
       console.log('📱 Push notification WebSocket server created at /ws/notifications');
 
       this.wss.on('connection', (ws, req) => {
-        console.log('📱 WebSocket client connected for push notifications from:', req.socket.remoteAddress);
+        console.log('📱 WebSocket client connected for push notifications');
+        console.log('📊 Connection details:', {
+          remoteAddress: req.socket.remoteAddress,
+          origin: req.headers.origin,
+          userAgent: req.headers['user-agent'],
+          url: req.url,
+          headers: req.headers
+        });
 
       ws.on('message', (message) => {
         try {
