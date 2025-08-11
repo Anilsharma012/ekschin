@@ -132,7 +132,7 @@ export default function EnhancedSellerDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/simple-login');
+      navigate('/login');
       return;
     }
     
@@ -149,7 +149,7 @@ export default function EnhancedSellerDashboard() {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/simple-login');
+        navigate('/login');
         return;
       }
 
