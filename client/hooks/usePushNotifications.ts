@@ -58,7 +58,30 @@ export const usePushNotifications = () => {
       const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
 
       console.log('🔄 Connecting to push notification service at:', wsUrl);
+      console.log('📊 Connection context:', {
+        protocol,
+        host: window.location.host,
+        isAuthenticated,
+        userId: user?.id || user?._id,
+        userType: user?.userType,
+        reconnectAttempt: reconnectAttempts.current
+      });
+
       wsRef.current = new WebSocket(wsUrl);
+
+      // Add additional logging for WebSocket state changes
+      wsRef.current.addEventListener('error', (event) => {
+        console.error('📡 Raw WebSocket error event:', {
+          type: event.type,
+          timeStamp: event.timeStamp,
+          isTrusted: event.isTrusted,
+          target: {
+            url: event.target?.url,
+            readyState: event.target?.readyState,
+            protocol: event.target?.protocol
+          }
+        });
+      });
 
       wsRef.current.onopen = () => {
         console.log('🔔 Connected to push notification service');
