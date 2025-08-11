@@ -71,7 +71,7 @@ export const usePushNotifications = () => {
       const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
 
       console.log('🔄 Connecting to push notification service at:', wsUrl);
-      console.log('📊 Connection context:', {
+      safeLog('log', '📊 Connection context:', {
         protocol,
         host: window.location.host,
         isAuthenticated,
