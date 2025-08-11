@@ -153,10 +153,18 @@ export const usePushNotifications = () => {
         console.group('🔴 Push Notification WebSocket Error Analysis');
 
         try {
-          // Log the raw error object
-          console.error('Raw error object:', error);
+          // Log the raw error object with proper serialization
+          const rawErrorInfo = {
+            type: typeof error,
+            constructor: error.constructor?.name || 'Unknown',
+            isEvent: error instanceof Event,
+            isError: error instanceof Error,
+            message: error instanceof Error ? error.message : (error as any)?.message || 'No message available'
+          };
+
+          console.error('Raw error object:', JSON.stringify(rawErrorInfo, null, 2));
           console.error('Error type:', typeof error);
-          console.error('Error constructor:', error.constructor.name);
+          console.error('Error constructor:', error.constructor?.name || 'Unknown');
 
           // Try to extract all possible error information
           const errorAnalysis = {
