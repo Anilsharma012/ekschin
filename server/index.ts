@@ -369,39 +369,12 @@ export function createServer() {
   const ALLOWED_ORIGINS = [
     "https://ashishproperty.netlify.app",
     "http://localhost:5173", // dev
-    "http://localhost:3000", // dev
-    "http://localhost:8080", // dev
-  ];
-
-  const ALLOWED_PATTERNS = [
-    /\.netlify\.app$/,
-    /\.fly\.dev$/,
-    /localhost:\d+$/,
-    /127\.0\.0\.1:\d+$/,
   ];
 
   app.use(cors({
     origin(origin, cb) {
-      // allow no-origin (curl/healthchecks)
-      if (!origin) {
-        console.log(`✅ CORS allowed origin: no-origin`);
-        return cb(null, true);
-      }
-
-      // Check exact matches
-      if (ALLOWED_ORIGINS.includes(origin)) {
-        console.log(`✅ CORS allowed origin: ${origin}`);
-        return cb(null, true);
-      }
-
-      // Check pattern matches
-      const isPatternMatch = ALLOWED_PATTERNS.some(pattern => pattern.test(origin));
-      if (isPatternMatch) {
-        console.log(`✅ CORS allowed origin (pattern): ${origin}`);
-        return cb(null, true);
-      }
-
-      console.log(`🔴 CORS blocked origin: ${origin}`);
+      // allow no-origin (curl/healthchecks) + allowed list
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -410,10 +383,7 @@ export function createServer() {
   }));
 
   // Important: respond to preflight for all routes
-  app.options("*", (req, res, next) => {
-    console.log(`🔄 OPTIONS request from origin: ${req.headers.origin} to path: ${req.path}`);
-    cors()(req, res, next);
-  });
+  app.options("*", cors());
 
 
   app.use(express.json({ limit: "1gb" }));
