@@ -376,7 +376,10 @@ export function createServer() {
   app.use(cors({
     origin(origin, cb) {
       // allow no-origin (curl/healthchecks) + allowed list
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        console.log(`✅ CORS allowed origin: ${origin || 'no-origin'}`);
+        return cb(null, true);
+      }
       console.log(`🔴 CORS blocked origin: ${origin}`);
       return cb(new Error("Not allowed by CORS"));
     },
