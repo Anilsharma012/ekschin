@@ -3,6 +3,7 @@
 import { createServer, initializePushNotifications, initializePackageSync } from "./index";
 import { ChatWebSocketServer } from "./websocket";
 import { connectToDatabase } from "./db/mongodb";
+import { createDefaultAdmin } from "./scripts/createDefaultAdmin";
 
 const PORT = process.env.PORT || 8080;
 
@@ -26,7 +27,7 @@ async function startServer() {
 
     // Initialize chat WebSocket server
     const chatWS = new ChatWebSocketServer(server);
-    console.log('💬 Chat WebSocket server initialized');
+    console.log('�� Chat WebSocket server initialized');
 
   } catch (error) {
     console.error("❌ Failed to start server:", error);
