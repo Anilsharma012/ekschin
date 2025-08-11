@@ -78,8 +78,8 @@ export async function createDefaultAdmin() {
   }
 }
 
-// Run this script directly if called
-if (require.main === module) {
+// Run this script directly if called (Node.js compatible)
+if (typeof require !== 'undefined' && require.main === module) {
   createDefaultAdmin()
     .then(() => {
       console.log("✅ Admin creation completed");
