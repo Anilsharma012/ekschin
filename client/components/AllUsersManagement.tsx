@@ -214,9 +214,16 @@ export default function AllUsersManagement() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // Update selectedUser if it's the same user being updated
+          if (selectedUser && selectedUser._id === userId) {
+            setSelectedUser({ ...selectedUser, status: newStatus });
+          }
           // Refresh users list
           fetchUsers();
           fetchStats();
+          // Show success message
+          setSuccessMessage(`User status updated to ${newStatus} successfully`);
+          setTimeout(() => setSuccessMessage(''), 3000);
         } else {
           setError(data.error || 'Failed to update user status');
         }
