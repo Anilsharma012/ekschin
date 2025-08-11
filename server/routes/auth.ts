@@ -232,13 +232,13 @@ export const registerUser: RequestHandler = async (req, res) => {
 // Login user
 export const loginUser: RequestHandler = async (req, res) => {
   try {
-    console.log("🔐 Login attempt:", {
+    console.log("🔐 Login attempt:", JSON.stringify({
       body: req.body,
       headers: req.headers.origin,
       method: req.method,
       url: req.url,
       timestamp: new Date().toISOString()
-    });
+    }, null, 2));
 
     const db = getDatabase();
     const { email, phone, password, userType } = req.body;
