@@ -30,6 +30,16 @@ class PushNotificationService {
 
       console.log('📱 Push notification WebSocket server created at /ws/notifications');
 
+      // Add server-level error handling
+      this.wss.on('error', (error) => {
+        console.error('🔴 WebSocket Server Error:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+          timestamp: new Date().toISOString()
+        });
+      });
+
       this.wss.on('connection', (ws, req) => {
         console.log('📱 WebSocket client connected for push notifications');
         console.log('📊 Connection details:', {
