@@ -49,7 +49,7 @@ export default function AgentDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/simple-login');
+      navigate('/login');
       return;
     }
     
@@ -75,7 +75,7 @@ export default function AgentDashboard() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/simple-login');
+        navigate('/login');
         return;
       }
 
@@ -114,7 +114,7 @@ export default function AgentDashboard() {
       if (error.message.includes('401') || error.message.includes('403')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        navigate('/simple-login');
+        navigate('/login');
         return;
       }
       setError('Failed to load your dashboard data. Please try again.');
