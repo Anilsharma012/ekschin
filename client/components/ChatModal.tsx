@@ -27,6 +27,8 @@ export default function ChatModal({
 }: ChatModalProps) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const quickMessages = [
     "Hi! Is this property still available?",
