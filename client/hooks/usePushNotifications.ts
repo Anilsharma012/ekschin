@@ -277,6 +277,13 @@ export const usePushNotifications = () => {
       };
     } catch (error) {
       console.error('Failed to connect to push notification service:', error);
+      setIsConnected(false);
+
+      // Don't retry if there's a fundamental connection issue
+      if (error instanceof Error && error.message.includes('WebSocket')) {
+        console.warn('⚠️ WebSocket connection failed, disabling notifications for this session');
+        reconnectAttempts.current = maxReconnectAttempts;
+      }
     }
   };
 
