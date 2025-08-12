@@ -58,11 +58,26 @@ const NetworkStatusComponent: React.FC = () => {
         }
       }, 3000);
 
-      const response = await fetch('/api/health', {
-        method: 'GET',
-        signal: controller.signal,
-        cache: 'no-cache'
-      });
+      // Try health endpoint first, fallback to ping if not available
+      let response;
+      try {
+        response = await fetch('/api/health', {
+          method: 'GET',
+          signal: controller.signal,
+          cache: 'no-cache'
+        });
+      } catch (healthError: any) {
+        // If health endpoint fails, try ping endpoint as fallback
+        if (healthError.name !== 'AbortError' && isMountedRef.current) {
+          response = await fetch('/api/ping', {
+            method: 'GET',
+            signal: controller.signal,
+            cache: 'no-cache'
+          });
+        } else {
+          throw healthError;
+        }
+      }
 
       // Clear timeout if request completed successfully
       clearTimeout(timeoutId);
