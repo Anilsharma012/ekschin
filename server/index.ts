@@ -307,6 +307,8 @@ import {
   changeSellerPassword,
   purchasePackage,
   getSellerStats,
+  getSellerProfile,
+  uploadProfilePicture,
 } from "./routes/seller";
 
 // Chatbot routes
