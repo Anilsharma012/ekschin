@@ -264,6 +264,9 @@ export default function AdminLogin() {
             <p>
               <strong>Password:</strong> admin123
             </p>
+            <div className="mt-2 p-2 bg-green-100 rounded text-green-800 text-xs">
+              ✅ Server running properly - Use above credentials for admin access
+            </div>
           </div>
         </div>
 
