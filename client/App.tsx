@@ -46,6 +46,7 @@ import WebSocketErrorTest from "./components/WebSocketErrorTest";
 import AdminLoginErrorTest from "./components/AdminLoginErrorTest";
 import NetworkStatusTest from "./components/NetworkStatusTest";
 import ChatTest from "./components/ChatTest";
+import ChatApiTest from "./components/ChatApiTest";
 import NetworkStatus from "./components/NetworkStatus";
 
 const queryClient = new QueryClient();
