@@ -156,23 +156,25 @@ export default function ChatModal({
         )}
 
         {/* Quick Messages */}
-        <div className="p-4">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">
-            Quick messages:
-          </h4>
-          <div className="space-y-2">
-            {quickMessages.map((quickMsg, index) => (
-              <button
-                key={index}
-                onClick={() => handleSendMessage(quickMsg)}
-                disabled={sending}
-                className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 border transition-colors"
-              >
-                {quickMsg}
-              </button>
-            ))}
+        {!success && (
+          <div className="p-4">
+            <h4 className="text-sm font-medium text-gray-900 mb-3">
+              Quick messages:
+            </h4>
+            <div className="space-y-2">
+              {quickMessages.map((quickMsg, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSendMessage(quickMsg)}
+                  disabled={sending || success}
+                  className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {quickMsg}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Custom Message */}
         <div className="p-4 border-t">
