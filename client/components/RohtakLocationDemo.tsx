@@ -146,7 +146,7 @@ export default function RohtakLocationDemo() {
       landmark: Landmark,
       area: MapPin,
       colony: Home,
-      road: Road,
+      road: MapPin,
       market: Store,
       society: Building
     };
