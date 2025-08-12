@@ -1276,7 +1276,9 @@ export function createServer() {
   app.get("/api/seller/messages", authenticateToken, getSellerMessages);
   app.get("/api/seller/packages", authenticateToken, getSellerPackages);
   app.get("/api/seller/payments", authenticateToken, getSellerPayments);
+  app.get("/api/seller/profile", authenticateToken, getSellerProfile);
   app.put("/api/seller/profile", authenticateToken, updateSellerProfile);
+  app.post("/api/seller/upload-profile-picture", authenticateToken, uploadProfilePicture);
   app.put(
     "/api/seller/change-password",
     authenticateToken,
