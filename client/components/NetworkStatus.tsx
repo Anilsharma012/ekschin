@@ -286,44 +286,57 @@ const NetworkStatusComponent: React.FC = () => {
     return null;
   }
 
-  return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm">
-      <Card className={`border ${getStatusColor()}`}>
-        <CardContent className="flex items-center justify-between p-3">
-          <div className="flex items-center space-x-2">
-            {getStatusIcon()}
-            <div>
-              <p className="text-sm font-medium">{getStatusText()}</p>
-              <p className="text-xs opacity-75">
-                Last checked: {status.lastChecked.toLocaleTimeString()}
-              </p>
+  // Safe wrapper to prevent any rendering errors
+  try {
+    return (
+      <div className="fixed top-4 right-4 z-50 max-w-sm">
+        <Card className={`border ${getStatusColor()}`}>
+          <CardContent className="flex items-center justify-between p-3">
+            <div className="flex items-center space-x-2">
+              {getStatusIcon()}
+              <div>
+                <p className="text-sm font-medium">{getStatusText()}</p>
+                <p className="text-xs opacity-75">
+                  Last checked: {status.lastChecked?.toLocaleTimeString() || 'Unknown'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center space-x-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={checkConnection}
-              disabled={isChecking}
-              className="h-6 w-6 p-0"
-            >
-              <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
-            </Button>
+            <div className="flex items-center space-x-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  try {
+                    checkConnection();
+                  } catch (error) {
+                    console.warn('Manual connection check failed:', error);
+                  }
+                }}
+                disabled={isChecking}
+                className="h-6 w-6 p-0"
+              >
+                <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
+              </Button>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsVisible(false)}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsVisible(false)}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  } catch (renderError) {
+    // If rendering fails for any reason, return null to prevent app crash
+    console.warn('NetworkStatus render error:', renderError);
+    return null;
+  }
 };
 
 export default NetworkStatusComponent;
