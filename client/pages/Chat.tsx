@@ -80,7 +80,7 @@ export default function Chat() {
   const fetchConversations = async () => {
     if (!token) return;
 
-    try {
+    const performFetch = async () => {
       const fetchPromise = fetch("/api/chat/conversations", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -105,8 +105,12 @@ export default function Chat() {
         setConversations(data.data);
         setError(""); // Clear error on success
       } else {
-        setError(data.error || "Failed to load conversations");
+        throw new Error(data.error || "Failed to load conversations");
       }
+    };
+
+    try {
+      await retryFetch(performFetch);
     } catch (error: any) {
       console.error("Error fetching conversations:", error);
       if (error.name === "AbortError" || error.message === "Request timeout") {
