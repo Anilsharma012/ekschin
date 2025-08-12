@@ -32,11 +32,6 @@ const NetworkStatusComponent: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
-  // Early return if disabled
-  if (!NETWORK_STATUS_ENABLED) {
-    return null;
-  }
-
   // Use ref to track if component is mounted
   const isMountedRef = useRef(true);
   const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
