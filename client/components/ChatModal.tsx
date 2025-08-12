@@ -134,6 +134,27 @@ export default function ChatModal({
           </div>
         </div>
 
+        {/* Success/Error Messages */}
+        {success && (
+          <div className="p-4 bg-green-50 border-b border-green-200">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <p className="text-green-700 font-medium">Message sent successfully!</p>
+            </div>
+            <p className="text-green-600 text-sm mt-1">Redirecting to chat...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 bg-red-50 border-b border-red-200">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <p className="text-red-700 font-medium">Error</p>
+            </div>
+            <p className="text-red-600 text-sm mt-1">{error}</p>
+          </div>
+        )}
+
         {/* Quick Messages */}
         <div className="p-4">
           <h4 className="text-sm font-medium text-gray-900 mb-3">
