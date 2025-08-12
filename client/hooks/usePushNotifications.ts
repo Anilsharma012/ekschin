@@ -80,6 +80,12 @@ export const usePushNotifications = () => {
         reconnectAttempt: reconnectAttempts.current
       });
 
+      // Check if WebSocket is supported
+      if (typeof WebSocket === 'undefined') {
+        console.warn('⚠️ WebSocket not supported in this environment');
+        return;
+      }
+
       wsRef.current = new WebSocket(wsUrl);
 
       // Add additional logging for WebSocket state changes
