@@ -60,27 +60,22 @@ const NetworkStatusComponent: React.FC = () => {
           }
         });
 
-        // Race with timeout
+        // Race with timeout - simpler approach
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error('Health check timeout')), 8000);
         });
 
-        response = await Promise.race([fetchPromise, timeoutPromise]);
-
-        // Validate response
-        if (response && typeof response.ok !== 'undefined') {
-          // Response is valid
+        try {
+          response = await Promise.race([fetchPromise, timeoutPromise]);
           fetchError = null;
-        } else {
-          fetchError = new Error('Invalid response received');
+        } catch (raceError: any) {
+          fetchError = raceError;
+          response = null;
         }
 
       } catch (error: any) {
         fetchError = error;
         response = null;
-
-        // Don't attempt fallback to reduce complexity and potential errors
-        // Just mark as unreachable and continue
       }
 
       // Check if component is still mounted before updating state
