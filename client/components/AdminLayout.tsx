@@ -67,6 +67,7 @@ const menuItems: MenuItem[] = [
     children: [
       { id: "ads-listing", label: "Ads Listing", icon: List },
       { id: "categories", label: "Categories", icon: Layers },
+      { id: "locations", label: "Rohtak Locations", icon: MapPin },
       { id: "custom-fields", label: "Custom Fields", icon: Settings },
       {
         id: "ad-management",
