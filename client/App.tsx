@@ -118,6 +118,8 @@ const App = () => (
               <Route path="/test-network-status" element={<div className="min-h-screen bg-gray-50 py-8"><NetworkStatusTest /></div>} />
               {/* Chat Test */}
               <Route path="/test-chat" element={<div className="min-h-screen bg-gray-50 py-8"><ChatTest /></div>} />
+              {/* Chat API Test */}
+              <Route path="/test-chat-api" element={<div className="min-h-screen bg-gray-50 py-8"><ChatApiTest /></div>} />
               {/* Dynamic Pages from Admin */}
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/:slug" element={<ContentPage />} />
