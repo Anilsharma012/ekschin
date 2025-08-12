@@ -1499,69 +1499,11 @@ const IntegratedSellerDashboard: React.FC = () => {
         </Tabs>
       </div>
 
-      {/* Profile Modal */}
-      {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Profile Details</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowProfileModal(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4 mb-6">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={user?.avatar} />
-                    <AvatarFallback className="text-lg">{user?.name?.charAt(0) || 'S'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-medium">{user?.name}</h3>
-                    <p className="text-gray-500">{user?.userType}</p>
-                    <Badge variant="outline" className="mt-1">
-                      {user?.emailVerified ? 'Verified' : 'Unverified'}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">{user?.email}</span>
-                  </div>
-                  {user?.phone && (
-                    <div className="flex items-center space-x-2">
-                      <Phone className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{user.phone}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">Member since {new Date(user?.createdAt || Date.now()).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Activity className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">{stats.totalProperties} properties listed</span>
-                  </div>
-                </div>
-                
-                <div className="mt-6 space-y-2">
-                  <Button className="w-full" variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Profile Management Modal */}
+      <SellerProfileManagement
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
 
       {/* Package Checkout Modal */}
       {showCheckoutModal && selectedPackage && (
