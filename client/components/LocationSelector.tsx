@@ -154,7 +154,7 @@ export default function LocationSelector({ value, onChange, required = false }: 
       landmark: Landmark,
       area: MapPin,
       colony: Home,
-      road: Road,
+      road: MapPin,
       market: Store,
       society: Building
     };
