@@ -691,3 +691,256 @@ export const getSellerStats: RequestHandler = async (req, res) => {
     });
   }
 };
+
+// Get seller profile with plan details
+export const getSellerProfile: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const userId = (req as any).userId;
+
+    // Get user profile
+    const user = await db.collection("users").findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { password: 0 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found"
+      });
+    }
+
+    // Get active user package for plan details
+    const activePackage = await db.collection("user_packages").findOne({
+      userId: userId,
+      status: "active",
+      expiryDate: { $gt: new Date() }
+    });
+
+    let planDetails = null;
+
+    if (activePackage) {
+      const packageDetails = await db.collection("packages").findOne({
+        _id: new ObjectId(activePackage.packageId)
+      });
+
+      if (packageDetails) {
+        const remainingDays = Math.max(0, Math.ceil(
+          (new Date(activePackage.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+        ));
+
+        planDetails = {
+          planType: packageDetails.type || "Premium",
+          startDate: activePackage.purchaseDate,
+          expiryDate: activePackage.expiryDate,
+          remainingDays,
+          features: packageDetails.features || [],
+          usage: {
+            propertiesPosted: activePackage.usageStats?.propertiesPosted || 0,
+            maxProperties: packageDetails.limits?.maxProperties || 10,
+            featuredListings: activePackage.usageStats?.featuredListings || 0,
+            maxFeaturedListings: packageDetails.limits?.maxFeaturedListings || 5,
+            premiumBoosts: activePackage.usageStats?.premiumBoosts || 0,
+            maxPremiumBoosts: packageDetails.limits?.maxPremiumBoosts || 3
+          }
+        };
+      }
+    } else {
+      // Free plan
+      planDetails = {
+        planType: "Free",
+        startDate: user.createdAt,
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+        remainingDays: 365,
+        features: [
+          "Post up to 2 properties",
+          "Basic listing visibility",
+          "Email support"
+        ],
+        usage: {
+          propertiesPosted: 0,
+          maxProperties: 2,
+          featuredListings: 0,
+          maxFeaturedListings: 0,
+          premiumBoosts: 0,
+          maxPremiumBoosts: 0
+        }
+      };
+    }
+
+    // Enhanced profile with default values
+    const profile = {
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      alternativePhone: user.profile?.alternativePhone || "",
+      whatsappNumber: user.profile?.whatsappNumber || "",
+      address: user.profile?.address || "",
+      city: user.profile?.city || "",
+      state: user.profile?.state || "",
+      pincode: user.profile?.pincode || "",
+      shopName: user.profile?.shopName || "",
+      shopAddress: user.profile?.shopAddress || "",
+      gstNumber: user.profile?.gstNumber || "",
+      description: user.profile?.description || "",
+      profilePicture: user.profile?.profilePicture || "",
+      coverPhoto: user.profile?.coverPhoto || "",
+      businessCategory: user.profile?.businessCategory || "",
+      website: user.profile?.website || "",
+      socialLinks: user.profile?.socialLinks || {},
+      preferences: {
+        emailNotifications: user.preferences?.emailNotifications ?? true,
+        smsNotifications: user.preferences?.smsNotifications ?? false,
+        pushNotifications: user.preferences?.pushNotifications ?? true,
+        profileVisibility: user.preferences?.profileVisibility ?? true,
+        contactInfoVisible: user.preferences?.contactInfoVisible ?? true,
+        businessHours: user.preferences?.businessHours || {
+          monday: { open: "09:00", close: "18:00", closed: false },
+          tuesday: { open: "09:00", close: "18:00", closed: false },
+          wednesday: { open: "09:00", close: "18:00", closed: false },
+          thursday: { open: "09:00", close: "18:00", closed: false },
+          friday: { open: "09:00", close: "18:00", closed: false },
+          saturday: { open: "09:00", close: "18:00", closed: false },
+          sunday: { open: "10:00", close: "17:00", closed: true }
+        }
+      },
+      verification: {
+        emailVerified: user.emailVerified || false,
+        phoneVerified: user.phoneVerified || false,
+        documentVerified: user.profile?.documentVerified || false,
+        profileCompleted: user.profile?.profileCompleted || false
+      }
+    };
+
+    const response: ApiResponse<{
+      profile: any;
+      plan: any;
+    }> = {
+      success: true,
+      data: {
+        profile,
+        plan: planDetails
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching seller profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch seller profile"
+    });
+  }
+};
+
+// Update seller profile
+export const updateSellerProfile: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const userId = (req as any).userId;
+    const updateData = req.body;
+
+    // Validate required fields
+    if (!updateData.name || !updateData.email || !updateData.phone) {
+      return res.status(400).json({
+        success: false,
+        error: "Name, email, and phone are required"
+      });
+    }
+
+    // Prepare update object
+    const userUpdate: any = {
+      name: updateData.name,
+      email: updateData.email,
+      phone: updateData.phone,
+      updatedAt: new Date()
+    };
+
+    // Profile data
+    const profileUpdate = {
+      alternativePhone: updateData.alternativePhone,
+      whatsappNumber: updateData.whatsappNumber,
+      address: updateData.address,
+      city: updateData.city,
+      state: updateData.state,
+      pincode: updateData.pincode,
+      shopName: updateData.shopName,
+      shopAddress: updateData.shopAddress,
+      gstNumber: updateData.gstNumber,
+      description: updateData.description,
+      businessCategory: updateData.businessCategory,
+      website: updateData.website,
+      socialLinks: updateData.socialLinks
+    };
+
+    // Preferences
+    const preferencesUpdate = updateData.preferences;
+
+    // Update user document
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          ...userUpdate,
+          profile: profileUpdate,
+          preferences: preferencesUpdate
+        }
+      }
+    );
+
+    const response: ApiResponse<{ updated: boolean }> = {
+      success: true,
+      data: { updated: true },
+      message: "Profile updated successfully"
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error updating seller profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update seller profile"
+    });
+  }
+};
+
+// Upload profile picture
+export const uploadProfilePicture: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const userId = (req as any).userId;
+
+    // In a real implementation, you would:
+    // 1. Handle file upload to cloud storage (AWS S3, Cloudinary, etc.)
+    // 2. Resize and optimize the image
+    // 3. Store the URL in the database
+
+    // For now, we'll simulate a successful upload
+    const profilePictureUrl = `/uploads/profiles/${userId}-${Date.now()}.jpg`;
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          "profile.profilePicture": profilePictureUrl,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    const response: ApiResponse<{ profilePicture: string }> = {
+      success: true,
+      data: { profilePicture: profilePictureUrl },
+      message: "Profile picture uploaded successfully"
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error uploading profile picture:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to upload profile picture"
+    });
+  }
+};
