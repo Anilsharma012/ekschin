@@ -29,10 +29,12 @@ export default function ChatModal({
   const [sending, setSending] = useState(false);
 
   const quickMessages = [
-    "Is this property still available?",
-    "I'm interested in viewing this property",
-    "What's the best price for this property?",
-    "Can you share more details about this property?",
+    "Hi! Is this property still available?",
+    "I'm interested in this property. Can we schedule a visit?",
+    "What's your best price for this property?",
+    "Can you share more photos and details?",
+    "Is the price negotiable?",
+    "When can I visit this property?",
   ];
 
   const handleSendMessage = async (messageText: string) => {
