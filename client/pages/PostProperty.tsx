@@ -27,6 +27,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ROHTAK_AREAS } from "@shared/types";
+import LocationSelector from "../components/LocationSelector";
 
 interface PropertyFormData {
   title: string;
