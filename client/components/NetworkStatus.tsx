@@ -29,8 +29,8 @@ const NetworkStatusComponent: React.FC = () => {
   const [isChecking, setIsChecking] = useState(false);
 
   // Use ref to track if component is mounted
-  const isMountedRef = React.useRef(true);
-  const currentControllerRef = React.useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
+  const currentControllerRef = useRef<AbortController | null>(null);
 
   const checkConnection = async () => {
     // Prevent multiple concurrent checks
