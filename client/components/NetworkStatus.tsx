@@ -141,32 +141,29 @@ const NetworkStatusComponent: React.FC = () => {
     // Mark component as mounted
     isMountedRef.current = true;
 
-    // Initial check after a small delay to ensure component is fully mounted
-    const initialCheckTimeout = setTimeout(() => {
-      if (isMountedRef.current) {
-        checkConnection();
-      }
-    }, 100);
-
-    // Set up event listeners
+    // Set up event listeners for network status
     const handleOnline = () => {
       if (!isMountedRef.current) return;
 
       setStatus(prev => ({ ...prev, isOnline: true }));
       setIsVisible(true);
 
-      // Debounce connection check
-      setTimeout(() => {
+      // Check connection after network comes back online
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+      }
+      checkTimeoutRef.current = setTimeout(() => {
         if (isMountedRef.current) {
           checkConnection();
         }
-      }, 500);
+      }, 1000);
 
+      // Hide status after showing online notification
       setTimeout(() => {
         if (isMountedRef.current) {
           setIsVisible(false);
         }
-      }, 3000);
+      }, 4000);
     };
 
     const handleOffline = () => {
@@ -181,37 +178,44 @@ const NetworkStatusComponent: React.FC = () => {
       setIsVisible(true);
     };
 
+    // Add event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodic check with longer interval to reduce load
-    const interval = setInterval(() => {
+    // Initial connection check with delay
+    const initialCheck = setTimeout(() => {
       if (isMountedRef.current) {
         checkConnection();
       }
-    }, 60000); // Increased to 60 seconds
+    }, 2000);
 
-    // Show status if connection is poor (with delay to avoid flash)
-    const statusCheckTimeout = setTimeout(() => {
+    // Periodic health check - less frequent to reduce errors
+    const healthInterval = setInterval(() => {
+      if (isMountedRef.current && navigator.onLine) {
+        checkConnection();
+      }
+    }, 120000); // Check every 2 minutes when online
+
+    // Show status indicator for poor connections
+    const statusCheck = setTimeout(() => {
       if (isMountedRef.current && (!status.isOnline || !status.serverReachable || status.connectionQuality === 'poor')) {
         setIsVisible(true);
       }
-    }, 1000);
+    }, 3000);
 
     return () => {
       // Mark component as unmounted
       isMountedRef.current = false;
 
-      // Cancel any pending requests
-      if (currentControllerRef.current) {
-        currentControllerRef.current.abort();
-        currentControllerRef.current = null;
-      }
+      // Clear all timeouts and intervals
+      clearTimeout(initialCheck);
+      clearTimeout(statusCheck);
+      clearInterval(healthInterval);
 
-      // Clear timeouts and intervals
-      clearTimeout(initialCheckTimeout);
-      clearTimeout(statusCheckTimeout);
-      clearInterval(interval);
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+        checkTimeoutRef.current = null;
+      }
 
       // Remove event listeners
       window.removeEventListener('online', handleOnline);
