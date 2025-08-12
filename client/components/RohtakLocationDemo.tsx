@@ -5,14 +5,13 @@ import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Alert, AlertDescription } from "./ui/alert";
-import { 
-  MapPin, 
-  Building, 
-  Home, 
-  Landmark, 
-  Road, 
-  Store, 
-  Star, 
+import {
+  MapPin,
+  Building,
+  Home,
+  Landmark,
+  Store,
+  Star,
   Search,
   Database,
   Settings,
