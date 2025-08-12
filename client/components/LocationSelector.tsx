@@ -10,7 +10,6 @@ import {
   MapPin,
   Star,
   Building,
-  Road,
   Home,
   Store,
   Landmark,
