@@ -71,10 +71,15 @@ export default function ChatModal({
         }),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
       console.log("📨 Chat response:", data);
 
-      if (response.ok && data.success) {
+      if (data.success) {
         setSuccess(true);
         console.log("✅ Message sent successfully, redirecting to chat...");
 
