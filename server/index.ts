@@ -80,6 +80,20 @@ import {
   getUnreadCount,
 } from "./routes/chat";
 
+// Location routes
+import {
+  getAllLocations,
+  getLocationsByType,
+  getPopularLocations,
+  searchLocations,
+  createLocation,
+  updateLocation,
+  deleteLocation,
+  bulkImportLocations,
+  initializeRohtakLocations,
+  getLocationStats,
+} from "./routes/locations";
+
 import { handleDemo } from "./routes/demo";
 import { seedDatabase } from "./routes/seed";
 import { initializeSystem } from "./routes/init";
