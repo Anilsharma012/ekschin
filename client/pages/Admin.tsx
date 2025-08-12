@@ -1014,6 +1014,8 @@ export default function Admin() {
           return <ReportsManagement />;
         case "categories":
           return <CompleteCategoryManagement />;
+        case "locations":
+          return <LocationManagement />;
         case "custom-fields":
           return <CustomFieldsManagement />;
         case "ad-management":
