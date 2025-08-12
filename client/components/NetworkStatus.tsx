@@ -19,6 +19,10 @@ interface NetworkStatus {
 }
 
 const NetworkStatusComponent: React.FC = () => {
+  // Feature flag to disable network status if needed
+  const NETWORK_STATUS_ENABLED = process.env.NODE_ENV === 'development' ||
+    import.meta.env.VITE_ENABLE_NETWORK_STATUS !== 'false';
+
   const [status, setStatus] = useState<NetworkStatus>({
     isOnline: navigator.onLine,
     serverReachable: false,
@@ -27,6 +31,11 @@ const NetworkStatusComponent: React.FC = () => {
   });
   const [isVisible, setIsVisible] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+
+  // Early return if disabled
+  if (!NETWORK_STATUS_ENABLED) {
+    return null;
+  }
 
   // Use ref to track if component is mounted
   const isMountedRef = useRef(true);
