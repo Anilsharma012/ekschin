@@ -42,12 +42,22 @@ export default function ChatModal({
   const handleSendMessage = async (messageText: string) => {
     try {
       setSending(true);
-      const token = localStorage.getItem("token"); // Fixed: use correct token key
+      setError("");
+      const token = localStorage.getItem("token");
 
       if (!token) {
-        window.location.href = "/login";
+        setError("Please login to send messages");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
         return;
       }
+
+      console.log("🚀 Sending message to property owner:", {
+        propertyId,
+        message: messageText,
+        sellerName
+      });
 
       const response = await fetch("/api/chat/start-property-conversation", {
         method: "POST",
@@ -61,15 +71,23 @@ export default function ChatModal({
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Redirect to chat conversation
-        window.location.href = `/chat?conversation=${data.data.conversationId}`;
+      const data = await response.json();
+      console.log("📨 Chat response:", data);
+
+      if (response.ok && data.success) {
+        setSuccess(true);
+        console.log("✅ Message sent successfully, redirecting to chat...");
+
+        // Show success message briefly then redirect
+        setTimeout(() => {
+          window.location.href = `/chat?conversation=${data.data.conversationId}`;
+        }, 1500);
       } else {
-        console.error("Failed to send message");
+        setError(data.error || "Failed to send message. Please try again.");
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch (error: any) {
+      console.error("❌ Error sending message:", error);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setSending(false);
     }
