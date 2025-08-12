@@ -120,7 +120,8 @@ export default function AdminLogin() {
       } else if (error.message.includes('Server error')) {
         setError(error.message);
       } else {
-        setError("Login failed. Please check your credentials and try again.");
+        // Simplified error message for users
+        setError("Login failed. Please use the demo credentials provided below.");
       }
     } finally {
       setLoading(false);
