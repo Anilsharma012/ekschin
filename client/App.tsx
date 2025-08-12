@@ -47,6 +47,7 @@ import AdminLoginErrorTest from "./components/AdminLoginErrorTest";
 import NetworkStatusTest from "./components/NetworkStatusTest";
 import ChatTest from "./components/ChatTest";
 import ChatApiTest from "./components/ChatApiTest";
+import RohtakLocationDemo from "./components/RohtakLocationDemo";
 import NetworkStatus from "./components/NetworkStatus";
 
 const queryClient = new QueryClient();
