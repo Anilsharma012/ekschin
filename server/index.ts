@@ -891,6 +891,21 @@ export function createServer() {
   );
   app.get("/api/chat/unread-count", authenticateToken, getUnreadCount);
 
+  // Location routes
+  app.get("/api/locations", getAllLocations);
+  app.get("/api/locations/by-type", getLocationsByType);
+  app.get("/api/locations/popular", getPopularLocations);
+  app.get("/api/locations/search", searchLocations);
+
+  // Admin location routes
+  app.get("/api/admin/locations", authenticateToken, requireAdmin, getAllLocations);
+  app.get("/api/admin/locations/stats", authenticateToken, requireAdmin, getLocationStats);
+  app.post("/api/admin/locations", authenticateToken, requireAdmin, createLocation);
+  app.put("/api/admin/locations/:locationId", authenticateToken, requireAdmin, updateLocation);
+  app.delete("/api/admin/locations/:locationId", authenticateToken, requireAdmin, deleteLocation);
+  app.post("/api/admin/locations/bulk-import", authenticateToken, requireAdmin, bulkImportLocations);
+  app.post("/api/admin/locations/initialize", authenticateToken, requireAdmin, initializeRohtakLocations);
+
   // Testimonials routes
   app.get("/api/testimonials", getPublicTestimonials);
   app.get(
