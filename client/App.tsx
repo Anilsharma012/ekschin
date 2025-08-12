@@ -112,6 +112,8 @@ const App = () => (
               <Route path="/test-websocket-errors" element={<div className="min-h-screen bg-gray-50 py-8"><WebSocketErrorTest /></div>} />
               {/* Admin Login Error Test */}
               <Route path="/test-admin-login-errors" element={<div className="min-h-screen bg-gray-50 py-8"><AdminLoginErrorTest /></div>} />
+              {/* NetworkStatus Test */}
+              <Route path="/test-network-status" element={<div className="min-h-screen bg-gray-50 py-8"><NetworkStatusTest /></div>} />
               {/* Dynamic Pages from Admin */}
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/:slug" element={<ContentPage />} />
