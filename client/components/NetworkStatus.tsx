@@ -28,25 +28,52 @@ const NetworkStatusComponent: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
-  const checkConnection = async () => {
-    setIsChecking(true);
-    
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+  // Use ref to track if component is mounted
+  const isMountedRef = React.useRef(true);
+  const currentControllerRef = React.useRef<AbortController | null>(null);
 
+  const checkConnection = async () => {
+    // Prevent multiple concurrent checks
+    if (isChecking || !isMountedRef.current) return;
+
+    setIsChecking(true);
+
+    // Cancel any existing request
+    if (currentControllerRef.current) {
+      currentControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    currentControllerRef.current = controller;
+
+    let timeoutId: NodeJS.Timeout;
+
+    try {
       const startTime = Date.now();
+
+      // Use a shorter timeout for better UX
+      timeoutId = setTimeout(() => {
+        if (isMountedRef.current) {
+          controller.abort();
+        }
+      }, 3000);
+
       const response = await fetch('/api/health', {
         method: 'GET',
         signal: controller.signal,
         cache: 'no-cache'
       });
 
+      // Clear timeout if request completed successfully
       clearTimeout(timeoutId);
+
+      // Check if component is still mounted before updating state
+      if (!isMountedRef.current) return;
+
       const latency = Date.now() - startTime;
 
       let quality: 'excellent' | 'good' | 'fair' | 'poor' | 'offline' = 'good';
-      
+
       if (!navigator.onLine) {
         quality = 'offline';
       } else if (!response.ok) {
@@ -68,15 +95,34 @@ const NetworkStatusComponent: React.FC = () => {
         connectionQuality: quality
       });
 
-    } catch (error) {
-      setStatus({
-        isOnline: navigator.onLine,
-        serverReachable: false,
-        lastChecked: new Date(),
-        connectionQuality: navigator.onLine ? 'poor' : 'offline'
-      });
+    } catch (error: any) {
+      // Clear timeout on error
+      if (timeoutId) clearTimeout(timeoutId);
+
+      // Only update state if component is mounted and error isn't from abortion
+      if (isMountedRef.current && error.name !== 'AbortError') {
+        setStatus({
+          isOnline: navigator.onLine,
+          serverReachable: false,
+          lastChecked: new Date(),
+          connectionQuality: navigator.onLine ? 'poor' : 'offline'
+        });
+      }
+
+      // Log non-abort errors for debugging
+      if (error.name !== 'AbortError') {
+        console.warn('Network check failed:', error.message);
+      }
     } finally {
-      setIsChecking(false);
+      // Clear the controller reference
+      if (currentControllerRef.current === controller) {
+        currentControllerRef.current = null;
+      }
+
+      // Only update checking state if component is mounted
+      if (isMountedRef.current) {
+        setIsChecking(false);
+      }
     }
   };
 
