@@ -38,7 +38,7 @@ export default function ChatModal({
   const handleSendMessage = async (messageText: string) => {
     try {
       setSending(true);
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("token"); // Fixed: use correct token key
 
       if (!token) {
         window.location.href = "/login";
