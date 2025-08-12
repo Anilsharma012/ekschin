@@ -501,6 +501,20 @@ export default function PropertyDetail() {
           enableHumanHandoff={true}
         />
       )}
+
+      {/* Chat Modal */}
+      {property && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          propertyTitle={property.title}
+          propertyPrice={`₹${(property.price / 100000).toFixed(1)}L ${property.priceType === 'rent' ? '/month' : ''}`}
+          propertyImage={property.images[0] || "/placeholder.svg"}
+          sellerId={property.ownerId || ""}
+          sellerName={property.contactInfo.name}
+          propertyId={parseInt(property._id)}
+        />
+      )}
     </div>
   );
 }
