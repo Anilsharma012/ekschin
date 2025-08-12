@@ -622,6 +622,15 @@ const IntegratedSellerDashboard: React.FC = () => {
                 )}
               </div>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowProfileModal(true)}
+                className="flex items-center space-x-2"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden md:block">Profile</span>
+              </Button>
+              <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowProfileModal(true)}
