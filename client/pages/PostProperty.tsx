@@ -37,9 +37,11 @@ interface PropertyFormData {
   propertyType: string;
   subCategory: string;
   location: {
-    area: string;
+    sector?: string;
+    mohalla?: string;
+    landmark?: string;
+    area?: string;
     address: string;
-    landmark: string;
   };
   specifications: {
     bedrooms: string;
