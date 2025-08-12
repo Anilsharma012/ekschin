@@ -181,7 +181,7 @@ export default function Chat() {
     setError("");
 
     try {
-      const response = await fetch("/api/chat/messages", {
+      const fetchPromise = fetch("/api/chat/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -192,7 +192,18 @@ export default function Chat() {
           message: newMessage,
           messageType: "text",
         }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout for sending
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 10000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: ApiResponse<{ messageId: string; conversationId: string }> =
         await response.json();
@@ -218,14 +229,24 @@ export default function Chat() {
 
         setMessages((prev) => [...prev, optimisticMessage]);
         setNewMessage("");
+        setError(""); // Clear error on success
 
         // Refresh conversations to update last message
         fetchConversations();
       } else {
         setError(data.error || "Failed to send message");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      if (error.name === "AbortError" || error.message === "Request timeout") {
+        setError("Message send timed out. Please try again.");
+      } else if (error.message.includes("HTTP 401")) {
+        setError("Authentication expired. Please login again.");
+      } else if (error.message.includes("HTTP")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     } finally {
       setSendingMessage(false);
     }
