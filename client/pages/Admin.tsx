@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { AdminDataProvider } from "../hooks/useAdminData";
 import AdminLayout from "../components/AdminLayout";
 import {
   BarChart3,
