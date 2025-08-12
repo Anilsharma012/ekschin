@@ -51,6 +51,31 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
 
+  // Retry utility function
+  const retryFetch = async (fetchFn: () => Promise<any>, maxRetries = 2) => {
+    let lastError;
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        await fetchFn();
+        return; // Success, exit retry loop
+      } catch (error: any) {
+        lastError = error;
+        console.log(`Attempt ${i + 1} failed:`, error.message);
+
+        // Don't retry on auth errors or client errors
+        if (error.message.includes("HTTP 401") || error.message.includes("HTTP 4")) {
+          throw error;
+        }
+
+        // Wait before retrying (exponential backoff)
+        if (i < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      }
+    }
+    throw lastError; // Throw the last error if all retries failed
+  };
+
   // Fetch conversations from API
   const fetchConversations = async () => {
     if (!token) return;
