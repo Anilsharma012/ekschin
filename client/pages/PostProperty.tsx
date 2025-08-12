@@ -134,9 +134,7 @@ export default function PostProperty() {
     propertyType: "",
     subCategory: "",
     location: {
-      area: "",
       address: "",
-      landmark: "",
     },
     specifications: {
       bedrooms: "",
