@@ -426,9 +426,26 @@ export default function Chat() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border-b border-red-200 p-3 flex items-center space-x-2">
-            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="bg-red-50 border-b border-red-200 p-3 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+            <Button
+              onClick={() => {
+                setError("");
+                if (currentConversation) {
+                  fetchMessages(currentConversation._id!);
+                } else {
+                  fetchConversations();
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+            >
+              Retry
+            </Button>
           </div>
         )}
 
