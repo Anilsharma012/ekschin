@@ -92,7 +92,10 @@ export const getAdPackages: RequestHandler = async (req, res) => {
     if (category) filter.category = category;
     if (location) filter.location = location;
 
-    console.log(`📦 Fetching packages with filter:`, filter);
+    // Only log when debug mode is enabled
+    if (req.query.debug === 'true') {
+      console.log(`📦 Fetching packages with filter:`, filter);
+    }
 
     const packages = await db
       .collection("ad_packages")
@@ -100,7 +103,9 @@ export const getAdPackages: RequestHandler = async (req, res) => {
       .sort({ type: 1, price: 1 })
       .toArray();
 
-    console.log(`📦 Found ${packages.length} packages`);
+    if (req.query.debug === 'true') {
+      console.log(`📦 Found ${packages.length} packages`);
+    }
 
     // If no packages found and activeOnly is true, try to initialize default packages
     if (packages.length === 0 && activeOnly === "true") {
