@@ -219,6 +219,11 @@ const NetworkStatusComponent: React.FC = () => {
     };
   }, []);
 
+  // Early return after hooks if disabled
+  if (!NETWORK_STATUS_ENABLED) {
+    return null;
+  }
+
   const getStatusIcon = () => {
     if (!status.isOnline) {
       return <WifiOff className="h-4 w-4 text-red-500" />;
