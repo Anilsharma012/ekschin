@@ -177,44 +177,59 @@ export default function ChatModal({
         )}
 
         {/* Custom Message */}
-        <div className="p-4 border-t">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">
-            Or write your own message:
-          </h4>
-          <div className="space-y-3">
-            <Textarea
-              placeholder="Type your message here..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={3}
-              className="resize-none"
-            />
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-                disabled={sending}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCustomMessage}
-                disabled={!message.trim() || sending}
-                className="flex-1 bg-[#C70000] hover:bg-[#A60000] text-white"
-              >
-                {sending ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send
-                  </>
-                )}
-              </Button>
+        {!success && (
+          <div className="p-4 border-t">
+            <h4 className="text-sm font-medium text-gray-900 mb-3">
+              Or write your own message:
+            </h4>
+            <div className="space-y-3">
+              <Textarea
+                placeholder="Type your message here..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={3}
+                className="resize-none"
+                disabled={sending || success}
+              />
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1"
+                  disabled={sending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCustomMessage}
+                  disabled={!message.trim() || sending || success}
+                  className="flex-1 bg-[#C70000] hover:bg-[#A60000] text-white"
+                >
+                  {sending ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Success state - show close button */}
+        {success && (
+          <div className="p-4 border-t">
+            <Button
+              onClick={onClose}
+              className="w-full bg-[#C70000] hover:bg-[#A60000] text-white"
+            >
+              Close
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
