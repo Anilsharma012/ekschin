@@ -30,7 +30,7 @@ const NetworkStatusComponent: React.FC = () => {
 
   // Use ref to track if component is mounted
   const isMountedRef = useRef(true);
-  const currentControllerRef = useRef<AbortController | null>(null);
+  const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const checkConnection = async () => {
     // Prevent multiple concurrent checks
@@ -38,84 +38,85 @@ const NetworkStatusComponent: React.FC = () => {
 
     setIsChecking(true);
 
-    // Cancel any existing request
-    if (currentControllerRef.current) {
-      currentControllerRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    currentControllerRef.current = controller;
-
-    let timeoutId: NodeJS.Timeout;
-
     try {
       const startTime = Date.now();
 
-      // Use a shorter timeout for better UX
-      timeoutId = setTimeout(() => {
-        if (isMountedRef.current) {
-          controller.abort();
-        }
-      }, 3000);
+      // Simple fetch with basic error handling - no AbortController
+      let response: Response | null = null;
+      let fetchError: Error | null = null;
 
-      // Try health endpoint first, fallback to ping if not available
-      let response;
+      // Try a simple fetch without AbortController to avoid AbortError issues
       try {
-        response = await fetch('/api/health', {
+        // Use a Promise.race for timeout instead of AbortController
+        const fetchPromise = fetch('/api/health', {
           method: 'GET',
-          signal: controller.signal,
           cache: 'no-cache'
         });
-      } catch (healthError: any) {
-        // If health endpoint fails, try ping endpoint as fallback
-        if (healthError.name !== 'AbortError' && isMountedRef.current) {
-          response = await fetch('/api/ping', {
-            method: 'GET',
-            signal: controller.signal,
-            cache: 'no-cache'
-          });
-        } else {
-          throw healthError;
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 5000);
+        });
+
+        response = await Promise.race([fetchPromise, timeoutPromise]);
+      } catch (error: any) {
+        fetchError = error;
+
+        // Try ping endpoint as fallback only if not a timeout
+        if (!error.message.includes('timeout') && isMountedRef.current) {
+          try {
+            const fallbackPromise = fetch('/api/ping', {
+              method: 'GET',
+              cache: 'no-cache'
+            });
+
+            const fallbackTimeout = new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error('Fallback timeout')), 3000);
+            });
+
+            response = await Promise.race([fallbackPromise, fallbackTimeout]);
+            fetchError = null;
+          } catch (fallbackError) {
+            // If both endpoints fail, keep the original error
+            fetchError = error;
+          }
         }
       }
-
-      // Clear timeout if request completed successfully
-      clearTimeout(timeoutId);
 
       // Check if component is still mounted before updating state
       if (!isMountedRef.current) return;
 
       const latency = Date.now() - startTime;
-
-      let quality: 'excellent' | 'good' | 'fair' | 'poor' | 'offline' = 'good';
+      let quality: 'excellent' | 'good' | 'fair' | 'poor' | 'offline' = 'poor';
+      let serverReachable = false;
 
       if (!navigator.onLine) {
         quality = 'offline';
-      } else if (!response.ok) {
-        quality = 'poor';
-      } else if (latency < 200) {
-        quality = 'excellent';
-      } else if (latency < 500) {
-        quality = 'good';
-      } else if (latency < 1000) {
-        quality = 'fair';
+      } else if (response && response.ok) {
+        serverReachable = true;
+        if (latency < 300) {
+          quality = 'excellent';
+        } else if (latency < 800) {
+          quality = 'good';
+        } else if (latency < 2000) {
+          quality = 'fair';
+        } else {
+          quality = 'poor';
+        }
       } else {
-        quality = 'poor';
+        // Server not reachable or error occurred
+        quality = navigator.onLine ? 'poor' : 'offline';
       }
 
       setStatus({
         isOnline: navigator.onLine,
-        serverReachable: response.ok,
+        serverReachable,
         lastChecked: new Date(),
         connectionQuality: quality
       });
 
     } catch (error: any) {
-      // Clear timeout on error
-      if (timeoutId) clearTimeout(timeoutId);
-
-      // Only update state if component is mounted and error isn't from abortion
-      if (isMountedRef.current && error.name !== 'AbortError') {
+      // Only update state if component is mounted
+      if (isMountedRef.current) {
         setStatus({
           isOnline: navigator.onLine,
           serverReachable: false,
@@ -124,16 +125,11 @@ const NetworkStatusComponent: React.FC = () => {
         });
       }
 
-      // Log non-abort errors for debugging
-      if (error.name !== 'AbortError') {
+      // Only log meaningful errors
+      if (!error.message.includes('timeout') && !error.message.includes('abort')) {
         console.warn('Network check failed:', error.message);
       }
     } finally {
-      // Clear the controller reference
-      if (currentControllerRef.current === controller) {
-        currentControllerRef.current = null;
-      }
-
       // Only update checking state if component is mounted
       if (isMountedRef.current) {
         setIsChecking(false);
