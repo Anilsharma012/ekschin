@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import ChatBot from "../components/ChatBot";
+import ChatModal from "../components/ChatModal";
 
 interface Property {
   _id: string;
