@@ -127,21 +127,43 @@ const NetworkStatusComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initial check
-    checkConnection();
+    // Mark component as mounted
+    isMountedRef.current = true;
+
+    // Initial check after a small delay to ensure component is fully mounted
+    const initialCheckTimeout = setTimeout(() => {
+      if (isMountedRef.current) {
+        checkConnection();
+      }
+    }, 100);
 
     // Set up event listeners
     const handleOnline = () => {
+      if (!isMountedRef.current) return;
+
       setStatus(prev => ({ ...prev, isOnline: true }));
       setIsVisible(true);
-      checkConnection();
-      setTimeout(() => setIsVisible(false), 3000);
+
+      // Debounce connection check
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          checkConnection();
+        }
+      }, 500);
+
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          setIsVisible(false);
+        }
+      }, 3000);
     };
 
     const handleOffline = () => {
-      setStatus(prev => ({ 
-        ...prev, 
-        isOnline: false, 
+      if (!isMountedRef.current) return;
+
+      setStatus(prev => ({
+        ...prev,
+        isOnline: false,
         serverReachable: false,
         connectionQuality: 'offline'
       }));
@@ -151,18 +173,38 @@ const NetworkStatusComponent: React.FC = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodic check
-    const interval = setInterval(checkConnection, 30000);
+    // Periodic check with longer interval to reduce load
+    const interval = setInterval(() => {
+      if (isMountedRef.current) {
+        checkConnection();
+      }
+    }, 60000); // Increased to 60 seconds
 
-    // Show status if connection is poor
-    if (!status.isOnline || !status.serverReachable || status.connectionQuality === 'poor') {
-      setIsVisible(true);
-    }
+    // Show status if connection is poor (with delay to avoid flash)
+    const statusCheckTimeout = setTimeout(() => {
+      if (isMountedRef.current && (!status.isOnline || !status.serverReachable || status.connectionQuality === 'poor')) {
+        setIsVisible(true);
+      }
+    }, 1000);
 
     return () => {
+      // Mark component as unmounted
+      isMountedRef.current = false;
+
+      // Cancel any pending requests
+      if (currentControllerRef.current) {
+        currentControllerRef.current.abort();
+        currentControllerRef.current = null;
+      }
+
+      // Clear timeouts and intervals
+      clearTimeout(initialCheckTimeout);
+      clearTimeout(statusCheckTimeout);
+      clearInterval(interval);
+
+      // Remove event listeners
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      clearInterval(interval);
     };
   }, []);
 
