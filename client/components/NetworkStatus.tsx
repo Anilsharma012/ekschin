@@ -45,41 +45,38 @@ const NetworkStatusComponent: React.FC = () => {
       let response: Response | null = null;
       let fetchError: Error | null = null;
 
-      // Try a simple fetch without AbortController to avoid AbortError issues
+      // Simplified fetch with minimal error-prone logic
       try {
-        // Use a Promise.race for timeout instead of AbortController
+        // Only check health endpoint, no fallback to reduce complexity
         const fetchPromise = fetch('/api/health', {
           method: 'GET',
-          cache: 'no-cache'
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json'
+          }
         });
 
+        // Race with timeout
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Request timeout')), 5000);
+          setTimeout(() => reject(new Error('Health check timeout')), 8000);
         });
 
         response = await Promise.race([fetchPromise, timeoutPromise]);
+
+        // Validate response
+        if (response && typeof response.ok !== 'undefined') {
+          // Response is valid
+          fetchError = null;
+        } else {
+          fetchError = new Error('Invalid response received');
+        }
+
       } catch (error: any) {
         fetchError = error;
+        response = null;
 
-        // Try ping endpoint as fallback only if not a timeout
-        if (!error.message.includes('timeout') && isMountedRef.current) {
-          try {
-            const fallbackPromise = fetch('/api/ping', {
-              method: 'GET',
-              cache: 'no-cache'
-            });
-
-            const fallbackTimeout = new Promise<never>((_, reject) => {
-              setTimeout(() => reject(new Error('Fallback timeout')), 3000);
-            });
-
-            response = await Promise.race([fallbackPromise, fallbackTimeout]);
-            fetchError = null;
-          } catch (fallbackError) {
-            // If both endpoints fail, keep the original error
-            fetchError = error;
-          }
-        }
+        // Don't attempt fallback to reduce complexity and potential errors
+        // Just mark as unreachable and continue
       }
 
       // Check if component is still mounted before updating state
