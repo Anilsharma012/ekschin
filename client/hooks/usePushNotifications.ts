@@ -262,8 +262,9 @@ export const usePushNotifications = () => {
 
         setIsConnected(false);
 
-        // Attempt reconnection after error with backoff
-        if (isAuthenticated && user && reconnectAttempts.current < maxReconnectAttempts) {
+        // Attempt reconnection after error with backoff only for network errors
+        const wsReadyState = wsRef.current?.readyState;
+        if (wsReadyState === WebSocket.CLOSED && isAuthenticated && user && reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.min(5000 * (reconnectAttempts.current + 1), 30000);
           console.log(`🔄 Attempting to reconnect push notifications in ${delay}ms...`);
           setTimeout(() => {
@@ -271,7 +272,7 @@ export const usePushNotifications = () => {
             connectWebSocket();
           }, delay);
         } else {
-          console.warn('⚠️ Max reconnection attempts reached or user not authenticated');
+          console.warn('⚠️ Max reconnection attempts reached, user not authenticated, or WebSocket not closed properly');
         }
       };
     } catch (error) {
