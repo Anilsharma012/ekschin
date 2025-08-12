@@ -121,6 +121,8 @@ const App = () => (
               <Route path="/test-chat" element={<div className="min-h-screen bg-gray-50 py-8"><ChatTest /></div>} />
               {/* Chat API Test */}
               <Route path="/test-chat-api" element={<div className="min-h-screen bg-gray-50 py-8"><ChatApiTest /></div>} />
+              {/* Rohtak Location Demo */}
+              <Route path="/rohtak-locations" element={<RohtakLocationDemo />} />
               {/* Dynamic Pages from Admin */}
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/:slug" element={<ContentPage />} />
