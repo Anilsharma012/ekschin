@@ -129,7 +129,7 @@ export default function Chat() {
   const fetchMessages = async (convId: string) => {
     if (!token) return;
 
-    try {
+    const performFetch = async () => {
       const fetchPromise = fetch(
         `/api/chat/conversations/${convId}/messages`,
         {
@@ -157,8 +157,12 @@ export default function Chat() {
         setMessages(data.data.messages);
         setError(""); // Clear error on success
       } else {
-        setError(data.error || "Failed to load messages");
+        throw new Error(data.error || "Failed to load messages");
       }
+    };
+
+    try {
+      await retryFetch(performFetch);
     } catch (error: any) {
       console.error("Error fetching messages:", error);
       if (error.name === "AbortError" || error.message === "Request timeout") {
