@@ -53,6 +53,7 @@ import QuickCreatePage from "../components/admin/QuickCreatePage";
 import FooterManagement from "../components/admin/FooterManagement";
 import HomepageSliderManagement from "../components/admin/HomepageSliderManagement";
 import StaffManagement from "../components/admin/StaffManagement";
+import LocationManagement from "../components/admin/LocationManagement";
 
 import PropertyImageManager from "../components/admin/PropertyImageManager";
 import PaymentTransactions from "../components/admin/PaymentTransactions";
