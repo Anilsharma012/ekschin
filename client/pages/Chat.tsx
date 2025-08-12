@@ -56,22 +56,43 @@ export default function Chat() {
     if (!token) return;
 
     try {
-      const response = await fetch("/api/chat/conversations", {
+      const fetchPromise = fetch("/api/chat/conversations", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        signal: AbortSignal.timeout(8000), // 8 second timeout
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 8000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: ApiResponse<ConversationWithDetails[]> =
         await response.json();
 
       if (data.success && data.data) {
         setConversations(data.data);
+        setError(""); // Clear error on success
       } else {
         setError(data.error || "Failed to load conversations");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    } catch (error: any) {
+      console.error("Error fetching conversations:", error);
+      if (error.name === "AbortError" || error.message === "Request timeout") {
+        setError("Request timed out. Please check your connection.");
+      } else if (error.message.includes("HTTP 401")) {
+        setError("Authentication expired. Please login again.");
+      } else if (error.message.includes("HTTP")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     }
   };
 
