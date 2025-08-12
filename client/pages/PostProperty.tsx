@@ -610,56 +610,13 @@ export default function PostProperty() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rohtak Area *
-                </label>
-                <Select
-                  value={formData.location.area}
-                  onValueChange={(value) =>
-                    handleInputChange("location.area", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select area in Rohtak" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROHTAK_AREAS.map((area) => (
-                      <SelectItem key={area} value={area}>
-                        {area}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Complete Address *
-                </label>
-                <Textarea
-                  value={formData.location.address}
-                  onChange={(e) =>
-                    handleInputChange("location.address", e.target.value)
-                  }
-                  placeholder="House/Plot number, Street, Area, Rohtak, Haryana"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nearby Landmark
-                </label>
-                <Input
-                  value={formData.location.landmark}
-                  onChange={(e) =>
-                    handleInputChange("location.landmark", e.target.value)
-                  }
-                  placeholder="e.g., Near PGI Rohtak, AIIMS Rohtak"
-                />
-              </div>
+              <LocationSelector
+                value={formData.location}
+                onChange={(location) => {
+                  setFormData({ ...formData, location });
+                }}
+                required={true}
+              />
             </div>
           )}
 
