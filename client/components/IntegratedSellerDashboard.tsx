@@ -45,6 +45,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Alert, AlertDescription } from './ui/alert';
 import { Progress } from './ui/progress';
 import PackageCheckoutModal from './PackageCheckoutModal';
+import SellerProfileManagement from './SellerProfileManagement';
 
 interface SellerStats {
   totalProperties: number;
