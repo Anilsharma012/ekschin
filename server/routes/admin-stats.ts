@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin } from '../middleware/auth';
 const router = Router();
 
 // Get comprehensive admin dashboard statistics
-router.get('/', authenticateAdmin, async (req, res) => {
+router.get('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const db = getDatabase();
     
