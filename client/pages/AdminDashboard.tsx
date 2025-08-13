@@ -74,8 +74,8 @@ export default function AdminDashboard() {
       // Fetch dashboard stats
       const response = await enhancedApi.get('admin/stats', token);
       
-      if (response.data.success) {
-        setStats(response.data.data);
+      if (response.success) {
+        setStats(response.data);
       } else {
         // Use default stats if API fails
         setStats({
