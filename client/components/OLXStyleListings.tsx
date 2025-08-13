@@ -27,6 +27,16 @@ export default function OLXStyleListings() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
+    // Load fallback data immediately for production
+    const { shouldUseFallbackData, fallbackProperties } = require('../utils/fallbackData');
+
+    if (shouldUseFallbackData()) {
+      setProperties(fallbackProperties);
+      setLoading(false);
+      loadFavorites();
+      return;
+    }
+
     // Add small delay on initial load to allow server to fully initialize
     const timer = setTimeout(() => {
       fetchProperties();
