@@ -65,8 +65,10 @@ class CircuitBreaker {
   private readonly timeout = 30000; // 30 seconds
 
   isOpen(): boolean {
-    return this.failureCount >= this.threshold &&
-           (Date.now() - this.lastFailureTime) < this.timeout;
+    return (
+      this.failureCount >= this.threshold &&
+      Date.now() - this.lastFailureTime < this.timeout
+    );
   }
 
   recordFailure(): void {
@@ -107,8 +109,8 @@ const checkServerReadiness = async (): Promise<boolean> => {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(healthUrl, {
-      method: 'GET',
-      signal: controller.signal
+      method: "GET",
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -129,7 +131,9 @@ export const safeApiRequest = async (
   ok: boolean;
   fromFallback?: boolean;
 }> => {
-  const isProduction = window.location.hostname.includes('.fly.dev') || window.location.hostname.includes('netlify.app');
+  const isProduction =
+    window.location.hostname.includes(".fly.dev") ||
+    window.location.hostname.includes("netlify.app");
 
   // Check circuit breaker
   if (circuitBreaker.isOpen()) {
@@ -137,7 +141,9 @@ export const safeApiRequest = async (
 
     // Reduce console spam in production
     if (!isProduction) {
-      console.warn(`🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`);
+      console.warn(
+        `🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`,
+      );
     }
 
     return {
@@ -226,12 +232,12 @@ export const safeApiRequest = async (
 
     // Better error serialization
     const errorDetails = {
-      message: error.message || 'Unknown error',
-      name: error.name || 'Error',
-      type: error.constructor?.name || 'UnknownError',
+      message: error.message || "Unknown error",
+      name: error.name || "Error",
+      type: error.constructor?.name || "UnknownError",
       code: error.code,
       status: error.status,
-      stack: error.stack?.split("\n")[0]
+      stack: error.stack?.split("\n")[0],
     };
 
     const isRetryableError =
@@ -245,14 +251,16 @@ export const safeApiRequest = async (
 
     // For database initialization errors, use longer delays
     const isDatabaseError = error.message?.includes("Database not initialized");
-    const retryDelay = isDatabaseError ? API_CONFIG.retryDelay * 2 : API_CONFIG.retryDelay;
+    const retryDelay = isDatabaseError
+      ? API_CONFIG.retryDelay * 2
+      : API_CONFIG.retryDelay;
 
     // Retry logic
     if (isRetryableError && retryCount < API_CONFIG.retryAttempts) {
       console.warn(
         `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${retryDelay * (retryCount + 1)}ms...`,
         isDatabaseError ? "(Database initializing)" : "",
-        errorDetails
+        errorDetails,
       );
 
       await new Promise((resolve) =>
@@ -265,7 +273,7 @@ export const safeApiRequest = async (
     console.error(
       `❌ API request failed after ${retryCount + 1} attempts for ${endpoint}:`,
       errorDetails,
-      `URL: ${url}`
+      `URL: ${url}`,
     );
 
     return {

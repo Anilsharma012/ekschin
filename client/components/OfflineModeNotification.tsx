@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { X, WifiOff, RefreshCw } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import React, { useState, useEffect } from "react";
+import { X, WifiOff, RefreshCw } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 interface OfflineModeNotificationProps {
   isBackendUnavailable: boolean;
@@ -12,7 +12,7 @@ interface OfflineModeNotificationProps {
 const OfflineModeNotification: React.FC<OfflineModeNotificationProps> = ({
   isBackendUnavailable,
   onDismiss,
-  onRetry
+  onRetry,
 }) => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -62,7 +62,8 @@ const OfflineModeNotification: React.FC<OfflineModeNotificationProps> = ({
                   Limited Connectivity
                 </h3>
                 <p className="text-orange-800 text-xs mt-1">
-                  Some features may be temporarily unavailable. The app will continue to work with cached data.
+                  Some features may be temporarily unavailable. The app will
+                  continue to work with cached data.
                 </p>
               </div>
             </div>
@@ -87,7 +88,7 @@ const OfflineModeNotification: React.FC<OfflineModeNotificationProps> = ({
               </Button>
             </div>
           </div>
-          
+
           <div className="mt-3 flex items-center gap-2 text-xs text-orange-700">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full bg-green-500"></div>

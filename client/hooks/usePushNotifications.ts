@@ -289,9 +289,9 @@ export const usePushNotifications = () => {
             );
           } else {
             // In production, only log once per session to avoid spam
-            if (!sessionStorage.getItem('ws-error-logged')) {
-              console.log('Push notifications temporarily unavailable');
-              sessionStorage.setItem('ws-error-logged', 'true');
+            if (!sessionStorage.getItem("ws-error-logged")) {
+              console.log("Push notifications temporarily unavailable");
+              sessionStorage.setItem("ws-error-logged", "true");
             }
           }
 
