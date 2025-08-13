@@ -16,6 +16,9 @@ export const usePushNotifications = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
+  const lastErrorTime = useRef<number>(0);
+  const errorCount = useRef<number>(0);
+  const circuitBreakerOpen = useRef<boolean>(false);
 
   // Safe logging utility to prevent [object Object] errors
   const safeLog = (
