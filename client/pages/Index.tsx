@@ -1,4 +1,6 @@
 import React from "react";
+import { isProductionEnvironment } from "../utils/fallbackData";
+import ProductionReadyIndex from "../components/ProductionReadyIndex";
 import OLXStyleHeader from "../components/OLXStyleHeader";
 import OLXStyleCategories from "../components/OLXStyleCategories";
 import OLXStyleListings from "../components/OLXStyleListings";
@@ -11,6 +13,11 @@ import DynamicFooter from "../components/DynamicFooter";
 import HeroImageSlider from "../components/HeroImageSlider";
 
 export default function Index() {
+  // Use production-ready component when backend is unavailable
+  if (isProductionEnvironment()) {
+    return <ProductionReadyIndex />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <OLXStyleHeader />
