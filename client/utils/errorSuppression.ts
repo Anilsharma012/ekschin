@@ -59,24 +59,8 @@ class ErrorSuppressor {
   }
 
   suppressConsoleErrors(): void {
-    if (!this.isProduction) return;
-
-    const originalError = console.error;
-    console.error = (...args) => {
-      const message = args.join(' ');
-      
-      // Suppress known production errors
-      if (
-        message.includes('WebSocket') ||
-        message.includes('Failed to fetch') ||
-        message.includes('NetworkError') ||
-        message.includes('TypeError: Failed to fetch')
-      ) {
-        return; // Suppress these errors in production
-      }
-      
-      originalError.apply(console, args);
-    };
+    // Disabled to prevent interference with other systems
+    return;
   }
 
   suppressUnhandledPromiseRejections(): void {
