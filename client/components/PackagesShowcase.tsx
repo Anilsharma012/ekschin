@@ -24,6 +24,15 @@ export default function PackagesShowcase() {
   const fetchingRef = React.useRef(false);
 
   useEffect(() => {
+    // Use fallback data immediately
+    const { shouldUseFallbackData, fallbackPackages } = require('../utils/fallbackData');
+
+    if (shouldUseFallbackData()) {
+      setPackages(fallbackPackages);
+      setLoading(false);
+      return;
+    }
+
     fetchPackages();
 
     // Set up periodic refresh every 60 seconds to catch admin updates
