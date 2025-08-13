@@ -307,7 +307,7 @@ router.get('/users/analytics', authenticateToken, requireAdmin, async (req, res)
 });
 
 // Get property analytics
-router.get('/properties/analytics', authenticateAdmin, async (req, res) => {
+router.get('/properties/analytics', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const db = getDatabase();
     const propertiesCollection = db.collection('properties');
