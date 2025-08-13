@@ -98,6 +98,12 @@ export const usePushNotifications = () => {
         return;
       }
 
+      // In production, add a small delay before connecting to avoid rapid connection attempts
+      if (isProduction && reconnectAttempts.current > 0) {
+        console.log('🕐 Production environment: Adding connection delay...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
       wsRef.current = new WebSocket(wsUrl);
 
       // Add additional logging for WebSocket state changes
@@ -132,7 +138,7 @@ export const usePushNotifications = () => {
             userId: user.id || user._id,
             userType: user.userType || 'user'
           };
-          console.log('🔐 Sending auth message:', authMessage);
+          console.log('�� Sending auth message:', authMessage);
           wsRef.current.send(JSON.stringify(authMessage));
         }
       };
