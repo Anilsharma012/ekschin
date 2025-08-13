@@ -13,6 +13,7 @@ import {
   Plus,
 } from "lucide-react";
 import { withApiErrorBoundary } from "./ApiErrorBoundary";
+import { shouldUseFallbackData, fallbackCategories } from '../utils/fallbackData';
 
 const categoryIcons: Record<string, any> = {
   Residential: Building2,
@@ -70,7 +71,6 @@ function OLXStyleCategories() {
 
   useEffect(() => {
     // Use fallback data immediately
-    const { shouldUseFallbackData, fallbackCategories } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setCategories(fallbackCategories);
