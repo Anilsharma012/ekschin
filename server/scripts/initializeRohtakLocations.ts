@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 import { connectToDatabase } from "../db/mongodb";
-import { ROHTAK_LOCATION_DATA } from "@shared/location-types";
+import { ROHTAK_LOCATION_DATA } from "../../shared/location-types";
 
 async function initializeRohtakLocations() {
   try {
