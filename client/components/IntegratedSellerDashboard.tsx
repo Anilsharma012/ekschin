@@ -1188,6 +1188,112 @@ const IntegratedSellerDashboard: React.FC = () => {
             </div>
           </TabsContent>
 
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Bell className="h-5 w-5" />
+                    <span>Notifications</span>
+                  </CardTitle>
+                  <Badge variant="outline">
+                    {stats.unreadNotifications} unread
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingNotifications ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center space-x-3 p-4 border rounded-lg animate-pulse">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : sellerNotifications.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Bell className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-500 mb-2">कोई notifications नहीं हैं</p>
+                    <p className="text-sm text-gray-400">Admin notifications यहाँ दिखाई जाएंगी</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sellerNotifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        className={`p-4 border rounded-lg transition-colors hover:bg-gray-50 ${
+                          !notification.isRead ? 'bg-blue-50 border-blue-200' : 'bg-white'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            <div className={`w-3 h-3 rounded-full mt-2 ${
+                              !notification.isRead ? 'bg-blue-500' : 'bg-gray-300'
+                            }`} />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className={`font-medium ${
+                                  !notification.isRead ? 'text-blue-900' : 'text-gray-900'
+                                }`}>
+                                  {notification.title}
+                                </h3>
+                                {notification.sentBy === 'admin' && (
+                                  <Badge variant="outline" className="text-xs bg-red-50 text-red-600 border-red-200">
+                                    Admin
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-gray-700 text-sm mb-2">
+                                {notification.message}
+                              </p>
+                              <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                <span className="flex items-center">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {formatTime(notification.createdAt)}
+                                </span>
+                                {notification.readAt && (
+                                  <span className="flex items-center text-green-600">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Read {formatTime(notification.readAt)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {!notification.isRead && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => markNotificationAsRead(notification._id)}
+                                className="text-xs"
+                              >
+                                Mark Read
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteNotification(notification._id)}
+                              className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Packages Tab */}
           <TabsContent value="packages" className="space-y-6">
             {/* Active User Packages */}
@@ -1460,7 +1566,7 @@ const IntegratedSellerDashboard: React.FC = () => {
                             )}
                           </div>
                           <div className="text-3xl font-bold text-blue-600">
-                            ₹{pkg.price}
+                            ��{pkg.price}
                             <span className="text-sm font-normal text-gray-500">
                               /{pkg.duration} days
                             </span>
