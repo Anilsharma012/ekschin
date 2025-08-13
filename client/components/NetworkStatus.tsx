@@ -19,9 +19,10 @@ interface NetworkStatus {
 }
 
 const NetworkStatusComponent: React.FC = () => {
-  // Feature flag to disable network status if needed
-  const NETWORK_STATUS_ENABLED = process.env.NODE_ENV === 'development' ||
-    import.meta.env.VITE_ENABLE_NETWORK_STATUS !== 'false';
+  // Feature flag to disable network status in production to prevent fetch errors
+  const isProduction = window.location.hostname.includes('.fly.dev') || window.location.hostname.includes('netlify.app');
+  const NETWORK_STATUS_ENABLED = !isProduction && (process.env.NODE_ENV === 'development' ||
+    import.meta.env.VITE_ENABLE_NETWORK_STATUS !== 'false');
 
   const [status, setStatus] = useState<NetworkStatus>({
     isOnline: navigator.onLine,
