@@ -7,28 +7,28 @@ const isProduction = () => {
          window.location.hostname.includes('netlify.app');
 };
 
+// Helper function to create proper Response with clone support
+const createApiResponse = (data: any, status = 200) => {
+  const jsonString = JSON.stringify(data);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  return new Response(blob, {
+    status,
+    statusText: status === 200 ? 'OK' : 'Service Unavailable',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': blob.size.toString()
+    }
+  });
+};
+
 // Override common API calls in production to prevent fetch errors
 if (isProduction()) {
   // Store original fetch
   const originalFetch = window.fetch;
-  
+
   // Override fetch to return fallback data for known endpoints
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = input.toString();
-    
-    // Helper function to create proper Response with clone support
-    const createApiResponse = (data: any, status = 200) => {
-      const jsonString = JSON.stringify(data);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      return new Response(blob, {
-        status,
-        statusText: status === 200 ? 'OK' : 'Service Unavailable',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': blob.size.toString()
-        }
-      });
-    };
 
     // Return fallback data for known API endpoints
     if (url.includes('/api/properties')) {
