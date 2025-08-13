@@ -85,7 +85,7 @@ export default function AdminLogin() {
       if (data.success && data.data?.token) {
         console.log("✅ Admin login successful");
         login(data.data.token, data.data.user);
-        window.location.href = "/admin";
+        window.location.href = "/admin/dashboard";
       } else {
         console.error("❌ Login failed:", data.error);
         setError(data.error || "Login failed - invalid credentials");
