@@ -168,18 +168,34 @@ export const usePushNotifications = () => {
         console.log('🚪 Disconnected from push notification service', {
           code: event.code,
           reason: event.reason,
-          wasClean: event.wasClean
+          wasClean: event.wasClean,
+          environment: window.location.hostname.includes('.fly.dev') ? 'production' : 'development'
         });
         setIsConnected(false);
         wsRef.current = null;
 
-        // Don't reconnect if closed due to auth issues or server is down
-        if (event.code === 1000 || event.code === 1001) {
-          console.log('📝 WebSocket closed normally, not reconnecting');
+        // Don't reconnect if closed normally or if WebSocket server not available
+        if (event.code === 1000 || event.code === 1001 || event.code === 1006) {
+          console.log('📝 WebSocket closed, checking if server is available before reconnecting');
+
+          // In production, check if WebSocket endpoint exists before reconnecting
+          if (window.location.hostname.includes('.fly.dev')) {
+            // Don't aggressively reconnect in production to avoid spam
+            if (reconnectAttempts.current < 3) {
+              const delay = 10000; // 10 second delay for production
+              console.log(`🔄 Production environment: Reconnecting in ${delay}ms`);
+              setTimeout(() => {
+                reconnectAttempts.current++;
+                connectWebSocket();
+              }, delay);
+            } else {
+              console.warn('⚠️ WebSocket unavailable in production, disabling push notifications');
+            }
+          }
           return;
         }
 
-        // Exponential backoff reconnection only for network issues
+        // Exponential backoff reconnection for other network issues
         if (isAuthenticated && user && reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
           console.log(`🔄 Reconnecting to push notifications in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
