@@ -38,6 +38,9 @@ export default function OLXStyleListings() {
 
   const fetchProperties = async () => {
     try {
+      // Check if we're in production and backend is unavailable
+      const isProduction = window.location.hostname.includes('.fly.dev');
+
       const { enhancedApi } = await import('../lib/api-enhanced');
       const response = await enhancedApi.get("properties?limit=20");
       const data = response.data;
