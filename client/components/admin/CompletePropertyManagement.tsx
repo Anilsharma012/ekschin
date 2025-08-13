@@ -175,9 +175,14 @@ function CompletePropertyManagement() {
       const response = await api.get(`admin/properties?${params}`, token);
       if (response.data.success) {
         console.log("📊 Properties fetched:", response.data.data.properties);
-        console.log("📊 First property structure:", response.data.data.properties[0]);
-        setProperties(response.data.data.properties);
-        setPagination(response.data.data.pagination);
+        const properties = response.data.data.properties || [];
+        if (properties.length > 0) {
+          console.log("📊 First property structure:", properties[0]);
+        } else {
+          console.log("📊 No properties found");
+        }
+        setProperties(properties);
+        setPagination(response.data.data.pagination || { page: 1, limit: 20, total: 0, pages: 0 });
       } else {
         setError(response.data.error || "Failed to fetch properties");
       }
