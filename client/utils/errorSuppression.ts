@@ -103,12 +103,11 @@ class ErrorSuppressor {
   }
 
   initializeGlobalSuppression(): void {
-    this.suppressFetchErrors();
-    this.suppressConsoleErrors();
+    // Only suppress promise rejections in production to avoid interfering with other systems
     this.suppressUnhandledPromiseRejections();
-    
+
     if (this.isProduction) {
-      console.log('Error suppression initialized for production environment');
+      console.log('Limited error suppression initialized for production environment');
     }
   }
 }
