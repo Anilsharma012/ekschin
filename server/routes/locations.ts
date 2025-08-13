@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { getDatabase } from "../db/mongodb";
-import { ApiResponse } from "@shared/types";
-import { RohtakLocation, LocationSearchFilters, ROHTAK_LOCATION_DATA } from "@shared/location-types";
+import { ApiResponse } from "../../shared/types";
+import { RohtakLocation, LocationSearchFilters, ROHTAK_LOCATION_DATA } from "../../shared/location-types";
 import { ObjectId } from "mongodb";
 
 // Get all locations with filtering and search
