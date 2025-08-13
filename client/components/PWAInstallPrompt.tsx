@@ -1,130 +1,240 @@
-import React, { useState, useEffect } from "react";
-import { X, Star, Download } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { X, Download, Smartphone } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[];
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
-    platform: string;
-  }>;
   prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Check if already installed
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSInstalled = (window.navigator as any).standalone === true;
+    
+    if (isInStandaloneMode || isIOSInstalled) {
       setIsInstalled(true);
       return;
     }
 
-    // Listen for the beforeinstallprompt event
+    // Check if iOS
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(iOS);
+
+    // Handle beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowPrompt(true);
+      setShowInstallButton(true);
+      
+      // Show prompt after a delay
+      setTimeout(() => {
+        setShowPrompt(true);
+      }, 2000);
     };
 
-    // Listen for the appinstalled event
+    // Handle app installed event
     const handleAppInstalled = () => {
       setIsInstalled(true);
+      setShowInstallButton(false);
       setShowPrompt(false);
-      setDeferredPrompt(null);
+      console.log('PWA was installed');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Show prompt after 2 seconds if not already shown
-    const timer = setTimeout(() => {
-      if (!isInstalled && !localStorage.getItem('pwa-prompt-dismissed')) {
-        setShowPrompt(true);
-      }
-    }, 2000);
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      clearTimeout(timer);
     };
-  }, [isInstalled]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+      const choiceResult = await deferredPrompt.userChoice;
       
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
         setShowPrompt(false);
+      } else {
+        console.log('User dismissed the install prompt');
       }
-    } else {
-      // Fallback for browsers that don't support the API
-      alert('To install this app, use your browser\'s "Add to Home Screen" option.');
+      
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-prompt-dismissed', 'true');
+    // Don't show again for this session
+    sessionStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
-  if (isInstalled || !showPrompt) {
+  // Don't show if already installed or dismissed
+  if (isInstalled || sessionStorage.getItem('pwa-prompt-dismissed')) {
+    return null;
+  }
+
+  // iOS install instructions
+  if (isIOS) {
+    return showPrompt ? (
+      <Card className="fixed bottom-4 left-4 right-4 z-50 bg-gradient-to-r from-red-600 to-red-700 border-red-500 text-white shadow-2xl">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5" />
+              <h3 className="font-semibold">App Install करें</h3>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleDismiss}
+              className="text-white hover:bg-red-500 h-6 w-6 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-2 text-sm">
+            <p className="mb-2">होम स्क्रीन पर app add करने के लिए:</p>
+            <div className="bg-red-800/30 p-2 rounded text-xs space-y-1">
+              <p>1. नीचे Share बटन दबाएं 📤</p>
+              <p>2. "Add to Home Screen" select करें</p>
+              <p>3. "Add" दबाएं</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ) : null;
+  }
+
+  // Regular install prompt for Android/Chrome
+  return showPrompt ? (
+    <Card className="fixed bottom-4 left-4 right-4 z-50 bg-gradient-to-r from-red-600 to-red-700 border-red-500 text-white shadow-2xl">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Download className="h-5 w-5" />
+            <h3 className="font-semibold">App Install करें</h3>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleDismiss}
+            className="text-white hover:bg-red-500 h-6 w-6 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <p className="text-sm mb-3 opacity-90">
+          Aashish Property app को अपने phone पर install करें। Faster access और better experience के लिए।
+        </p>
+        
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleInstallClick}
+            className="bg-white text-red-600 hover:bg-gray-100 font-medium flex-1"
+            size="sm"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Install करें
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={handleDismiss}
+            className="text-white hover:bg-red-500 border border-red-400"
+            size="sm"
+          >
+            बाद में
+          </Button>
+        </div>
+        
+        <div className="flex items-center justify-center mt-3 text-xs opacity-75">
+          <div className="flex items-center gap-4">
+            <span>📱 Offline काम करता है</span>
+            <span>⚡ Fast loading</span>
+            <span>🔔 Push notifications</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ) : null;
+}
+
+// Inline install button for header/navigation
+export function PWAInstallButton() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSInstalled = (window.navigator as any).standalone === true;
+    
+    if (isInStandaloneMode || isIOSInstalled) {
+      setIsInstalled(true);
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setShowInstallButton(true);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setShowInstallButton(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    }
+  };
+
+  if (isInstalled || !showInstallButton) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 w-80">
-      <div className="bg-blue-600 text-white rounded-xl shadow-2xl overflow-hidden mx-4">
-        <button
-          onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 hover:bg-blue-700 rounded-full"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        <div className="p-4 text-center">
-          <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-3">
-            <img
-              src="/favicon.ico"
-              alt="App Icon"
-              className="w-10 h-10"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-            <div className="w-10 h-10 bg-[#C70000] rounded-xl hidden items-center justify-center">
-              <span className="text-white font-bold">AP</span>
-            </div>
-          </div>
-
-          <h3 className="font-bold text-lg mb-1">Aashish Property App</h3>
-          <p className="text-sm opacity-90 mb-2">Buy & Sell better with app</p>
-
-          <div className="flex items-center justify-center space-x-1 mb-4">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              ))}
-            </div>
-            <span className="text-sm opacity-90 ml-2">4.5 • 10Cr+ Downloads</span>
-          </div>
-
-          <button
-            onClick={handleInstallClick}
-            className="w-full bg-white text-blue-600 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2 shadow-lg"
-          >
-            <Download className="h-5 w-5" />
-            <span>Install App</span>
-          </button>
-        </div>
-      </div>
-    </div>
+    <Button 
+      onClick={handleInstallClick}
+      variant="outline"
+      size="sm"
+      className="text-red-600 border-red-300 hover:bg-red-50"
+    >
+      <Download className="h-4 w-4 mr-1" />
+      Install App
+    </Button>
   );
 }
