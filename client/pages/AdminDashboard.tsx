@@ -288,7 +288,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <AdminLayout>
+    <div className="min-h-screen bg-gray-100">
       <div className="flex h-screen bg-gray-100">
         {/* Sidebar */}
         <div className="w-64 bg-white shadow-lg">
@@ -316,10 +316,45 @@ export default function AdminDashboard() {
               );
             })}
           </nav>
+
+          {/* Logout Button */}
+          <div className="absolute bottom-4 left-4 right-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                localStorage.removeItem('authToken');
+                window.location.href = '/admin/login';
+              }}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
+          {/* Header */}
+          <div className="bg-white shadow-sm border-b px-6 py-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 capitalize">
+                {activeSection.replace("-", " ")}
+              </h2>
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-600">
+                  Welcome, {user?.name || 'Admin'}
+                </div>
+                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm">
+                    {user?.name?.charAt(0).toUpperCase() || 'A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
           <div className="p-6">
             {loading ? (
               <div className="flex items-center justify-center h-96">
@@ -331,6 +366,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
