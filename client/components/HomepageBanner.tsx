@@ -27,14 +27,33 @@ export default function HomepageBanner({ position, className = "" }: HomepageBan
 
   const fetchBanners = async () => {
     try {
-      const response = await fetch(`/api/banners/${position}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`/api/banners/${position}`, {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data.success) {
         setBanners(data.data);
       }
     } catch (error) {
-      console.error("Error fetching banners:", error);
+      const isProduction = window.location.hostname.includes('.fly.dev');
+
+      if (!isProduction) {
+        console.error("Error fetching banners:", error);
+      }
+
+      // In production, fail silently and show no banners
+      if (isProduction && error instanceof Error && error.message.includes('Failed to fetch')) {
+        console.log('Banner service unavailable, continuing without banners');
+      }
+
+      setBanners([]); // Show no banners instead of breaking the page
     } finally {
       setLoading(false);
     }
