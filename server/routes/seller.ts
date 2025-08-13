@@ -334,61 +334,6 @@ export const getSellerPayments: RequestHandler = async (req, res) => {
   }
 };
 
-// Update seller profile
-export const updateSellerProfile: RequestHandler = async (req, res) => {
-  try {
-    const db = getDatabase();
-    const sellerId = (req as any).userId;
-    const { name, email, phone, emailNotifications, pushNotifications } = req.body;
-
-    // Validate required fields
-    if (!name || !email) {
-      return res.status(400).json({
-        success: false,
-        error: "Name and email are required",
-      });
-    }
-
-    // Check if email already exists for another user
-    const existingUser = await db.collection("users").findOne({
-      email,
-      _id: { $ne: new ObjectId(sellerId) },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        error: "Email already exists",
-      });
-    }
-
-    // Update user profile
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(sellerId) },
-      {
-        $set: {
-          name,
-          email,
-          phone,
-          emailNotifications: emailNotifications ?? true,
-          pushNotifications: pushNotifications ?? true,
-          updatedAt: new Date(),
-        },
-      }
-    );
-
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-    });
-  } catch (error) {
-    console.error("Error updating seller profile:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to update profile",
-    });
-  }
-};
 
 // Change seller password
 export const changeSellerPassword: RequestHandler = async (req, res) => {
