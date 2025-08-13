@@ -289,7 +289,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+    >
       <div className="flex h-screen bg-gray-100">
         {/* Sidebar */}
         <div className="w-64 bg-white shadow-lg">
