@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { AdPackage } from "@shared/types";
+import { shouldUseFallbackData, fallbackPackages } from '../utils/fallbackData';
 
 export default function PackagesShowcase() {
   const [packages, setPackages] = useState<AdPackage[]>([]);
