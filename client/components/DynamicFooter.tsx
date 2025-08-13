@@ -196,15 +196,44 @@ export default function DynamicFooter() {
 
   const safeApiCall = async (url: string): Promise<ApiResponse<any>> => {
     try {
-      const response = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
+
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         return await response.json();
       } else {
+        console.warn(`API call returned ${response.status} for ${url}`);
         return { success: false, data: null, error: `HTTP ${response.status}` };
       }
     } catch (error) {
-      console.warn(`API call failed for ${url}:`, error);
-      return { success: false, data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+      // Don't log fetch errors in production to avoid console spam
+      const isProduction = window.location.hostname.includes('.fly.dev');
+      if (!isProduction) {
+        console.warn(`API call failed for ${url}:`, error);
+      }
+
+      // Provide better error messaging
+      let errorMessage = 'Network error';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timeout';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = 'Server unavailable';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      return { success: false, data: null, error: errorMessage };
     }
   };
 
