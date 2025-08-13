@@ -11,6 +11,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 // Initialize simple production error handling
 import "./utils/productionErrorHandler";
+// Initialize production API service with fallback data
+import "./utils/productionApiService";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Properties from "./pages/Properties";
