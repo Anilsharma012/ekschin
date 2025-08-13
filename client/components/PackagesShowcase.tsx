@@ -80,18 +80,26 @@ export default function PackagesShowcase() {
         setPackages([]);
       }
     } catch (error: any) {
-      console.error("❌ PackagesShowcase fetch error:", error);
-      setError(`Failed to load packages: ${error.message}`);
+      const isProduction = window.location.hostname.includes('.fly.dev');
 
-      // Show debug info
-      console.log("🔍 PackagesShowcase debug info:");
-      console.log("- API endpoint: packages?activeOnly=true");
-      console.log("- Current packages length:", packages.length);
-      console.log("- Error details:", error);
+      if (!isProduction) {
+        console.error("❌ PackagesShowcase fetch error:", error);
+        console.log("🔍 PackagesShowcase debug info:");
+        console.log("- API endpoint: packages?activeOnly=true");
+        console.log("- Current packages length:", packages.length);
+        console.log("- Error details:", error);
+      }
 
-      // Don't clear packages on error to avoid hiding the component
-      if (packages.length === 0) {
-        setPackages([]);
+      // In production, fail silently and hide the component
+      if (isProduction && error.message?.includes('Failed to fetch')) {
+        setError(null); // Don't show error to users
+        setPackages([]); // Hide component when backend unavailable
+      } else {
+        setError(`Failed to load packages: ${error.message}`);
+        // Don't clear packages on error to avoid hiding the component
+        if (packages.length === 0) {
+          setPackages([]);
+        }
       }
     } finally {
       fetchingRef.current = false;
