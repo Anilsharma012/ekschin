@@ -16,54 +16,53 @@ if (isProduction()) {
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = input.toString();
     
+    // Helper function to create proper Response with clone support
+    const createApiResponse = (data: any, status = 200) => {
+      const jsonString = JSON.stringify(data);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      return new Response(blob, {
+        status,
+        statusText: status === 200 ? 'OK' : 'Service Unavailable',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': blob.size.toString()
+        }
+      });
+    };
+
     // Return fallback data for known API endpoints
     if (url.includes('/api/properties')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: true,
         data: { properties: fallbackProperties }
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     if (url.includes('/api/categories')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: true,
         data: fallbackCategories
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     if (url.includes('/api/packages')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: true,
         data: fallbackPackages
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     if (url.includes('/api/banners')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: true,
         data: fallbackBanners
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     if (url.includes('/api/homepage-sliders')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: true,
         data: []
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
       });
     }
     
