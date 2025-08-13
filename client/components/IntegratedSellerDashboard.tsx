@@ -527,12 +527,53 @@ const IntegratedSellerDashboard: React.FC = () => {
     }
   };
 
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/seller/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        // Update local state
+        setSellerNotifications(prev =>
+          prev.map(n => n._id === notificationId ? { ...n, isRead: true, readAt: new Date() } : n)
+        );
+        // Update unread count
+        setStats(prev => ({ ...prev, unreadNotifications: prev.unreadNotifications - 1 }));
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/seller/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        const notif = sellerNotifications.find(n => n._id === notificationId);
+        setSellerNotifications(prev => prev.filter(n => n._id !== notificationId));
+        // Update unread count if it was unread
+        if (notif && !notif.isRead) {
+          setStats(prev => ({ ...prev, unreadNotifications: prev.unreadNotifications - 1 }));
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
   const filteredConversations = conversations.filter(conv =>
-    searchQuery === '' || 
-    conv.participantDetails.some(p => 
+    searchQuery === '' ||
+    conv.participantDetails.some(p =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase())
     ) ||
-    conv.propertyDetails?.some(p => 
+    conv.propertyDetails?.some(p =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
