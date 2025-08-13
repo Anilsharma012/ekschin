@@ -272,7 +272,7 @@ export const usePushNotifications = () => {
                 : (error as any)?.message || "No message available",
           };
 
-          // In production, reduce console spam
+          // In production, significantly reduce logging
           const isProduction = window.location.hostname.includes(".fly.dev");
           if (!isProduction) {
             console.error(
@@ -285,9 +285,11 @@ export const usePushNotifications = () => {
               error.constructor?.name || "Unknown",
             );
           } else {
-            console.warn(
-              "WebSocket connection failed in production environment",
-            );
+            // In production, only log once per session to avoid spam
+            if (!sessionStorage.getItem('ws-error-logged')) {
+              console.log('Push notifications temporarily unavailable');
+              sessionStorage.setItem('ws-error-logged', 'true');
+            }
           }
 
           // Try to extract all possible error information
