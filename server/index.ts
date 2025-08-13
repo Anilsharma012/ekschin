@@ -628,6 +628,9 @@ export function createServer() {
   // Admin routes
   app.get("/api/admin/users", authenticateToken, requireAdmin, getAllUsers);
   app.get("/api/admin/stats", authenticateToken, requireAdmin, getUserStats);
+
+  // Enhanced admin stats routes
+  app.use("/api/admin/stats", adminStatsRouter);
   app.get(
     "/api/admin/user-stats",
     authenticateToken,
