@@ -340,6 +340,9 @@ import {
 } from "./routes/footer";
 import { testFooterData } from "./routes/footerTest";
 
+// Admin stats routes
+import adminStatsRouter from "./routes/admin-stats";
+
 // Custom fields routes
 import {
   getAllCustomFields,
