@@ -81,6 +81,31 @@ export const usePushNotifications = () => {
       const isProduction = window.location.hostname.includes(".fly.dev");
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
+      // Circuit breaker logic for production
+      if (isProduction) {
+        const now = Date.now();
+        if (circuitBreakerOpen.current) {
+          // Check if we should retry (circuit breaker timeout)
+          if (now - lastErrorTime.current < 60000) { // 1 minute circuit breaker
+            return;
+          } else {
+            circuitBreakerOpen.current = false;
+            errorCount.current = 0;
+          }
+        }
+
+        // If too many errors recently, open circuit breaker
+        if (errorCount.current >= 3 && (now - lastErrorTime.current) < 30000) {
+          circuitBreakerOpen.current = true;
+
+          if (!sessionStorage.getItem('circuit-breaker-logged')) {
+            console.log('WebSocket circuit breaker activated - notifications disabled temporarily');
+            sessionStorage.setItem('circuit-breaker-logged', 'true');
+          }
+          return;
+        }
+      }
+
       // Use the same host as the current page for WebSocket connection
       const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
 
@@ -289,9 +314,9 @@ export const usePushNotifications = () => {
             );
           } else {
             // In production, only log once per session to avoid spam
-            if (!sessionStorage.getItem("ws-error-logged")) {
-              console.log("Push notifications temporarily unavailable");
-              sessionStorage.setItem("ws-error-logged", "true");
+            if (!sessionStorage.getItem('ws-error-logged')) {
+              console.log('Push notifications temporarily unavailable');
+              sessionStorage.setItem('ws-error-logged', 'true');
             }
           }
 
