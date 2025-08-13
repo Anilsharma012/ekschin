@@ -1428,6 +1428,38 @@ export function createServer() {
   app.get("/api/debug/custom-fields", testCustomFields);
   app.post("/api/debug/custom-fields/fix", fixCustomFields);
 
+  // WebSocket connection test endpoint
+  app.get("/api/websocket/test", (req, res) => {
+    try {
+      const wsConnectedClients = require("./services/pushNotificationService").pushNotificationService.getConnectedClientsCount();
+      res.json({
+        success: true,
+        websocket: {
+          pushNotifications: {
+            connected: true,
+            connectedClients: wsConnectedClients,
+            endpoint: "/ws/notifications"
+          }
+        },
+        server: {
+          port: process.env.PORT || 3000,
+          environment: process.env.NODE_ENV || "development",
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        websocket: {
+          pushNotifications: {
+            connected: false,
+            error: "Service not initialized"
+          }
+        }
+      });
+    }
+  });
+
   // Health check endpoint for network monitoring
   app.get("/api/health", databaseHealthCheck, (req, res) => {
     const dbStatus = req.databaseStatus || { connected: false, responsive: false };
