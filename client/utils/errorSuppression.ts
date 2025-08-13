@@ -53,22 +53,9 @@ class ErrorSuppressor {
   suppressFetchErrors(): void {
     if (!this.isProduction) return;
 
-    // Intercept and suppress repetitive fetch errors
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      try {
-        return await originalFetch(...args);
-      } catch (error) {
-        const url = args[0]?.toString() || 'unknown';
-        const errorKey = `fetch-${url}`;
-        
-        if (!this.shouldSuppressError(errorKey, 2, 30000)) {
-          console.log(`Network request failed: ${url}`);
-        }
-        
-        throw error;
-      }
-    };
+    // Don't intercept fetch in production to avoid recursion issues
+    // Instead, just suppress console errors
+    console.log('Error suppression enabled for production environment');
   }
 
   suppressConsoleErrors(): void {
