@@ -30,6 +30,7 @@ import SellerDashboard from "./pages/SellerDashboard";
 import BuyerDashboard from "./pages/BuyerDashboard";
 import AgentDashboard from "./pages/AgentDashboard";
 import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import CategoryProperties from "./pages/CategoryProperties";
 import PropertyDetail from "./pages/PropertyDetail";
