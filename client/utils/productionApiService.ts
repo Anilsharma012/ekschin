@@ -10,13 +10,12 @@ const isProduction = () => {
 // Helper function to create proper Response with clone support
 const createApiResponse = (data: any, status = 200) => {
   const jsonString = JSON.stringify(data);
-  const blob = new Blob([jsonString], { type: 'application/json' });
-  return new Response(blob, {
+  return new Response(jsonString, {
     status,
     statusText: status === 200 ? 'OK' : 'Service Unavailable',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': blob.size.toString()
+      'Content-Length': new Blob([jsonString]).size.toString()
     }
   });
 };
