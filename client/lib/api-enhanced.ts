@@ -129,10 +129,16 @@ export const safeApiRequest = async (
   ok: boolean;
   fromFallback?: boolean;
 }> => {
+  const isProduction = window.location.hostname.includes('.fly.dev') || window.location.hostname.includes('netlify.app');
+
   // Check circuit breaker
   if (circuitBreaker.isOpen()) {
     const remainingTime = Math.ceil(circuitBreaker.getRemainingTime() / 1000);
-    console.warn(`🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`);
+
+    // Reduce console spam in production
+    if (!isProduction) {
+      console.warn(`🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`);
+    }
 
     return {
       data: getFallbackData(endpoint),
