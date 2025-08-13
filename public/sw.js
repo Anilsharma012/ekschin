@@ -45,14 +45,16 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+      
+      // Enable navigation preload if supported
+      if ('navigationPreload' in self.registration) {
+        await self.registration.navigationPreload.enable();
+      }
+      
+      // Claim control of all clients
+      self.clients.claim();
     })()
   );
-  // Enable navigation preload if supported
-  if ('navigationPreload' in self.registration) {
-    await self.registration.navigationPreload.enable();
-  }
-  // Claim control of all clients
-  self.clients.claim();
 });
 
 // Fetch event - implement caching strategies
