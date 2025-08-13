@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, MapPin, Clock, MessageCircle } from "lucide-react";
 import PropertyLoadingSkeleton from "./PropertyLoadingSkeleton";
+import { shouldUseFallbackData, fallbackProperties } from '../utils/fallbackData';
 
 interface Property {
   _id: string;
@@ -28,7 +29,6 @@ export default function OLXStyleListings() {
 
   useEffect(() => {
     // Load fallback data immediately for production
-    const { shouldUseFallbackData, fallbackProperties } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setProperties(fallbackProperties);
@@ -312,7 +312,6 @@ export default function OLXStyleListings() {
       }
 
       // Use fallback data immediately on any error
-      const { fallbackProperties } = await import('../utils/fallbackData');
       setProperties(fallbackProperties);
     } finally {
       setLoading(false);
