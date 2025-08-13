@@ -89,6 +89,14 @@ import {
 
 export default function Admin() {
   const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+
+  // Redirect to new admin dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user?.userType === "admin") {
+      window.location.href = "/admin/dashboard";
+      return;
+    }
+  }, [authLoading, isAuthenticated, user]);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [stats, setStats] = useState<any>({
     totalUsers: 0,
