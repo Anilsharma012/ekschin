@@ -169,6 +169,10 @@ const IntegratedSellerDashboard: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(true);
 
+  // Seller notifications state
+  const [sellerNotifications, setSellerNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+
   // Messaging state
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<ChatConversation | null>(null);
