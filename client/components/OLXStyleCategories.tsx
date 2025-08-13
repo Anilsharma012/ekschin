@@ -69,6 +69,16 @@ function OLXStyleCategories() {
   ];
 
   useEffect(() => {
+    // Use fallback data immediately
+    const { shouldUseFallbackData, fallbackCategories } = require('../utils/fallbackData');
+
+    if (shouldUseFallbackData()) {
+      setCategories(fallbackCategories);
+      setSliders([]);
+      setLoading(false);
+      return;
+    }
+
     fetchData();
   }, []);
 
