@@ -394,6 +394,10 @@ export const usePushNotifications = () => {
 
         setIsConnected(false);
 
+        // Track errors for circuit breaker
+        errorCount.current++;
+        lastErrorTime.current = Date.now();
+
         // Attempt reconnection after error with backoff only for network errors
         const wsReadyState = wsRef.current?.readyState;
         if (
