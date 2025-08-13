@@ -1431,19 +1431,23 @@ export function createServer() {
   // WebSocket connection test endpoint
   app.get("/api/websocket/test", (req, res) => {
     try {
-      const wsConnectedClients = require("./services/pushNotificationService").pushNotificationService.getConnectedClientsCount();
+      const connectedClients = pushNotificationService.getConnectedClientsCount();
+      const clients = pushNotificationService.getConnectedClients();
+
       res.json({
         success: true,
         websocket: {
           pushNotifications: {
             connected: true,
-            connectedClients: wsConnectedClients,
+            connectedClients,
+            clients,
             endpoint: "/ws/notifications"
           }
         },
         server: {
           port: process.env.PORT || 3000,
           environment: process.env.NODE_ENV || "development",
+          uptime: process.uptime()
         }
       });
     } catch (error) {
