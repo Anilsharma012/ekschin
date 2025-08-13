@@ -154,6 +154,14 @@ export default function ChatBot({
 
   const connectWebSocket = () => {
     try {
+      // Disable WebSocket in production
+      const isProduction = window.location.hostname.includes(".fly.dev");
+      if (isProduction) {
+        console.log('🚫 Chat WebSocket disabled in production environment');
+        setConnectionStatus('disconnected');
+        return;
+      }
+
       setConnectionStatus('connecting');
       const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/chat`;
       wsRef.current = new WebSocket(wsUrl);
