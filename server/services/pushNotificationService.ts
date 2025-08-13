@@ -254,7 +254,7 @@ class PushNotificationService {
   async getUserNotifications(userId: string, limit: number = 50): Promise<PushNotification[]> {
     try {
       const db = getDatabase();
-      
+
       const notifications = await db
         .collection('userNotifications')
         .find({ userId })
@@ -267,6 +267,17 @@ class PushNotificationService {
       console.error('Error fetching user notifications:', error);
       return [];
     }
+  }
+
+  getConnectedClientsCount(): number {
+    return this.clients.size;
+  }
+
+  getConnectedClients(): Array<{userId: string, userType: string}> {
+    return Array.from(this.clients.entries()).map(([userId, client]) => ({
+      userId,
+      userType: client.userType
+    }));
   }
 
   getConnectedUsers(): string[] {
