@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BannerAd } from "@shared/types";
+import { shouldUseFallbackData, fallbackBanners } from '../utils/fallbackData';
 
 interface HomepageBannerProps {
   position: "homepage_top" | "homepage_middle" | "homepage_bottom";
@@ -16,7 +17,6 @@ export default function HomepageBanner({
 
   useEffect(() => {
     // Use fallback data immediately if in production
-    const { shouldUseFallbackData, fallbackBanners } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setBanners(fallbackBanners);
