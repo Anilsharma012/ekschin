@@ -69,7 +69,7 @@ export default function AdminDashboard() {
 
     try {
       setLoading(true);
-      const { api } = await import('../lib/api');
+      const { enhancedApi } = await import('../lib/enhanced-api');
       
       // Fetch dashboard stats
       const response = await api.get('admin/stats', token);
