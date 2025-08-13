@@ -31,10 +31,14 @@ if (isProduction()) {
     const url = input.toString();
 
     // Return fallback data for known API endpoints
-    if (url.includes('/api/properties')) {
+    if (url.includes('/api/properties') || url.includes('/api/admin/properties')) {
       return createApiResponse({
         success: true,
-        data: { properties: fallbackProperties }
+        data: fallbackProperties,
+        total: fallbackProperties.length,
+        page: 1,
+        limit: 20,
+        pages: 1
       });
     }
 
