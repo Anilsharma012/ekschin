@@ -142,13 +142,28 @@ export const markNotificationAsRead: RequestHandler = async (req, res) => {
       });
     }
 
-    await db.collection("notifications").updateOne(
-      { 
-        _id: new ObjectId(notificationId), 
-        sellerId: new ObjectId(sellerId) 
+    // Try to update in user_notifications first (admin notifications)
+    const userNotifResult = await db.collection("user_notifications").updateOne(
+      {
+        _id: new ObjectId(notificationId),
+        userId: new ObjectId(sellerId)
       },
-      { $set: { isRead: true, readAt: new Date() } }
+      { $set: { readAt: new Date() } }
     );
+
+    // If not found in user_notifications, try legacy notifications
+    if (userNotifResult.matchedCount === 0) {
+      await db.collection("notifications").updateOne(
+        {
+          _id: new ObjectId(notificationId),
+          $or: [
+            { sellerId: new ObjectId(sellerId) },
+            { userId: new ObjectId(sellerId) }
+          ]
+        },
+        { $set: { isRead: true, readAt: new Date() } }
+      );
+    }
 
     res.json({
       success: true,
