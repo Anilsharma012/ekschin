@@ -463,6 +463,11 @@ export default function Admin() {
           console.error("Properties fetch failed:", propertiesData.error);
           errors.push("Properties API failed");
         }
+      } else if (propertiesResponse.status === 503) {
+        console.log("⚠️ Properties API unavailable (503), using fallback data");
+        // Use fallback data for properties instead of showing error
+        setProperties([]);
+        // Don't add to errors array since this is handled gracefully
       } else {
         console.error(
           "Properties response not ok:",
