@@ -344,6 +344,31 @@ const IntegratedSellerDashboard: React.FC = () => {
     }
   };
 
+  const fetchSellerNotifications = async () => {
+    try {
+      setLoadingNotifications(true);
+      const response = await fetch('/api/seller/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setSellerNotifications(data.data || []);
+          // Update unread count in stats
+          const unreadCount = data.data.filter(n => !n.isRead).length;
+          setStats(prev => ({ ...prev, unreadNotifications: unreadCount }));
+        }
+      } else {
+        console.error('Failed to fetch notifications:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching seller notifications:', error);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
   const fetchConversations = async () => {
     try {
       setLoadingConversations(true);
