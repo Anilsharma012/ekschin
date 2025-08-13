@@ -56,53 +56,13 @@ const HeroImageSlider: React.FC = () => {
     },
   ];
 
-  // Fetch slider images from admin
+  // Use static images immediately
   useEffect(() => {
-    const fetchSliderImages = async () => {
-      try {
-        const response = await fetch("/api/homepage-sliders");
-        if (response.ok) {
-          const data = await response.json();
-          if (
-            data.success &&
-            data.data &&
-            Array.isArray(data.data) &&
-            data.data.length > 0
-          ) {
-            // Filter active slides and sort by order
-            const activeSlides = data.data
-              .filter((slide: SliderImage) => slide.isActive !== false)
-              .sort(
-                (a: SliderImage, b: SliderImage) =>
-                  (a.order || 0) - (b.order || 0),
-              );
+    setImages(defaultImages);
+    setLoading(false);
 
-            setImages(activeSlides);
-            console.log(
-              "✅ Slider images loaded from admin:",
-              activeSlides.length,
-            );
-          } else {
-            console.log("📂 No slider images found, using defaults");
-            setImages(defaultImages);
-          }
-        } else {
-          throw new Error("API response not ok");
-        }
-      } catch (error) {
-        console.warn("⚠️ Failed to fetch slider images:", error);
-        console.log("📂 Using default slider images");
-        setImages(defaultImages);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSliderImages();
-
-    // Listen for admin updates
+    // No need for admin updates - using static images
     const handleSliderUpdate = () => {
-      console.log("🔄 Slider update event received, refreshing...");
       fetchSliderImages();
     };
 
