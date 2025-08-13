@@ -68,13 +68,10 @@ if (isProduction()) {
     
     // For any other API calls, return service unavailable
     if (url.includes('/api/')) {
-      return new Response(JSON.stringify({
+      return createApiResponse({
         success: false,
         error: 'Service temporarily unavailable'
-      }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      }, 503);
     }
     
     // For non-API calls, use original fetch
