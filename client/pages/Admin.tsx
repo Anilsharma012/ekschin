@@ -548,6 +548,11 @@ export default function Admin() {
       if (testResponse.ok) {
         console.log("✅ Basic connectivity restored");
         await fetchAdminData();
+      } else if (testResponse.status === 503) {
+        // Handle 503 gracefully - backend service is available but database is down
+        console.log("⚠️ Backend available but database unavailable, switching to offline mode");
+        setOfflineMode(true);
+        setError("Database service unavailable. Operating in offline mode with cached data.");
       } else {
         throw new Error(`Server responded with ${testResponse.status}`);
       }
