@@ -38,51 +38,84 @@ export const getSellerNotifications: RequestHandler = async (req, res) => {
     const db = getDatabase();
     const sellerId = (req as any).userId;
 
-    // Get notifications for this seller from unified collection
-    const notifications = await db
+    // Get notifications for this seller from user_notifications collection
+    const userNotifications = await db
+      .collection("user_notifications")
+      .find({ userId: new ObjectId(sellerId) })
+      .sort({ sentAt: -1 })
+      .toArray();
+
+    // Also get legacy notifications
+    const legacyNotifications = await db
       .collection("notifications")
       .find({
         $or: [
           { userId: new ObjectId(sellerId), userType: "seller" },
-          { sellerId: new ObjectId(sellerId) } // Support legacy format
+          { sellerId: new ObjectId(sellerId) }
         ]
       })
       .sort({ createdAt: -1 })
       .toArray();
 
-    // Create some sample notifications if none exist
-    if (notifications.length === 0) {
-      const sampleNotifications = [
-        {
-          sellerId: new ObjectId(sellerId),
-          title: "Welcome to Seller Dashboard",
-          message: "Your seller account has been successfully activated. You can now start posting properties!",
-          type: "account",
-          isRead: false,
-          createdAt: new Date(),
-        },
-        {
-          sellerId: new ObjectId(sellerId),
-          title: "Property Approval Guidelines",
-          message: "Please ensure your property listings follow our guidelines for faster approval.",
-          type: "general",
-          isRead: false,
-          createdAt: new Date(),
-        },
-      ];
+    // Combine and format notifications
+    const allNotifications = [
+      ...userNotifications.map(notif => ({
+        _id: notif._id,
+        title: notif.title,
+        message: notif.message,
+        type: notif.type || 'info',
+        isRead: !!notif.readAt,
+        readAt: notif.readAt,
+        createdAt: notif.sentAt,
+        sentBy: 'admin', // Admin notifications
+        status: notif.status || 'delivered'
+      })),
+      ...legacyNotifications.map(notif => ({
+        _id: notif._id,
+        title: notif.title,
+        message: notif.message,
+        type: notif.type || 'info',
+        isRead: notif.isRead || false,
+        readAt: notif.readAt,
+        createdAt: notif.createdAt,
+        sentBy: 'system',
+        status: 'delivered'
+      }))
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-      await db.collection("notifications").insertMany(sampleNotifications);
-      
-      const response: ApiResponse<any[]> = {
-        success: true,
-        data: sampleNotifications,
+    // Create welcome notification if no notifications exist
+    if (allNotifications.length === 0) {
+      const welcomeNotification = {
+        userId: new ObjectId(sellerId),
+        title: "Welcome to Seller Dashboard! 🎉",
+        message: "आपका seller account successfully activate हो गया है। अब आप properties post कर सकते हैं!",
+        type: "welcome",
+        sentAt: new Date(),
+        readAt: null,
+        status: "delivered",
+        recipientInfo: {
+          userType: "seller"
+        }
       };
-      return res.json(response);
+
+      await db.collection("user_notifications").insertOne(welcomeNotification);
+
+      allNotifications.push({
+        _id: welcomeNotification._id,
+        title: welcomeNotification.title,
+        message: welcomeNotification.message,
+        type: welcomeNotification.type,
+        isRead: false,
+        readAt: null,
+        createdAt: welcomeNotification.sentAt,
+        sentBy: 'system',
+        status: 'delivered'
+      });
     }
 
     const response: ApiResponse<any[]> = {
       success: true,
-      data: notifications,
+      data: allNotifications,
     };
 
     res.json(response);
