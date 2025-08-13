@@ -101,7 +101,9 @@ export const usePushNotifications = () => {
       // In production, add a small delay before connecting to avoid rapid connection attempts
       if (isProduction && reconnectAttempts.current > 0) {
         console.log('🕐 Production environment: Adding connection delay...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Use setTimeout instead of await to avoid making function async
+        setTimeout(() => connectWebSocket(), 2000);
+        return;
       }
 
       wsRef.current = new WebSocket(wsUrl);
