@@ -114,6 +114,12 @@ export const usePushNotifications = () => {
 
       wsRef.current.onopen = () => {
         console.log('🔔 Connected to push notification service');
+        console.log('📊 WebSocket connection details:', {
+          url: wsRef.current?.url,
+          protocol: wsRef.current?.protocol,
+          readyState: wsRef.current?.readyState,
+          extensions: wsRef.current?.extensions
+        });
         setIsConnected(true);
         reconnectAttempts.current = 0; // Reset reconnection attempts on success
 
