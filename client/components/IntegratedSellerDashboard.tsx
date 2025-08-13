@@ -741,7 +741,7 @@ const IntegratedSellerDashboard: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="properties">
               Properties
@@ -756,6 +756,14 @@ const IntegratedSellerDashboard: React.FC = () => {
               {stats.unreadMessages > 0 && (
                 <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
                   {stats.unreadMessages}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="notifications">
+              Notifications
+              {stats.unreadNotifications > 0 && (
+                <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {stats.unreadNotifications}
                 </Badge>
               )}
             </TabsTrigger>
