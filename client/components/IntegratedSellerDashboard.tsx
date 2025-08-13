@@ -205,9 +205,16 @@ const IntegratedSellerDashboard: React.FC = () => {
 
     const connectWebSocket = () => {
       try {
+        // Disable WebSocket in production
+        const isProduction = window.location.hostname.includes(".fly.dev");
+        if (isProduction) {
+          console.log('🚫 Chat WebSocket disabled in production environment');
+          return;
+        }
+
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/chat`;
-        
+
         wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = () => {
