@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Search, Heart, Menu, MapPin, ChevronDown, User, LogOut } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { ROHTAK_AREAS } from "@shared/types";
+import PushNotificationDisplay from "./PushNotificationDisplay";
 
 export default function OLXStyleHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -55,8 +56,8 @@ export default function OLXStyleHeader() {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="text-2xl font-bold">
-              <span className="text-white">AASHISH</span>
-              <span className="text-white"> PROPERTY</span>
+              <span className="text-white">Ashish</span>
+              <span className="text-white"> Properties</span>
             </div>
           </div>
 
@@ -88,13 +89,20 @@ export default function OLXStyleHeader() {
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="w-full pl-10 pr-12 py-3 border-2 border-white border-opacity-30 rounded-lg focus:border-white focus:outline-none text-white placeholder-white placeholder-opacity-70 bg-white bg-opacity-20 backdrop-blur-sm"
               />
-              <button
-                type="button"
-                onClick={handleFavoritesClick}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
-              >
-                <Heart className="h-5 w-5 text-white opacity-70" />
-              </button>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                {isAuthenticated && (
+                  <div className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors">
+                    <PushNotificationDisplay />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleFavoritesClick}
+                  className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+                >
+                  <Heart className="h-5 w-5 text-white opacity-70" />
+                </button>
+              </div>
             </div>
 
             {/* Search Suggestions */}

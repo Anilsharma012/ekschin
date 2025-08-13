@@ -11,6 +11,10 @@ export interface Property {
     mohalla?: string;
     landmark?: string;
     area?: string; // Rohtak specific areas
+    colony?: string;
+    road?: string;
+    market?: string;
+    society?: string;
     address: string;
     coordinates?: {
       lat: number;

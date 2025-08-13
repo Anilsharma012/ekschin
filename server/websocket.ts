@@ -61,12 +61,18 @@ export class ChatWebSocketServer {
       }
     });
 
-    ws.on('close', () => {
+    ws.on('close', (code, reason) => {
+      console.log(`🚪 Chat WebSocket closed: ${code} ${reason?.toString() || ''}`);
       this.handleDisconnection(ws);
     });
 
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      console.error('🔴 Chat WebSocket error:', {
+        message: error.message,
+        stack: error.stack,
+        type: error.constructor.name,
+        userId: ws.userId
+      });
       this.handleDisconnection(ws);
     });
   }

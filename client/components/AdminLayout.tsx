@@ -67,6 +67,7 @@ const menuItems: MenuItem[] = [
     children: [
       { id: "ads-listing", label: "Ads Listing", icon: List },
       { id: "categories", label: "Categories", icon: Layers },
+      { id: "locations", label: "Rohtak Locations", icon: MapPin },
       { id: "custom-fields", label: "Custom Fields", icon: Settings },
       {
         id: "ad-management",
@@ -215,7 +216,6 @@ const menuItems: MenuItem[] = [
     icon: Wrench,
     children: [
       { id: "system-status", label: "System Status", icon: Activity },
-      { id: "login-test", label: "Login Test Suite", icon: Users },
       { id: "settings", label: "Settings", icon: Settings },
       { id: "system-update", label: "System Update", icon: RefreshCw },
       { id: "auth-debug", label: "Auth Debug", icon: Shield },

@@ -6,7 +6,10 @@ interface HomepageBannerProps {
   className?: string;
 }
 
-export default function HomepageBanner({ position, className = "" }: HomepageBannerProps) {
+export default function HomepageBanner({
+  position,
+  className = "",
+}: HomepageBannerProps) {
   const [banners, setBanners] = useState<BannerAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,14 +30,37 @@ export default function HomepageBanner({ position, className = "" }: HomepageBan
 
   const fetchBanners = async () => {
     try {
-      const response = await fetch(`/api/banners/${position}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`/api/banners/${position}`, {
+        signal: controller.signal,
+        cache: "no-cache",
+      });
+
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data.success) {
         setBanners(data.data);
       }
     } catch (error) {
-      console.error("Error fetching banners:", error);
+      const isProduction = window.location.hostname.includes(".fly.dev");
+
+      if (!isProduction) {
+        console.error("Error fetching banners:", error);
+      }
+
+      // In production, fail silently and show no banners
+      if (
+        isProduction &&
+        error instanceof Error &&
+        error.message.includes("Failed to fetch")
+      ) {
+        console.log("Banner service unavailable, continuing without banners");
+      }
+
+      setBanners([]); // Show no banners instead of breaking the page
     } finally {
       setLoading(false);
     }
@@ -80,7 +106,7 @@ export default function HomepageBanner({ position, className = "" }: HomepageBan
                 target.src = `https://via.placeholder.com/800x200/f97316/ffffff?text=${encodeURIComponent(currentBanner.title)}`;
               }}
             />
-            
+
             {/* Gradient overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent rounded-lg"></div>
           </div>
@@ -99,17 +125,17 @@ export default function HomepageBanner({ position, className = "" }: HomepageBan
             {/* Call-to-action arrow */}
             {currentBanner.link && (
               <div className="text-white/80 hover:text-white transition-colors">
-                <svg 
-                  className="w-5 h-5 md:w-6 md:h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 md:w-6 md:h-6"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M9 5l7 7-7 7" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
                   />
                 </svg>
               </div>
@@ -125,8 +151,8 @@ export default function HomepageBanner({ position, className = "" }: HomepageBan
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                  index === currentIndex 
-                    ? "bg-white" 
+                  index === currentIndex
+                    ? "bg-white"
                     : "bg-white/50 hover:bg-white/70"
                 }`}
               />

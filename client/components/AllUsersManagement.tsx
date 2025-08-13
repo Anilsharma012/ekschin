@@ -87,6 +87,7 @@ export default function AllUsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserType, setSelectedUserType] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -94,6 +95,7 @@ export default function AllUsersManagement() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [confirmDeleteUser, setConfirmDeleteUser] = useState<User | null>(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -202,6 +204,9 @@ export default function AllUsersManagement() {
     if (!token) return;
 
     try {
+      setUpdatingUserId(userId);
+      setError('');
+      setSuccessMessage('');
       const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
@@ -214,9 +219,18 @@ export default function AllUsersManagement() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // Clear any previous error
+          setError('');
+          // Update selectedUser if it's the same user being updated
+          if (selectedUser && selectedUser._id === userId) {
+            setSelectedUser({ ...selectedUser, status: newStatus });
+          }
           // Refresh users list
           fetchUsers();
           fetchStats();
+          // Show success message
+          setSuccessMessage(`User status updated to ${newStatus} successfully`);
+          setTimeout(() => setSuccessMessage(''), 3000);
         } else {
           setError(data.error || 'Failed to update user status');
         }
@@ -225,6 +239,8 @@ export default function AllUsersManagement() {
       }
     } catch (err) {
       setError('Network error while updating user status');
+    } finally {
+      setUpdatingUserId(null);
     }
   };
 
@@ -404,6 +420,25 @@ export default function AllUsersManagement() {
           Export CSV
         </Button>
       </div>
+
+      {/* Success and Error Messages */}
+      {successMessage && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <p className="text-green-700">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <p className="text-red-700">{error}</p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
@@ -683,6 +718,7 @@ export default function AllUsersManagement() {
               <div className="flex space-x-2">
                 <Button
                   variant="outline"
+                  disabled={updatingUserId === selectedUser._id}
                   onClick={() =>
                     updateUserStatus(
                       selectedUser._id,
@@ -690,14 +726,29 @@ export default function AllUsersManagement() {
                     )
                   }
                 >
-                  {selectedUser.status === 'active' ? 'Deactivate' : 'Activate'}
+                  {updatingUserId === selectedUser._id ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                      <span>Updating...</span>
+                    </div>
+                  ) : (
+                    selectedUser.status === 'active' ? 'Deactivate' : 'Activate'
+                  )}
                 </Button>
                 <Button
                   variant="outline"
                   className="text-red-600"
+                  disabled={updatingUserId === selectedUser._id}
                   onClick={() => updateUserStatus(selectedUser._id, 'suspended')}
                 >
-                  Suspend User
+                  {updatingUserId === selectedUser._id ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full"></div>
+                      <span>Suspending...</span>
+                    </div>
+                  ) : (
+                    'Suspend User'
+                  )}
                 </Button>
               </div>
             </div>

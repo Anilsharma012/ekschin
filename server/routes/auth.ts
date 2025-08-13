@@ -13,12 +13,12 @@ const SALT_ROUNDS = 10;
 // Register new user (seller, agent, or buyer)
 export const registerUser: RequestHandler = async (req, res) => {
   try {
-    console.log("🔍 Registration request received:", {
+    console.log("🔍 Registration request received:", JSON.stringify({
       body: req.body,
       headers: req.headers,
       method: req.method,
       url: req.url
-    });
+    }, null, 2));
 
     const db = getDatabase();
     const {
@@ -232,6 +232,14 @@ export const registerUser: RequestHandler = async (req, res) => {
 // Login user
 export const loginUser: RequestHandler = async (req, res) => {
   try {
+    console.log("🔐 Login attempt:", JSON.stringify({
+      body: req.body,
+      headers: req.headers.origin,
+      method: req.method,
+      url: req.url,
+      timestamp: new Date().toISOString()
+    }, null, 2));
+
     const db = getDatabase();
     const { email, phone, password, userType } = req.body;
 
@@ -264,20 +272,31 @@ export const loginUser: RequestHandler = async (req, res) => {
     const user = await db.collection("users").findOne(query);
 
     if (!user) {
+      console.log("❌ User not found for login:", { query, email, phone, username });
       return res.status(401).json({
         success: false,
-        error: "Invalid credentials",
+        error: "Invalid credentials - user not found",
       });
     }
+
+    console.log("✅ User found for login:", {
+      userId: user._id,
+      userType: user.userType,
+      email: user.email,
+      role: user.role
+    });
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      console.log("❌ Invalid password for user:", user.email);
       return res.status(401).json({
         success: false,
-        error: "Invalid credentials",
+        error: "Invalid credentials - password mismatch",
       });
     }
+
+    console.log("✅ Password verified for user:", user.email);
 
     // Update last login time
     await db.collection("users").updateOne(
@@ -331,6 +350,12 @@ export const loginUser: RequestHandler = async (req, res) => {
       userResponse.roleInfo = roleInfo[user.role] || { displayName: user.role, color: "gray" };
     }
 
+    console.log("✅ Login successful for user:", {
+      email: user.email,
+      userType: user.userType,
+      role: user.role || 'none'
+    });
+
     const response: ApiResponse<{ token: string; user: any }> = {
       success: true,
       data: {
@@ -340,12 +365,26 @@ export const loginUser: RequestHandler = async (req, res) => {
       message: user.isFirstLogin ? "First login successful - please change your password" : "Login successful",
     };
 
+    // Add security headers for admin users
+    if (user.userType === 'admin' || user.role === 'super_admin') {
+      res.header('X-Admin-Login', 'true');
+      res.header('X-User-Role', user.role || user.userType);
+    }
+
     res.json(response);
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("❌ Login error:", {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+      origin: req.headers.origin,
+      timestamp: new Date().toISOString()
+    });
+
     res.status(500).json({
       success: false,
-      error: "Failed to login",
+      error: "Server error during login",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { AdminDataProvider } from "../hooks/useAdminData";
 import AdminLayout from "../components/AdminLayout";
 import {
   BarChart3,
@@ -52,6 +53,7 @@ import QuickCreatePage from "../components/admin/QuickCreatePage";
 import FooterManagement from "../components/admin/FooterManagement";
 import HomepageSliderManagement from "../components/admin/HomepageSliderManagement";
 import StaffManagement from "../components/admin/StaffManagement";
+import LocationManagement from "../components/admin/LocationManagement";
 
 import PropertyImageManager from "../components/admin/PropertyImageManager";
 import PaymentTransactions from "../components/admin/PaymentTransactions";
@@ -201,15 +203,27 @@ export default function Admin() {
       return;
     }
 
-    // Quick connectivity test
-    const testConnectivity = async () => {
+    // Enhanced connectivity test with better error handling
+    const testConnectivity = async (retryCount = 0) => {
+      const maxRetries = 3;
+      const retryDelay = 1000 * (retryCount + 1); // Progressive delay: 1s, 2s, 3s
+
       try {
-        // Try a simple fetch with a reasonable timeout
+        // Try a simple fetch with progressive timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeout = 5000 + retryCount * 2000; // 5s, 7s, 9s
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        console.log(
+          `🔍 Testing connectivity (attempt ${retryCount + 1}/${maxRetries + 1})...`,
+        );
 
         const response = await fetch("/api/admin/stats", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
           signal: controller.signal,
           cache: "no-cache",
         });
@@ -217,23 +231,50 @@ export default function Admin() {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
+          if (response.status === 503 && retryCount < maxRetries) {
+            console.log(
+              `🔄 Server unavailable (503), retrying in ${retryDelay}ms...`,
+            );
+            setTimeout(() => testConnectivity(retryCount + 1), retryDelay);
+            return;
+          }
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
         // If we get here, connectivity is working
         console.log("✅ Connectivity test passed, loading admin data");
+        setOfflineMode(false);
         if (!skipDataLoading) {
           fetchAdminData();
         } else {
           setLoading(false);
-          setOfflineMode(true);
         }
       } catch (error) {
-        console.warn("⚠️ Connectivity test failed:", error.message || error);
-        console.log("🔄 Enabling graceful offline mode with retry capability");
+        const isAbortError = error.name === "AbortError";
+        const isNetworkError = error.message.includes("Failed to fetch");
+
+        console.warn(
+          `⚠️ Connectivity test failed (attempt ${retryCount + 1}):`,
+          {
+            error: error.message,
+            type: error.name,
+            isAbort: isAbortError,
+            isNetwork: isNetworkError,
+          },
+        );
+
+        if (retryCount < maxRetries && (isNetworkError || isAbortError)) {
+          console.log(`🔄 Retrying connectivity test in ${retryDelay}ms...`);
+          setTimeout(() => testConnectivity(retryCount + 1), retryDelay);
+          return;
+        }
+
+        console.log(
+          "🔄 Max retries reached, enabling offline mode with fallback",
+        );
         setOfflineMode(true);
 
-        // Try to load real data anyway, fallback to mock if it fails
+        // Try to load real data anyway as a last resort
         if (!skipDataLoading) {
           try {
             await fetchAdminData();
@@ -257,6 +298,45 @@ export default function Admin() {
     skipDataLoading,
   ]);
 
+  // Helper function for consistent fetch with error handling
+  const adminFetch = async (url: string, label: string, timeout = 15000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // In production, log API errors more quietly
+      const isProduction = window.location.hostname.includes(".fly.dev");
+      if (!response.ok && !isProduction) {
+        console.warn(`Admin API call failed for ${url}: ${response.status}`);
+      }
+
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      // Better error handling for production
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          throw new Error(`${label} request timed out`);
+        } else if (error.message.includes("Failed to fetch")) {
+          throw new Error(`${label} server unavailable`);
+        }
+      }
+      throw error;
+    }
+  };
+
   const fetchAdminData = async () => {
     if (!token) {
       console.log("No token available for admin data fetch");
@@ -273,12 +353,10 @@ export default function Admin() {
       token.substring(0, 20) + "...",
     );
 
-    // Fetch stats with individual error handling
+    // Fetch stats with enhanced error handling
     try {
       console.log("Fetching admin stats...");
-      const statsResponse = await fetch("/api/admin/stats", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const statsResponse = await adminFetch("/api/admin/stats", "stats");
 
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
@@ -301,16 +379,32 @@ export default function Admin() {
         errors.push(`Stats API error: ${statsResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
-      errors.push("Stats API unreachable");
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
+
+      console.error("Error fetching stats:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError,
+      });
+
+      if (isAbortError) {
+        errors.push("Stats API timeout (server may be slow)");
+      } else if (isNetworkError) {
+        errors.push("Stats API network error (check connection)");
+      } else {
+        errors.push(`Stats API error: ${error.message || "Unknown error"}`);
+      }
     }
 
-    // Fetch users with individual error handling
+    // Fetch users with enhanced error handling
     try {
       console.log("Fetching admin users...");
-      const usersResponse = await fetch("/api/admin/users?limit=10", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const usersResponse = await adminFetch(
+        "/api/admin/users?limit=10",
+        "users",
+      );
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
@@ -333,16 +427,32 @@ export default function Admin() {
         errors.push(`Users API error: ${usersResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
-      errors.push("Users API unreachable");
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
+
+      console.error("Error fetching users:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError,
+      });
+
+      if (isAbortError) {
+        errors.push("Users API timeout");
+      } else if (isNetworkError) {
+        errors.push("Users API network error");
+      } else {
+        errors.push(`Users API error: ${error.message || "Unknown error"}`);
+      }
     }
 
-    // Fetch properties with individual error handling
+    // Fetch properties with enhanced error handling
     try {
       console.log("Fetching admin properties...");
-      const propertiesResponse = await fetch("/api/admin/properties?limit=10", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const propertiesResponse = await adminFetch(
+        "/api/admin/properties?limit=10",
+        "properties",
+      );
 
       if (propertiesResponse.ok) {
         const propertiesData = await propertiesResponse.json();
@@ -362,19 +472,39 @@ export default function Admin() {
         errors.push(`Properties API error: ${propertiesResponse.status}`);
       }
     } catch (error) {
-      console.error("Error fetching properties:", error);
-      errors.push("Properties API unreachable");
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
+
+      console.error("Error fetching properties:", {
+        message: error.message,
+        name: error.name,
+        isAbort: isAbortError,
+        isNetwork: isNetworkError,
+      });
+
+      if (isAbortError) {
+        errors.push("Properties API timeout");
+      } else if (isNetworkError) {
+        errors.push("Properties API network error");
+      } else {
+        errors.push(
+          `Properties API error: ${error.message || "Unknown error"}`,
+        );
+      }
     }
 
     setApiErrors(errors);
 
     // Check if errors are database connection related
-    const hasDbConnectionErrors = errors.some(error => error.includes("Database connecting"));
+    const hasDbConnectionErrors = errors.some((error) =>
+      error.includes("Database connecting"),
+    );
 
     if (hasDbConnectionErrors) {
       console.log("Database still connecting, retrying in 3 seconds...");
       setTimeout(() => {
-        if (!loading) { // Only retry if not already loading
+        if (!loading) {
+          // Only retry if not already loading
           console.log("Retrying admin data fetch...");
           fetchAdminData();
         }
@@ -398,6 +528,39 @@ export default function Admin() {
     }
 
     setLoading(false);
+  };
+
+  // Manual retry function for user-triggered retries
+  const retryConnection = async () => {
+    console.log("🔄 Manual retry triggered by user");
+    setError("");
+    setApiErrors([]);
+    setOfflineMode(false);
+    setLoading(true);
+
+    try {
+      // First test basic connectivity
+      const testResponse = await fetch("/api/ping", {
+        headers: { "Cache-Control": "no-cache" },
+        cache: "no-cache",
+      });
+
+      if (testResponse.ok) {
+        console.log("✅ Basic connectivity restored");
+        await fetchAdminData();
+      } else {
+        throw new Error(`Server responded with ${testResponse.status}`);
+      }
+    } catch (error) {
+      console.error("❌ Connectivity test failed:", error);
+      setError(
+        "Cannot connect to server. Please check your internet connection.",
+      );
+      setLoading(false);
+
+      // Still try to load data as fallback
+      setTimeout(() => fetchAdminData(), 2000);
+    }
   };
 
   // Show loading while auth is being determined
@@ -530,25 +693,55 @@ export default function Admin() {
           <div className="flex items-center space-x-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-yellow-500" />
             <p className="text-yellow-700 font-medium">
-              Some services are unavailable
+              {apiErrors.some((err) => err.includes("network"))
+                ? "Network Connection Issues Detected"
+                : "Some Services Are Unavailable"}
             </p>
           </div>
+          {apiErrors.some((err) => err.includes("network")) && (
+            <div className="bg-yellow-100 rounded p-3 mb-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Troubleshooting:</strong>
+              </p>
+              <ul className="text-xs text-yellow-600 mt-1 ml-4">
+                <li>• Check your internet connection</li>
+                <li>• Server may be temporarily unavailable</li>
+                <li>• Try refreshing the page or wait a moment</li>
+              </ul>
+            </div>
+          )}
           <ul className="text-sm text-yellow-600 ml-7">
             {apiErrors.map((err, index) => (
               <li key={index}>• {err}</li>
             ))}
           </ul>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setApiErrors([]);
-              fetchAdminData();
-            }}
-            className="mt-2"
-          >
-            Retry
-          </Button>
+          <div className="flex space-x-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={retryConnection}
+              disabled={loading}
+              className="flex items-center"
+            >
+              {loading ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Retry Connection
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setOfflineMode(true);
+                setApiErrors([]);
+                loadMockData();
+              }}
+            >
+              Continue Offline
+            </Button>
+          </div>
         </div>
       )}
       {loading ? (
@@ -859,6 +1052,8 @@ export default function Admin() {
           return <ReportsManagement />;
         case "categories":
           return <CompleteCategoryManagement />;
+        case "locations":
+          return <LocationManagement />;
         case "custom-fields":
           return <CustomFieldsManagement />;
         case "ad-management":

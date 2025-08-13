@@ -16,31 +16,43 @@ const HeroImageSlider: React.FC = () => {
   const [images, setImages] = useState<SliderImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Default fallback images
+  // Default fallback images with more test banners
   const defaultImages: SliderImage[] = [
     {
-      url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2Ffa2e9286339c496d856e6de8806ef00c?format=webp&width=800",
+      url: "https://cdn.builder.io/api/v1/image/assets%2Faca6a5a965b04b5a9363bc5b1febaeba%2F651710a05e4347469b07fc0a51b765c6?format=webp&width=800",
       alt: "Property showcase 1",
       title: "Find Your Perfect Property",
       subtitle: "Discover amazing properties in your area",
     },
     {
-      url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2Fdcba62406a134729a34be08c488ddbab?format=webp&width=800",
+      url: "https://cdn.builder.io/api/v1/image/assets%2Faca6a5a965b04b5a9363bc5b1febaeba%2F813119609a3842cda2daba18ee7ad541?format=webp&width=800",
       alt: "Property showcase 2",
       title: "Premium Properties",
       subtitle: "Luxury homes and commercial spaces",
     },
     {
-      url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2Feb795a9f70554d888ddf9669d4b3441d?format=webp&width=800",
+      url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop",
       alt: "Property showcase 3",
       title: "Your Dream Home Awaits",
       subtitle: "Browse verified listings with expert guidance",
     },
     {
-      url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2F817b72ff3e4f40ee830c7ab0fcd5d25a?format=webp&width=800",
+      url: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&h=600&fit=crop",
       alt: "Property showcase 4",
       title: "Trusted Property Partner",
       subtitle: "Professional service you can rely on",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1605146769289-440113cc3d00?w=800&h=600&fit=crop",
+      alt: "Property showcase 5",
+      title: "Modern Living Spaces",
+      subtitle: "Contemporary homes with all amenities",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop",
+      alt: "Property showcase 6",
+      title: "Investment Opportunities",
+      subtitle: "Prime locations for smart investors",
     },
   ];
 
@@ -117,12 +129,14 @@ const HeroImageSlider: React.FC = () => {
 
   // Auto-slide every 5 seconds
   useEffect(() => {
+    if (images.length <= 1) return; // Don't auto-slide if only one image
+
     const interval = setInterval(() => {
-      nextSlide();
+      setCurrentSlide((prev) => (prev + 1) % images.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
 
   if (loading) {
     return (

@@ -51,27 +51,77 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
 
+  // Retry utility function
+  const retryFetch = async (fetchFn: () => Promise<any>, maxRetries = 2) => {
+    let lastError;
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        await fetchFn();
+        return; // Success, exit retry loop
+      } catch (error: any) {
+        lastError = error;
+        console.log(`Attempt ${i + 1} failed:`, error.message);
+
+        // Don't retry on auth errors or client errors
+        if (error.message.includes("HTTP 401") || error.message.includes("HTTP 4")) {
+          throw error;
+        }
+
+        // Wait before retrying (exponential backoff)
+        if (i < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      }
+    }
+    throw lastError; // Throw the last error if all retries failed
+  };
+
   // Fetch conversations from API
   const fetchConversations = async () => {
     if (!token) return;
 
-    try {
-      const response = await fetch("/api/chat/conversations", {
+    const performFetch = async () => {
+      const fetchPromise = fetch("/api/chat/conversations", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        signal: AbortSignal.timeout(8000), // 8 second timeout
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 8000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: ApiResponse<ConversationWithDetails[]> =
         await response.json();
 
       if (data.success && data.data) {
         setConversations(data.data);
+        setError(""); // Clear error on success
       } else {
-        setError(data.error || "Failed to load conversations");
+        throw new Error(data.error || "Failed to load conversations");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    };
+
+    try {
+      await retryFetch(performFetch);
+    } catch (error: any) {
+      console.error("Error fetching conversations:", error);
+      if (error.name === "AbortError" || error.message === "Request timeout") {
+        setError("Request timed out. Please check your connection.");
+      } else if (error.message.includes("HTTP 401")) {
+        setError("Authentication expired. Please login again.");
+      } else if (error.message.includes("HTTP")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     }
   };
 
@@ -79,26 +129,51 @@ export default function Chat() {
   const fetchMessages = async (convId: string) => {
     if (!token) return;
 
-    try {
-      const response = await fetch(
+    const performFetch = async () => {
+      const fetchPromise = fetch(
         `/api/chat/conversations/${convId}/messages`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          signal: AbortSignal.timeout(8000), // 8 second timeout
         },
       );
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 8000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: ApiResponse<{ messages: ChatMessage[] }> =
         await response.json();
 
       if (data.success && data.data) {
         setMessages(data.data.messages);
+        setError(""); // Clear error on success
       } else {
-        setError(data.error || "Failed to load messages");
+        throw new Error(data.error || "Failed to load messages");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    };
+
+    try {
+      await retryFetch(performFetch);
+    } catch (error: any) {
+      console.error("Error fetching messages:", error);
+      if (error.name === "AbortError" || error.message === "Request timeout") {
+        setError("Request timed out. Please check your connection.");
+      } else if (error.message.includes("HTTP 401")) {
+        setError("Authentication expired. Please login again.");
+      } else if (error.message.includes("HTTP")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     }
   };
 
@@ -139,7 +214,7 @@ export default function Chat() {
     setError("");
 
     try {
-      const response = await fetch("/api/chat/messages", {
+      const fetchPromise = fetch("/api/chat/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,7 +225,18 @@ export default function Chat() {
           message: newMessage,
           messageType: "text",
         }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout for sending
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 10000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: ApiResponse<{ messageId: string; conversationId: string }> =
         await response.json();
@@ -176,14 +262,24 @@ export default function Chat() {
 
         setMessages((prev) => [...prev, optimisticMessage]);
         setNewMessage("");
+        setError(""); // Clear error on success
 
         // Refresh conversations to update last message
         fetchConversations();
       } else {
         setError(data.error || "Failed to send message");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      if (error.name === "AbortError" || error.message === "Request timeout") {
+        setError("Message send timed out. Please try again.");
+      } else if (error.message.includes("HTTP 401")) {
+        setError("Authentication expired. Please login again.");
+      } else if (error.message.includes("HTTP")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     } finally {
       setSendingMessage(false);
     }
@@ -330,9 +426,26 @@ export default function Chat() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border-b border-red-200 p-3 flex items-center space-x-2">
-            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="bg-red-50 border-b border-red-200 p-3 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+            <Button
+              onClick={() => {
+                setError("");
+                if (currentConversation) {
+                  fetchMessages(currentConversation._id!);
+                } else {
+                  fetchConversations();
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+            >
+              Retry
+            </Button>
           </div>
         )}
 
@@ -430,9 +543,22 @@ export default function Chat() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center space-x-2">
-            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+            <Button
+              onClick={() => {
+                setError("");
+                fetchConversations();
+              }}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+            >
+              Retry
+            </Button>
           </div>
         )}
 

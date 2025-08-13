@@ -35,7 +35,8 @@ const getApiBaseUrl = () => {
 
   switch (environment) {
     case "development":
-      return "http://localhost:8080";
+      // In development, use the same origin to avoid CORS issues
+      return `${window.location.protocol}//${window.location.host}`;
     case "fly":
       return `${window.location.protocol}//${window.location.host}`;
     case "netlify":
@@ -50,11 +51,41 @@ const environment = detectEnvironment();
 
 export const API_CONFIG = {
   baseUrl: API_BASE_URL,
-  timeout: 8000, // Reduced timeout for faster fallback
-  retryAttempts: 2,
-  retryDelay: 1000,
+  timeout: 15000, // Increased timeout to handle database initialization
+  retryAttempts: 3,
+  retryDelay: 2000, // Increased delay to allow server to stabilize
   environment,
 };
+
+// Circuit breaker to prevent excessive requests when server is down
+class CircuitBreaker {
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private readonly threshold = 5;
+  private readonly timeout = 30000; // 30 seconds
+
+  isOpen(): boolean {
+    return this.failureCount >= this.threshold &&
+           (Date.now() - this.lastFailureTime) < this.timeout;
+  }
+
+  recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+  }
+
+  recordSuccess(): void {
+    this.failureCount = 0;
+    this.lastFailureTime = 0;
+  }
+
+  getRemainingTime(): number {
+    if (!this.isOpen()) return 0;
+    return this.timeout - (Date.now() - this.lastFailureTime);
+  }
+}
+
+const circuitBreaker = new CircuitBreaker();
 
 // Helper function to create API URLs
 export const createApiUrl = (endpoint: string): string => {
@@ -68,6 +99,25 @@ export const createApiUrl = (endpoint: string): string => {
   return `/api/${cleanEndpoint.replace("api/", "")}`;
 };
 
+// Check if server is ready by pinging health endpoint
+const checkServerReadiness = async (): Promise<boolean> => {
+  try {
+    const healthUrl = createApiUrl("health");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    const response = await fetch(healthUrl, {
+      method: 'GET',
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 // Enhanced fetch with retry and fallback
 export const safeApiRequest = async (
   endpoint: string,
@@ -79,17 +129,38 @@ export const safeApiRequest = async (
   ok: boolean;
   fromFallback?: boolean;
 }> => {
+  // Check circuit breaker
+  if (circuitBreaker.isOpen()) {
+    const remainingTime = Math.ceil(circuitBreaker.getRemainingTime() / 1000);
+    console.warn(`🚫 Circuit breaker open, server unavailable. Retrying in ${remainingTime}s`);
+
+    return {
+      data: getFallbackData(endpoint),
+      status: 503,
+      ok: false,
+      fromFallback: true,
+    };
+  }
+
   const url = createApiUrl(endpoint);
   const controller = new AbortController();
+  let timeoutId: NodeJS.Timeout | null = null;
 
-  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+  // Create a promise that rejects on timeout
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`Request timeout after ${API_CONFIG.timeout}ms`));
+    }, API_CONFIG.timeout);
+  });
 
   try {
     console.log(
       `🔄 API Request [${retryCount + 1}/${API_CONFIG.retryAttempts + 1}]: ${url}`,
     );
 
-    const response = await fetch(url, {
+    // Use Promise.race to handle timeout more gracefully
+    const fetchPromise = fetch(url, {
       ...options,
       signal: controller.signal,
       headers: {
@@ -98,7 +169,15 @@ export const safeApiRequest = async (
       },
     });
 
-    clearTimeout(timeoutId);
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+    // Record success for circuit breaker
+    circuitBreaker.recordSuccess();
 
     let responseData;
     try {
@@ -131,22 +210,47 @@ export const safeApiRequest = async (
       ok: response.ok,
     };
   } catch (error: any) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+    // Record failure for circuit breaker
+    circuitBreaker.recordFailure();
+
+    // Better error serialization
+    const errorDetails = {
+      message: error.message || 'Unknown error',
+      name: error.name || 'Error',
+      type: error.constructor?.name || 'UnknownError',
+      code: error.code,
+      status: error.status,
+      stack: error.stack?.split("\n")[0]
+    };
 
     const isRetryableError =
       error.name === "AbortError" ||
       error.message?.includes("Failed to fetch") ||
       error.message?.includes("NetworkError") ||
-      error.message?.includes("timeout");
+      error.message?.includes("timeout") ||
+      error.message?.includes("Database not initialized") ||
+      error.message?.includes("ECONNREFUSED") ||
+      error.code === "NETWORK_ERROR";
+
+    // For database initialization errors, use longer delays
+    const isDatabaseError = error.message?.includes("Database not initialized");
+    const retryDelay = isDatabaseError ? API_CONFIG.retryDelay * 2 : API_CONFIG.retryDelay;
 
     // Retry logic
     if (isRetryableError && retryCount < API_CONFIG.retryAttempts) {
       console.warn(
-        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${API_CONFIG.retryDelay}ms...`,
+        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${retryDelay * (retryCount + 1)}ms...`,
+        isDatabaseError ? "(Database initializing)" : "",
+        errorDetails
       );
 
       await new Promise((resolve) =>
-        setTimeout(resolve, API_CONFIG.retryDelay * (retryCount + 1)),
+        setTimeout(resolve, retryDelay * (retryCount + 1)),
       );
       return safeApiRequest(endpoint, options, retryCount + 1);
     }
@@ -154,12 +258,8 @@ export const safeApiRequest = async (
     // Return fallback data after all retries failed
     console.error(
       `❌ API request failed after ${retryCount + 1} attempts for ${endpoint}:`,
-      {
-        error: error.message,
-        name: error.name,
-        stack: error.stack?.split("\n")[0],
-        url,
-      },
+      errorDetails,
+      `URL: ${url}`
     );
 
     return {

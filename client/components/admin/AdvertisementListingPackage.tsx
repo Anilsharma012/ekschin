@@ -101,11 +101,10 @@ export default function AdvertisementListingPackage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Filter for listing-type packages (basic, standard, premium that are not featured packages)
+          // Filter for listing-type packages (basic, standard, premium, featured)
           const listingPackages = data.data.filter((pkg: any) =>
             pkg.category === "property" &&
-            (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium") &&
-            !pkg.featureLevel // Exclude featured advertisement packages
+            (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium" || pkg.type === "featured")
           );
           setPackages(listingPackages);
         } else {
@@ -130,7 +129,10 @@ export default function AdvertisementListingPackage() {
         ...newPackage,
         type: newPackage.listingType,
         features: newPackage.features.filter(f => f.trim() !== ""),
+        active: true, // Ensure package is active by default
       };
+
+      console.log("📦 Creating advertisement listing package:", packageData);
 
       const response = await fetch("/api/packages", {
         method: "POST",
@@ -144,6 +146,7 @@ export default function AdvertisementListingPackage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          console.log("✅ Advertisement listing package created successfully:", data.data);
           fetchPackages();
           setNewPackage({
             name: "",
@@ -157,6 +160,9 @@ export default function AdvertisementListingPackage() {
             features: [""],
           });
           setIsCreateDialogOpen(false);
+
+          // Show success message
+          alert("📦 Advertisement package created successfully! It should now appear on the website.");
         } else {
           setError(data.error || "Failed to create package");
         }

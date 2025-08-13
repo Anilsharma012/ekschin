@@ -109,6 +109,7 @@ export default function AdminSettings() {
       enablePayments: false,
       paymentGateway: 'razorpay',
       paymentApiKey: '',
+      paymentSecretKey: '',
       commissionRate: 5,
     },
   });
@@ -128,28 +129,31 @@ export default function AdminSettings() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/admin/settings', {
-        headers: { Authorization: `Bearer ${token}` },
+      // Fetch payment settings
+      const paymentResponse = await fetch('/api/admin/payment-settings', {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.success) {
-            setSettings({ ...settings, ...data.data });
-          } else {
-            setError(data.error || 'Failed to fetch settings');
-          }
-        } else {
-          // API endpoint doesn't exist, use default settings
-          console.log('Settings API not implemented, using default settings');
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        if (paymentData.success) {
+          setSettings(prev => ({
+            ...prev,
+            payment: {
+              enablePayments: paymentData.data.enablePayments || false,
+              paymentGateway: paymentData.data.paymentGateway || 'razorpay',
+              paymentApiKey: paymentData.data.paymentApiKey || '',
+              paymentSecretKey: paymentData.data.paymentSecretKey || '',
+              commissionRate: paymentData.data.commissionRate || 5,
+            }
+          }));
         }
       } else {
-        // API endpoint doesn't exist, use default settings
-        console.log('Settings API not implemented, using default settings');
+        console.log('Using default payment settings');
       }
+
     } catch (err) {
+      console.error('Error fetching settings:', err);
       setError('Network error while fetching settings');
     } finally {
       setLoading(false);
@@ -164,32 +168,57 @@ export default function AdminSettings() {
       setError('');
       setSuccess('');
 
-      const response = await fetch('/api/admin/settings', {
+      // Save payment settings
+      const paymentResponse = await fetch('/api/admin/payment-settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(settings.payment),
       });
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.success) {
-            setSuccess('Settings saved successfully!');
-            setTimeout(() => setSuccess(''), 3000);
-          } else {
-            setError(data.error || 'Failed to save settings');
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        if (paymentData.success) {
+          setSuccess('Payment settings saved successfully!');
+          setTimeout(() => setSuccess(''), 3000);
+
+          // Test Razorpay connection if enabled
+          if (settings.payment.enablePayments &&
+              settings.payment.paymentGateway === 'razorpay' &&
+              settings.payment.paymentApiKey) {
+
+            const testResponse = await fetch('/api/admin/payment-settings/test-razorpay', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                razorpayKeyId: settings.payment.paymentApiKey,
+                razorpayKeySecret: settings.payment.paymentSecretKey,
+              }),
+            });
+
+            if (testResponse.ok) {
+              const testData = await testResponse.json();
+              if (testData.success) {
+                setSuccess('Payment settings saved and Razorpay connection verified!');
+              } else {
+                setError(`Payment settings saved, but Razorpay test failed: ${testData.error}`);
+              }
+            }
           }
         } else {
-          setError('Settings API not implemented yet');
+          setError(paymentData.error || 'Failed to save payment settings');
         }
       } else {
-        setError('Settings API not implemented yet');
+        const errorData = await paymentResponse.json();
+        setError(errorData.error || 'Failed to save payment settings');
       }
     } catch (err) {
+      console.error('Save settings error:', err);
       setError('Network error while saving settings');
     } finally {
       setSaving(false);
@@ -542,15 +571,36 @@ export default function AdminSettings() {
                   </div>
 
                   <div>
-                    <Label htmlFor="paymentApiKey">Payment API Key</Label>
+                    <Label htmlFor="paymentApiKey">
+                      {settings.payment.paymentGateway === 'razorpay' ? 'Razorpay Key ID' : 'Payment API Key'}
+                    </Label>
                     <Input
                       id="paymentApiKey"
                       type="password"
                       value={settings.payment.paymentApiKey}
                       onChange={(e) => updatePaymentSetting('paymentApiKey', e.target.value)}
-                      placeholder="Your payment gateway API key"
+                      placeholder={settings.payment.paymentGateway === 'razorpay' ? 'rzp_test_... or rzp_live_...' : 'Your payment gateway API key'}
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {settings.payment.paymentGateway === 'razorpay' && 'Get this from Razorpay Dashboard > Settings > API Keys'}
+                    </p>
                   </div>
+
+                  {settings.payment.paymentGateway === 'razorpay' && (
+                    <div>
+                      <Label htmlFor="paymentSecretKey">Razorpay Key Secret</Label>
+                      <Input
+                        id="paymentSecretKey"
+                        type="password"
+                        value={settings.payment.paymentSecretKey}
+                        onChange={(e) => updatePaymentSetting('paymentSecretKey', e.target.value)}
+                        placeholder="Your Razorpay key secret"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Keep this secret and never share it publicly
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
             </CardContent>

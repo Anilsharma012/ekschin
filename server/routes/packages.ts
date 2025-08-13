@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { getDatabase } from "../db/mongodb";
 import { AdPackage, Transaction, ApiResponse } from "@shared/types";
 import { ObjectId, Db } from "mongodb";
+import { packageSyncService } from "../services/packageSyncService";
 
 // Internal function to initialize packages
 async function initializePackagesInternal(db: Db) {
@@ -91,7 +92,10 @@ export const getAdPackages: RequestHandler = async (req, res) => {
     if (category) filter.category = category;
     if (location) filter.location = location;
 
-    console.log(`📦 Fetching packages with filter:`, filter);
+    // Only log when debug mode is enabled
+    if (req.query.debug === 'true') {
+      console.log(`📦 Fetching packages with filter:`, filter);
+    }
 
     const packages = await db
       .collection("ad_packages")
@@ -99,7 +103,9 @@ export const getAdPackages: RequestHandler = async (req, res) => {
       .sort({ type: 1, price: 1 })
       .toArray();
 
-    console.log(`📦 Found ${packages.length} packages`);
+    if (req.query.debug === 'true') {
+      console.log(`📦 Found ${packages.length} packages`);
+    }
 
     // If no packages found and activeOnly is true, try to initialize default packages
     if (packages.length === 0 && activeOnly === "true") {
@@ -204,6 +210,11 @@ export const createPackage: RequestHandler = async (req, res) => {
     // Get the created package with the ID
     const createdPackage = await db.collection("ad_packages").findOne({ _id: result.insertedId });
 
+    // Broadcast package creation to all connected clients
+    if (createdPackage) {
+      packageSyncService.broadcastPackageCreated(createdPackage);
+    }
+
     const response: ApiResponse<AdPackage> = {
       success: true,
       data: createdPackage as AdPackage,
@@ -244,6 +255,11 @@ export const updatePackage: RequestHandler = async (req, res) => {
 
     // Get the updated package
     const updatedPackage = await db.collection("ad_packages").findOne({ _id: new ObjectId(packageId) });
+
+    // Broadcast package update to all connected clients
+    if (updatedPackage) {
+      packageSyncService.broadcastPackageUpdated(updatedPackage);
+    }
 
     const response: ApiResponse<AdPackage> = {
       success: true,
@@ -291,6 +307,9 @@ export const deletePackage: RequestHandler = async (req, res) => {
         error: "Package not found",
       });
     }
+
+    // Broadcast package deletion to all connected clients
+    packageSyncService.broadcastPackageDeleted(packageId);
 
     const response: ApiResponse<{ message: string }> = {
       success: true,

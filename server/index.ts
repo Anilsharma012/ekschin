@@ -3,7 +3,10 @@ import cors from "cors";
 
 import { connectToDatabase, getDatabase } from "./db/mongodb";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
+import { ensureDatabase, databaseHealthCheck } from "./middleware/database";
 import { ChatWebSocketServer } from "./websocket";
+import { pushNotificationService } from "./services/pushNotificationService";
+import { packageSyncService } from "./services/packageSyncService";
 
 // Property routes
 import {
@@ -63,6 +66,9 @@ import {
   updatePropertyApproval,
   createTestProperty,
   debugProperties,
+  sendNotification,
+  getAdminPackages,
+  getAdminUserPackages,
 } from "./routes/admin";
 
 // Chat routes
@@ -73,6 +79,20 @@ import {
   startPropertyConversation,
   getUnreadCount,
 } from "./routes/chat";
+
+// Location routes
+import {
+  getAllLocations,
+  getLocationsByType,
+  getPopularLocations,
+  searchLocations,
+  createLocation,
+  updateLocation,
+  deleteLocation,
+  bulkImportLocations,
+  initializeRohtakLocations,
+  getLocationStats,
+} from "./routes/locations";
 
 import { handleDemo } from "./routes/demo";
 import { seedDatabase } from "./routes/seed";
@@ -102,6 +122,14 @@ import {
   verifyPayment,
   getPaymentMethods,
 } from "./routes/payments";
+
+// Payment settings routes
+import {
+  getPaymentSettings,
+  updatePaymentSettings,
+  testRazorpayConnection,
+  getActivePaymentMethods,
+} from "./routes/payment-settings";
 
 // Banner routes
 import {
@@ -279,6 +307,8 @@ import {
   changeSellerPassword,
   purchasePackage,
   getSellerStats,
+  getSellerProfile,
+  uploadProfilePicture,
 } from "./routes/seller";
 
 // Chatbot routes
@@ -310,33 +340,96 @@ import {
 } from "./routes/footer";
 import { testFooterData } from "./routes/footerTest";
 
+// Custom fields routes
+import {
+  getAllCustomFields,
+  getCustomFieldById,
+  createCustomField,
+  updateCustomField,
+  deleteCustomField,
+  updateCustomFieldStatus,
+  reorderCustomFields,
+  initializeCustomFields,
+} from "./routes/custom-fields";
+
+// Debug custom fields routes
+import {
+  testCustomFields,
+  fixCustomFields,
+} from "./routes/debug-custom-fields";
+
+// Test push notification routes
+import {
+  testPushNotification,
+  getPushNotificationStats,
+  testUserConnection,
+} from "./routes/test-push-notifications";
+
+// WebSocket debug routes
+// import {
+//   getWebSocketStatus,
+//   testWebSocketConnection,
+// } from "./routes/websocket-debug";
+
+// Admin test routes
+// import {
+//   testAdminConnectivity,
+//   createDefaultAdminUsers,
+//   getAdminUsers,
+// } from "./routes/admin-test";
+
 export function createServer() {
   const app = express();
 
- const allowedOrigins = [
-     "https://aproperty.netlify.app",
-    "http://localhost:5173"
+  // CORS configuration - MUST be at the very top
+  const ALLOWED_ORIGINS = [
+    "https://ashishproperty.netlify.app",
+    "http://localhost:5173", // dev
   ];
 
   app.use(
     cors({
-      origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          console.log("❌ CORS blocked for origin:", origin);
-          callback(new Error("Not allowed by CORS"));
+      origin(origin, cb) {
+        // allow no-origin (curl/healthchecks) + allowed list
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+          return cb(null, true);
         }
+
+        // Allow localhost and development domains
+        if (
+          origin &&
+          (origin.includes("localhost") ||
+            origin.includes("127.0.0.1") ||
+            origin.includes(".fly.dev"))
+        ) {
+          return cb(null, true);
+        }
+
+        console.log(`🔴 CORS blocked origin: ${origin}`);
+        return cb(new Error("Not allowed by CORS"));
       },
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    })
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    }),
   );
 
+  // Important: respond to preflight for all routes
+  app.options("*", cors());
 
   app.use(express.json({ limit: "1gb" }));
   app.use(express.urlencoded({ extended: true, limit: "1gb" }));
+
+  // CORS test endpoint
+  app.get("/api/cors-test", (req, res) => {
+    res.json({
+      success: true,
+      message: "CORS test successful",
+      origin: req.headers.origin,
+      allowedOrigins: ALLOWED_ORIGINS,
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   // Initialize MongoDB connection
   connectToDatabase()
@@ -454,13 +547,14 @@ export function createServer() {
     resendEmailVerification,
   );
 
-  // Property routes
-  app.get("/api/properties", getProperties);
-  app.get("/api/properties/featured", getFeaturedProperties);
-  app.get("/api/properties/:id", getPropertyById);
+  // Property routes (with database middleware)
+  app.get("/api/properties", ensureDatabase, getProperties);
+  app.get("/api/properties/featured", ensureDatabase, getFeaturedProperties);
+  app.get("/api/properties/:id", ensureDatabase, getPropertyById);
   app.post(
     "/api/properties",
     authenticateToken,
+    ensureDatabase,
     upload.array("images", 10),
     createProperty,
   );
@@ -656,7 +750,7 @@ export function createServer() {
     try {
       console.log("🧪 TEST: Property approval request received:");
       console.log("📋 URL path:", req.path);
-      console.log("📋 Route params:", req.params);
+      console.log("��� Route params:", req.params);
       console.log("📋 Property ID:", req.params.propertyId);
       console.log("📋 Request body:", req.body);
 
@@ -712,6 +806,27 @@ export function createServer() {
   );
   app.post("/api/payments/verify", verifyPayment);
   app.get("/api/payments/methods", getPaymentMethods);
+
+  // Payment settings routes (admin only)
+  app.get(
+    "/api/admin/payment-settings",
+    authenticateToken,
+    requireAdmin,
+    getPaymentSettings,
+  );
+  app.put(
+    "/api/admin/payment-settings",
+    authenticateToken,
+    requireAdmin,
+    updatePaymentSettings,
+  );
+  app.post(
+    "/api/admin/payment-settings/test-razorpay",
+    authenticateToken,
+    requireAdmin,
+    testRazorpayConnection,
+  );
+  app.get("/api/payments/active-methods", getActivePaymentMethods);
 
   // Banner routes
   app.get("/api/banners/:position", getBannersByPosition);
@@ -783,6 +898,56 @@ export function createServer() {
     startPropertyConversation,
   );
   app.get("/api/chat/unread-count", authenticateToken, getUnreadCount);
+
+  // Location routes
+  app.get("/api/locations", getAllLocations);
+  app.get("/api/locations/by-type", getLocationsByType);
+  app.get("/api/locations/popular", getPopularLocations);
+  app.get("/api/locations/search", searchLocations);
+
+  // Admin location routes
+  app.get(
+    "/api/admin/locations",
+    authenticateToken,
+    requireAdmin,
+    getAllLocations,
+  );
+  app.get(
+    "/api/admin/locations/stats",
+    authenticateToken,
+    requireAdmin,
+    getLocationStats,
+  );
+  app.post(
+    "/api/admin/locations",
+    authenticateToken,
+    requireAdmin,
+    createLocation,
+  );
+  app.put(
+    "/api/admin/locations/:locationId",
+    authenticateToken,
+    requireAdmin,
+    updateLocation,
+  );
+  app.delete(
+    "/api/admin/locations/:locationId",
+    authenticateToken,
+    requireAdmin,
+    deleteLocation,
+  );
+  app.post(
+    "/api/admin/locations/bulk-import",
+    authenticateToken,
+    requireAdmin,
+    bulkImportLocations,
+  );
+  app.post(
+    "/api/admin/locations/initialize",
+    authenticateToken,
+    requireAdmin,
+    initializeRohtakLocations,
+  );
 
   // Testimonials routes
   app.get("/api/testimonials", getPublicTestimonials);
@@ -1010,6 +1175,42 @@ export function createServer() {
     getNotificationById,
   );
 
+  // User notification routes
+  app.put(
+    "/api/notifications/:notificationId/read",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const { pushNotificationService } = await import(
+          "./services/pushNotificationService"
+        );
+        const userId = (req as any).userId;
+        const { notificationId } = req.params;
+
+        const success = await pushNotificationService.markNotificationAsRead(
+          userId,
+          notificationId,
+        );
+
+        if (success) {
+          res.json({ success: true, message: "Notification marked as read" });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, error: "Notification not found" });
+        }
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+        res
+          .status(500)
+          .json({
+            success: false,
+            error: "Failed to mark notification as read",
+          });
+      }
+    },
+  );
+
   // Homepage slider management routes
   app.get(
     "/api/admin/homepage-sliders",
@@ -1128,7 +1329,13 @@ export function createServer() {
   app.get("/api/seller/messages", authenticateToken, getSellerMessages);
   app.get("/api/seller/packages", authenticateToken, getSellerPackages);
   app.get("/api/seller/payments", authenticateToken, getSellerPayments);
+  app.get("/api/seller/profile", authenticateToken, getSellerProfile);
   app.put("/api/seller/profile", authenticateToken, updateSellerProfile);
+  app.post(
+    "/api/seller/upload-profile-picture",
+    authenticateToken,
+    uploadProfilePicture,
+  );
   app.put(
     "/api/seller/change-password",
     authenticateToken,
@@ -1184,6 +1391,32 @@ export function createServer() {
     clearAllTransactions,
   );
 
+  // Push notification test routes (for debugging)
+  app.post(
+    "/api/test/push-notification",
+    authenticateToken,
+    testPushNotification,
+  );
+  app.get(
+    "/api/test/push-notification/stats",
+    authenticateToken,
+    getPushNotificationStats,
+  );
+  app.get(
+    "/api/test/push-notification/user/:userId",
+    authenticateToken,
+    testUserConnection,
+  );
+
+  // WebSocket debug routes
+  // app.get("/api/debug/websocket/status", getWebSocketStatus);
+  // app.post("/api/debug/websocket/test", testWebSocketConnection);
+
+  // Admin test routes (for debugging admin login issues)
+  // app.get("/api/test/admin/connectivity", testAdminConnectivity);
+  // app.post("/api/test/admin/create-default", createDefaultAdminUsers);
+  // app.get("/api/test/admin/users", getAdminUsers);
+
   // Footer management routes
   app.get("/api/footer/links", getActiveFooterLinks);
   app.get(
@@ -1228,18 +1461,153 @@ export function createServer() {
   app.post("/api/footer/initialize", initializeFooterData);
   app.get("/api/footer/test", testFooterData);
 
+  // Custom fields routes
+  app.get(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    getAllCustomFields,
+  );
+  app.get(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    getCustomFieldById,
+  );
+  app.post(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    createCustomField,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    updateCustomField,
+  );
+  app.delete(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    deleteCustomField,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId/status",
+    authenticateToken,
+    requireAdmin,
+    updateCustomFieldStatus,
+  );
+  app.put(
+    "/api/admin/custom-fields/reorder",
+    authenticateToken,
+    requireAdmin,
+    reorderCustomFields,
+  );
+  app.post("/api/custom-fields/initialize", initializeCustomFields);
+
+  // Admin notification and package management routes
+  app.post(
+    "/api/admin/send-notification",
+    authenticateToken,
+    requireAdmin,
+    sendNotification,
+  );
+  app.get(
+    "/api/admin/packages",
+    authenticateToken,
+    requireAdmin,
+    getAdminPackages,
+  );
+  app.get(
+    "/api/admin/user-packages",
+    authenticateToken,
+    requireAdmin,
+    getAdminUserPackages,
+  );
+
+  // WebSocket debug routes
+  const {
+    getWebSocketStatus,
+    testWebSocketConnection,
+  } = require("./routes/websocket-debug");
+  app.get("/api/debug/websocket-status", getWebSocketStatus);
+  app.post("/api/debug/websocket-test", testWebSocketConnection);
+
+  // Debug custom fields endpoints (for troubleshooting)
+  app.get("/api/debug/custom-fields", testCustomFields);
+  app.post("/api/debug/custom-fields/fix", fixCustomFields);
+
+  // WebSocket connection test endpoint
+  app.get("/api/websocket/test", (req, res) => {
+    try {
+      const connectedClients =
+        pushNotificationService.getConnectedClientsCount();
+      const clients = pushNotificationService.getConnectedClients();
+
+      res.json({
+        success: true,
+        websocket: {
+          pushNotifications: {
+            connected: true,
+            connectedClients,
+            clients,
+            endpoint: "/ws/notifications",
+          },
+        },
+        server: {
+          port: process.env.PORT || 3000,
+          environment: process.env.NODE_ENV || "development",
+          uptime: process.uptime(),
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        websocket: {
+          pushNotifications: {
+            connected: false,
+            error: "Service not initialized",
+          },
+        },
+      });
+    }
+  });
+
   // Health check endpoint for network monitoring
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", databaseHealthCheck, (req, res) => {
+    const dbStatus = req.databaseStatus || {
+      connected: false,
+      responsive: false,
+    };
+
     res.json({
-      status: "ok",
+      status: dbStatus.connected && dbStatus.responsive ? "ok" : "degraded",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || "development",
+      database: {
+        connected: dbStatus.connected,
+        responsive: dbStatus.responsive,
+        error: dbStatus.error,
+      },
     });
   });
 
   return app;
 }
 
-// For production
+// Initialize push notification service
+export function initializePushNotifications(server: any) {
+  pushNotificationService.initialize(server);
+  console.log("📱 Push notification service initialized");
+}
 
+// Initialize package sync service
+export function initializePackageSync(server: any) {
+  packageSyncService.initialize(server);
+  console.log("📦 Package sync service initialized");
+}
+
+// For production

@@ -62,10 +62,23 @@ export const downloadAPK: RequestHandler = async (req, res) => {
       });
     }
 
-    // Set headers for file download
+    // Get file stats for headers
+    const stats = fs.statSync(apkPath);
+
+    // Set headers for Android APK download
     res.setHeader("Content-Type", "application/vnd.android.package-archive");
     res.setHeader("Content-Disposition", "attachment; filename=AashishProperty.apk");
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Content-Length", stats.size.toString());
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    // Headers to help with Android download manager
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+
+    // Set proper MIME type for Android recognition
+    res.setHeader("Content-Transfer-Encoding", "binary");
 
     // Stream the file
     const fileStream = fs.createReadStream(apkPath);

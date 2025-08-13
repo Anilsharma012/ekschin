@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import ChatBot from "../components/ChatBot";
+import ChatModal from "../components/ChatModal";
 
 interface Property {
   _id: string;
@@ -74,6 +75,7 @@ export default function PropertyDetail() {
   const [error, setError] = useState<string>("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -128,37 +130,21 @@ export default function PropertyDetail() {
   };
 
   const handleStartChat = () => {
-    // Try to navigate to chat page first
-    try {
-      // Check if user is logged in
-      const token = localStorage.getItem('token');
-      if (token) {
-        // Navigate to chat page with property context
-        navigate('/chat', {
-          state: {
-            propertyId: property?._id,
-            sellerId: property?.ownerId,
-            propertyTitle: property?.title
-          }
-        });
-      } else {
-        // If not logged in, redirect to login first
-        navigate('/login', {
-          state: {
-            redirectTo: `/property/${id}`,
-            message: 'Please login to start chat'
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error starting chat:', error);
-      // Fallback to WhatsApp
-      if (property?.contactInfo.whatsappNumber) {
-        handleWhatsApp(property.contactInfo.whatsappNumber);
-      } else {
-        handleWhatsApp(property.contactInfo.phone);
-      }
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // If not logged in, redirect to login first
+      navigate('/login', {
+        state: {
+          redirectTo: `/properties/${id}`,
+          message: 'Please login to start chat'
+        }
+      });
+      return;
     }
+
+    // Open chat modal
+    setChatModalOpen(true);
   };
 
   const nextImage = () => {
@@ -513,6 +499,20 @@ export default function PropertyDetail() {
           position="bottom-right"
           theme="red"
           enableHumanHandoff={true}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {property && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          propertyTitle={property.title}
+          propertyPrice={`₹${(property.price / 100000).toFixed(1)}L ${property.priceType === 'rent' ? '/month' : ''}`}
+          propertyImage={property.images[0] || "/placeholder.svg"}
+          sellerId={property.ownerId || ""}
+          sellerName={property.contactInfo.name}
+          propertyId={parseInt(property._id)}
         />
       )}
     </div>

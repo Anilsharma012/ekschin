@@ -3,6 +3,7 @@ import { getDatabase } from "../db/mongodb";
 import { ApiResponse, Category } from "@shared/types";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
+import { pushNotificationService } from "../services/pushNotificationService";
 
 // Get all users (admin only)
 export const getAllUsers: RequestHandler = async (req, res) => {
@@ -1306,6 +1307,161 @@ export const updatePropertyApproval: RequestHandler = async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to update property approval",
+    });
+  }
+};
+
+// Send notification to users (admin only)
+export const sendNotification: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const { title, message, type = 'info', userType = 'all' } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({
+        success: false,
+        error: "Title and message are required",
+      });
+    }
+
+    // Get target users based on userType filter
+    const filter: any = {};
+    if (userType !== 'all') {
+      filter.userType = userType;
+    }
+
+    const targetUsers = await db
+      .collection("users")
+      .find(filter, { projection: { _id: 1, name: 1, email: 1 } })
+      .toArray();
+
+    // Create notification documents for each user
+    const notifications = targetUsers.map(user => ({
+      userId: user._id,
+      title,
+      message,
+      type,
+      read: false,
+      timestamp: new Date(),
+      createdAt: new Date()
+    }));
+
+    // Insert notifications into database
+    if (notifications.length > 0) {
+      await db.collection("notifications").insertMany(notifications);
+    }
+
+    // Send real-time notifications via WebSocket
+    if (targetUsers.length > 0) {
+      await pushNotificationService.sendBulkNotifications(
+        targetUsers.map(user => user._id.toString()),
+        {
+          title,
+          message,
+          type,
+          timestamp: new Date()
+        }
+      );
+    }
+
+    console.log(`📢 Sent notification to ${targetUsers.length} users (${userType}): ${title}`);
+
+    const response: ApiResponse<{
+      message: string;
+      sentTo: number;
+      targetUserType: string;
+    }> = {
+      success: true,
+      data: {
+        message: "Notification sent successfully",
+        sentTo: targetUsers.length,
+        targetUserType: userType
+      },
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to send notification",
+    });
+  }
+};
+
+// Get admin packages
+export const getAdminPackages: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+
+    const packages = await db
+      .collection("ad_packages")
+      .find({})
+      .sort({ type: 1, price: 1 })
+      .toArray();
+
+    const response: ApiResponse<any[]> = {
+      success: true,
+      data: packages,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching admin packages:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch packages",
+    });
+  }
+};
+
+// Get user packages for admin
+export const getAdminUserPackages: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+
+    const userPackages = await db
+      .collection("user_packages")
+      .aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "user"
+          }
+        },
+        {
+          $lookup: {
+            from: "ad_packages",
+            localField: "packageId",
+            foreignField: "_id",
+            as: "package"
+          }
+        },
+        {
+          $unwind: "$user"
+        },
+        {
+          $unwind: "$package"
+        },
+        {
+          $sort: { purchaseDate: -1 }
+        }
+      ])
+      .toArray();
+
+    const response: ApiResponse<any[]> = {
+      success: true,
+      data: userPackages,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching user packages:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch user packages",
     });
   }
 };

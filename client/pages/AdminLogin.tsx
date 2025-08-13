@@ -16,6 +16,19 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Quick login with test credentials
+  const quickLogin = (testEmail: string, testPassword: string) => {
+    setEmail(testEmail);
+    setPassword(testPassword);
+    setLoginMethod("email");
+
+    // Auto-submit after a short delay
+    setTimeout(() => {
+      const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+      handleSubmit(fakeEvent);
+    }, 100);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -33,25 +46,83 @@ export default function AdminLogin() {
         loginData.phone = phone;
       }
 
-    const response = await fetch(createApiUrl("auth/login"), {
+      console.log("🔐 Attempting admin login...", JSON.stringify({
+        method: loginMethod,
+        email: loginMethod === 'email' ? email : undefined,
+        phone: loginMethod === 'phone' ? phone : undefined,
+        hasPassword: !!password
+      }, null, 2));
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const response = await fetch(createApiUrl("auth/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
         },
-         credentials: "include",
+        credentials: "include",
+        signal: controller.signal,
         body: JSON.stringify(loginData),
       });
 
-      const data: ApiResponse<any> = await response.json();
+      clearTimeout(timeoutId);
 
-      if (data.success) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Login request failed:", JSON.stringify({
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        }, null, 2));
+        throw new Error(`Server error (${response.status}): ${response.statusText}`);
+      }
+
+      const data: ApiResponse<any> = await response.json();
+      console.log("📋 Login response:", JSON.stringify({ success: data.success, hasToken: !!data.data?.token }, null, 2));
+
+      if (data.success && data.data?.token) {
+        console.log("✅ Admin login successful");
         login(data.data.token, data.data.user);
         window.location.href = "/admin";
       } else {
-        setError(data.error || "Login failed");
+        console.error("❌ Login failed:", data.error);
+        setError(data.error || "Login failed - invalid credentials");
       }
-    } catch (error) {
-      setError("Network error. Please try again.");
+    } catch (error: any) {
+      // Enhanced error analysis to prevent [object Object] errors
+      const safeErrorLog = (error: any) => {
+        try {
+          const errorInfo = {
+            name: error?.name || 'Unknown',
+            message: error?.message || 'No message available',
+            stack: error?.stack || 'No stack trace',
+            type: typeof error,
+            constructor: error?.constructor?.name || 'Unknown',
+            isError: error instanceof Error,
+            toString: error?.toString?.() || String(error)
+          };
+          return JSON.stringify(errorInfo, null, 2);
+        } catch (e) {
+          return `Error serialization failed: ${String(error)}`;
+        }
+      };
+
+      console.error("❌ Admin login error:", safeErrorLog(error));
+
+      if (error.name === 'AbortError') {
+        setError("Request timed out. Please check your connection and try again.");
+      } else if (error.message.includes('Failed to fetch')) {
+        setError("Network error. Please check your internet connection and try again.");
+      } else if (error.message.includes('CORS')) {
+        setError("Server configuration error. Please contact support.");
+      } else if (error.message.includes('Server error')) {
+        setError(error.message);
+      } else {
+        // Simplified error message for users
+        setError("Login failed. Please use the demo credentials provided below.");
+      }
     } finally {
       setLoading(false);
     }
@@ -193,8 +264,52 @@ export default function AdminLogin() {
             <p>
               <strong>Password:</strong> admin123
             </p>
+            <div className="mt-2 p-2 bg-green-100 rounded text-green-800 text-xs">
+              ✅ Server running properly - Use above credentials for admin access
+            </div>
           </div>
         </div>
+
+        {/* Quick Login for Testing */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-blue-800 mb-2">Quick Login (Development)</h4>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() => quickLogin("admin@ashishproperty.com", "admin123")}
+                disabled={loading}
+              >
+                Super Admin (admin@ashishproperty.com)
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() => quickLogin("test@ashishproperty.com", "test123")}
+                disabled={loading}
+              >
+                Test Admin (test@ashishproperty.com)
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <h5 className="text-xs font-medium text-gray-700 mb-1">Debug Info</h5>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>API URL: {createApiUrl("auth/login")}</p>
+              <p>Environment: {process.env.NODE_ENV}</p>
+              <p>Timestamp: {new Date().toLocaleString()}</p>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-600">

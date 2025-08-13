@@ -27,6 +27,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ROHTAK_AREAS } from "@shared/types";
+import LocationSelector from "../components/LocationSelector";
 
 interface PropertyFormData {
   title: string;
@@ -36,9 +37,11 @@ interface PropertyFormData {
   propertyType: string;
   subCategory: string;
   location: {
-    area: string;
+    sector?: string;
+    mohalla?: string;
+    landmark?: string;
+    area?: string;
     address: string;
-    landmark: string;
   };
   specifications: {
     bedrooms: string;
@@ -131,9 +134,7 @@ export default function PostProperty() {
     propertyType: "",
     subCategory: "",
     location: {
-      area: "",
       address: "",
-      landmark: "",
     },
     specifications: {
       bedrooms: "",
@@ -335,7 +336,7 @@ export default function PostProperty() {
           alert("Your session has expired. Please login again.");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          window.location.href = "/user-login";
+          window.location.href = "/login?type=seller";
           return;
         }
         throw new Error(`HTTP ${response.status}: Failed to create property`);
@@ -609,56 +610,13 @@ export default function PostProperty() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rohtak Area *
-                </label>
-                <Select
-                  value={formData.location.area}
-                  onValueChange={(value) =>
-                    handleInputChange("location.area", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select area in Rohtak" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROHTAK_AREAS.map((area) => (
-                      <SelectItem key={area} value={area}>
-                        {area}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Complete Address *
-                </label>
-                <Textarea
-                  value={formData.location.address}
-                  onChange={(e) =>
-                    handleInputChange("location.address", e.target.value)
-                  }
-                  placeholder="House/Plot number, Street, Area, Rohtak, Haryana"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nearby Landmark
-                </label>
-                <Input
-                  value={formData.location.landmark}
-                  onChange={(e) =>
-                    handleInputChange("location.landmark", e.target.value)
-                  }
-                  placeholder="e.g., Near PGI Rohtak, AIIMS Rohtak"
-                />
-              </div>
+              <LocationSelector
+                value={formData.location}
+                onChange={(location) => {
+                  setFormData({ ...formData, location });
+                }}
+                required={true}
+              />
             </div>
           )}
 
@@ -1054,31 +1012,83 @@ export default function PostProperty() {
           )}
         </div>
 
-        {/* Navigation Buttons - Enhanced for better visibility */}
+        {/* Navigation Buttons - Fixed for responsive design */}
         {currentStep < 6 && (
-          <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-6 z-50 shadow-lg">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex justify-between items-center w-full">
+          <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 mt-6 z-50 shadow-lg">
+            <div className="max-w-7xl mx-auto p-3 sm:p-4">
+              {/* Mobile Layout */}
+              <div className="block sm:hidden">
+                {/* Step indicator at top for mobile */}
+                <div className="flex justify-center mb-3">
+                  <div className="flex flex-col items-center">
+                    <div className="text-xs text-gray-600 font-medium mb-1">
+                      Step {currentStep} of {stepTitles.length}
+                    </div>
+                    <div className="flex space-x-1">
+                      {stepTitles.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                            index + 1 <= currentStep
+                              ? 'bg-[#C70000]'
+                              : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buttons side by side for mobile */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handlePrevStep}
+                    disabled={currentStep === 1}
+                    variant="outline"
+                    className="flex-1 py-3 text-sm font-medium border-2 hover:bg-gray-50 flex items-center justify-center disabled:opacity-50"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+
+                  <Button
+                    onClick={handleNextStep}
+                    disabled={!validateStep(currentStep)}
+                    className={`flex-1 py-3 text-sm font-medium flex items-center justify-center transition-all ${
+                      validateStep(currentStep)
+                        ? 'bg-[#C70000] hover:bg-[#A60000] text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
+                    }`}
+                    title={!validateStep(currentStep) ? 'Please fill all required fields' : ''}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex justify-between items-center w-full">
                 <Button
                   onClick={handlePrevStep}
                   disabled={currentStep === 1}
                   variant="outline"
-                  className="px-6 py-3 text-base min-w-[100px] border-2 hover:bg-gray-50 flex items-center"
+                  className="px-6 py-3 text-base min-w-[120px] border-2 hover:bg-gray-50 flex items-center disabled:opacity-50"
                 >
                   <ChevronLeft className="h-4 w-4 mr-2" />
                   Previous
                 </Button>
 
-                {/* Enhanced Step indicator - visible on all screens */}
+                {/* Step indicator in center for desktop */}
                 <div className="flex flex-col items-center">
-                  <div className="text-sm text-gray-600 font-medium mb-1">
+                  <div className="text-sm text-gray-600 font-medium mb-2">
                     Step {currentStep} of {stepTitles.length}
                   </div>
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-2">
                     {stepTitles.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-2 h-2 rounded-full transition-colors ${
+                        className={`w-2.5 h-2.5 rounded-full transition-colors ${
                           index + 1 <= currentStep
                             ? 'bg-[#C70000]'
                             : 'bg-gray-300'
@@ -1091,10 +1101,10 @@ export default function PostProperty() {
                 <Button
                   onClick={handleNextStep}
                   disabled={!validateStep(currentStep)}
-                  className={`px-6 py-3 text-base min-w-[100px] flex items-center transition-all ${
+                  className={`px-6 py-3 text-base min-w-[120px] flex items-center transition-all ${
                     validateStep(currentStep)
                       ? 'bg-[#C70000] hover:bg-[#A60000] text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
                   }`}
                   title={!validateStep(currentStep) ? 'Please fill all required fields' : ''}
                 >

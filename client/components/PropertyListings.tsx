@@ -71,7 +71,7 @@ export default function PropertyListings() {
 
   const handleStartChat = (property: any) => {
     // Check if user is logged in
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem("token"); // Fixed: use correct token key
     if (!token) {
       // Redirect to login
       window.location.href = "/login";

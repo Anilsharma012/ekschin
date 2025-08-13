@@ -100,22 +100,65 @@ export default function CustomFieldsManagement() {
       setError("");
 
       const response = await fetch("/api/admin/custom-fields", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setFields(data.data.sort((a: CustomField, b: CustomField) => a.order - b.order));
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.success) {
+            const fieldsData = data.data || [];
+
+            // If no fields exist, try to initialize default fields
+            if (fieldsData.length === 0) {
+              console.log("No custom fields found, initializing defaults...");
+              try {
+                const initResponse = await fetch("/api/custom-fields/initialize", {
+                  method: "POST",
+                  headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  },
+                });
+
+                if (initResponse.ok) {
+                  const initData = await initResponse.json();
+                  if (initData.success) {
+                    console.log("Default custom fields initialized, refetching...");
+                    // Refetch after initialization
+                    setTimeout(fetchFields, 1000);
+                    return;
+                  }
+                }
+              } catch (initError) {
+                console.warn("Failed to initialize default custom fields:", initError);
+              }
+            }
+
+            setFields(fieldsData.sort((a: CustomField, b: CustomField) => a.order - b.order));
+          } else {
+            setError(data.error || "Failed to fetch custom fields");
+          }
         } else {
-          setError(data.error || "Failed to fetch custom fields");
+          console.error("API returned non-JSON response:", await response.text());
+          setError("Server returned invalid response format");
         }
       } else {
-        setError("Failed to fetch custom fields");
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        setError(`Failed to fetch custom fields (${response.status})`);
       }
     } catch (error) {
       console.error("Error fetching custom fields:", error);
-      setError("Failed to fetch custom fields");
+      if (error instanceof SyntaxError && error.message.includes("Unexpected token")) {
+        setError("Server returned HTML instead of JSON. Check if API endpoints are properly configured.");
+      } else {
+        setError("Network error while fetching custom fields");
+      }
     } finally {
       setLoading(false);
     }
@@ -137,20 +180,33 @@ export default function CustomFieldsManagement() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          fetchFields();
-          resetForm();
-          setShowCreateDialog(false);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.success) {
+            fetchFields();
+            resetForm();
+            setShowCreateDialog(false);
+          } else {
+            setError(data.error || "Failed to create custom field");
+          }
         } else {
-          setError(data.error || "Failed to create custom field");
+          const errorText = await response.text();
+          console.error("Create API returned non-JSON response:", errorText);
+          setError("Server returned invalid response format");
         }
       } else {
-        setError("Failed to create custom field");
+        const errorText = await response.text();
+        console.error("Create API error response:", errorText);
+        setError(`Failed to create custom field (${response.status})`);
       }
     } catch (error) {
       console.error("Error creating custom field:", error);
-      setError("Failed to create custom field");
+      if (error instanceof SyntaxError && error.message.includes("Unexpected token")) {
+        setError("Server returned HTML instead of JSON. Check if API endpoints are properly configured.");
+      } else {
+        setError("Network error while creating custom field");
+      }
     } finally {
       setSaving(false);
     }
@@ -260,16 +316,16 @@ export default function CustomFieldsManagement() {
 
   const populateForm = (field: CustomField) => {
     setFormData({
-      name: field.name,
-      slug: field.slug,
-      type: field.type,
-      label: field.label,
+      name: field.name || "",
+      slug: field.slug || "",
+      type: field.type || "text",
+      label: field.label || "",
       placeholder: field.placeholder || "",
-      required: field.required,
-      active: field.active,
-      order: field.order,
+      required: field.required || false,
+      active: field.active !== undefined ? field.active : true,
+      order: field.order || 999,
       options: field.options || [],
-      categories: field.categories,
+      categories: field.categories || [],
       description: field.description || "",
     });
   };
@@ -277,12 +333,12 @@ export default function CustomFieldsManagement() {
   const addOption = () => {
     setFormData({
       ...formData,
-      options: [...formData.options, ""]
+      options: [...(formData.options || []), ""]
     });
   };
 
   const updateOption = (index: number, value: string) => {
-    const updatedOptions = [...formData.options];
+    const updatedOptions = [...(formData.options || [])];
     updatedOptions[index] = value;
     setFormData({ ...formData, options: updatedOptions });
   };
@@ -290,7 +346,7 @@ export default function CustomFieldsManagement() {
   const removeOption = (index: number) => {
     setFormData({
       ...formData,
-      options: formData.options.filter((_, i) => i !== index)
+      options: (formData.options || []).filter((_, i) => i !== index)
     });
   };
 
@@ -358,7 +414,7 @@ export default function CustomFieldsManagement() {
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{fields.length}</div>
+            <div className="text-2xl font-bold">{fields?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Custom fields</p>
           </CardContent>
         </Card>
@@ -369,7 +425,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {fields.filter(f => f.active).length}
+              {fields?.filter(f => f && f.active).length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Currently enabled</p>
           </CardContent>
@@ -381,7 +437,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {fields.filter(f => f.required).length}
+              {fields?.filter(f => f && f.required).length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Mandatory fields</p>
           </CardContent>
@@ -393,7 +449,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(fields.map(f => f.type)).size}
+              {fields?.length ? new Set(fields.map(f => f?.type).filter(Boolean)).size : 0}
             </div>
             <p className="text-xs text-muted-foreground">Different types</p>
           </CardContent>
@@ -415,13 +471,13 @@ export default function CustomFieldsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fields.map((field) => (
+              {fields?.map((field) => field && (
                 <TableRow key={field._id}>
                   <TableCell className="font-medium">
                     <div>
-                      <p className="font-semibold">{field.label}</p>
-                      <p className="text-sm text-gray-500">{field.name}</p>
-                      <code className="text-xs bg-gray-100 px-1 rounded">{field.slug}</code>
+                      <p className="font-semibold">{field.label || "Untitled"}</p>
+                      <p className="text-sm text-gray-500">{field.name || "No name"}</p>
+                      <code className="text-xs bg-gray-100 px-1 rounded">{field.slug || "no-slug"}</code>
                       {field.description && (
                         <p className="text-xs text-gray-400 mt-1">{field.description}</p>
                       )}
@@ -440,7 +496,7 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      {field.categories.length > 0 ? (
+                      {field.categories && field.categories.length > 0 ? (
                         field.categories.slice(0, 2).map((cat, index) => (
                           <Badge key={index} variant="outline" className="mr-1">
                             {cat}
@@ -449,7 +505,7 @@ export default function CustomFieldsManagement() {
                       ) : (
                         <Badge variant="secondary">All Categories</Badge>
                       )}
-                      {field.categories.length > 2 && (
+                      {field.categories && field.categories.length > 2 && (
                         <Badge variant="outline">
                           +{field.categories.length - 2} more
                         </Badge>
@@ -504,7 +560,7 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                 </TableRow>
               ))}
-              {fields.length === 0 && (
+              {(!fields || fields.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                     No custom fields found. Create your first custom field to get started.
@@ -611,11 +667,11 @@ export default function CustomFieldsManagement() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {formData.options.map((option, index) => (
+                  {(formData.options || []).map((option, index) => (
                     <div key={index} className="flex space-x-2">
                       <Input
                         placeholder={`Option ${index + 1}`}
-                        value={option}
+                        value={option || ""}
                         onChange={(e) => updateOption(index, e.target.value)}
                         className="flex-1"
                       />

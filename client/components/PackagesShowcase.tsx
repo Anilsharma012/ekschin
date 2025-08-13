@@ -52,18 +52,43 @@ export default function PackagesShowcase() {
       const data = response.data;
 
       if (data.success && Array.isArray(data.data)) {
-        // Limit to 3 for showcase
-        const showcasePackages = data.data.slice(0, 3);
+        // Filter for active advertisement listing packages
+        const advertisementPackages = data.data.filter((pkg: AdPackage) => {
+          return pkg.active &&
+                 pkg.category === "property" &&
+                 (pkg.type === "basic" || pkg.type === "standard" || pkg.type === "premium" || pkg.type === "featured");
+        });
+
+        console.log("📦 Advertisement packages found:", advertisementPackages);
+
+        // Limit to 3 for showcase, prioritize premium/featured packages
+        const sortedPackages = advertisementPackages.sort((a, b) => {
+          const order = { premium: 3, featured: 2, standard: 1, basic: 0 };
+          return (order[b.type] || 0) - (order[a.type] || 0);
+        });
+
+        const showcasePackages = sortedPackages.slice(0, 3);
         setPackages(showcasePackages);
         setError(null);
+
+        if (showcasePackages.length === 0) {
+          console.warn("⚠️ No advertisement packages found to display");
+        }
       } else {
         console.warn("Invalid packages data received:", data);
         setError("Invalid data format received");
         setPackages([]);
       }
     } catch (error: any) {
-      console.error("Error fetching packages:", error);
+      console.error("❌ PackagesShowcase fetch error:", error);
       setError(`Failed to load packages: ${error.message}`);
+
+      // Show debug info
+      console.log("🔍 PackagesShowcase debug info:");
+      console.log("- API endpoint: packages?activeOnly=true");
+      console.log("- Current packages length:", packages.length);
+      console.log("- Error details:", error);
+
       // Don't clear packages on error to avoid hiding the component
       if (packages.length === 0) {
         setPackages([]);
@@ -114,13 +139,41 @@ export default function PackagesShowcase() {
     );
   }
 
-  // Don't render if no packages and there was an error
+  // Don't render if no packages and there was an error (unless in development)
   if (packages.length === 0 && error) {
+    // Show debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <section className="bg-yellow-50 py-8 px-4 border-l-4 border-yellow-400">
+          <div className="max-w-7xl mx-auto text-center">
+            <h3 className="text-lg font-medium text-yellow-800 mb-2">PackagesShowcase Debug</h3>
+            <p className="text-yellow-700">❌ Error: {error}</p>
+            <p className="text-sm text-yellow-600 mt-2">
+              Check: Admin → Advertisement Listing Package → Create packages
+            </p>
+          </div>
+        </section>
+      );
+    }
     return null;
   }
 
-  // Don't render if no packages available
+  // Don't render if no packages available (unless in development)
   if (packages.length === 0) {
+    // Show debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <section className="bg-blue-50 py-8 px-4 border-l-4 border-blue-400">
+          <div className="max-w-7xl mx-auto text-center">
+            <h3 className="text-lg font-medium text-blue-800 mb-2">PackagesShowcase Debug</h3>
+            <p className="text-blue-700">📦 No advertisement packages found</p>
+            <p className="text-sm text-blue-600 mt-2">
+              Go to Admin → Advertisement Listing Package to create packages
+            </p>
+          </div>
+        </section>
+      );
+    }
     return null;
   }
 

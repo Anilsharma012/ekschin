@@ -41,7 +41,16 @@ export const upload = multer({
 // Get all properties with optional filtering
 export const getProperties: RequestHandler = async (req, res) => {
   try {
-    const db = getDatabase();
+    // Ensure database is connected before proceeding
+    let db;
+    try {
+      db = getDatabase();
+    } catch (dbError) {
+      console.log("📊 Database not ready, attempting to connect...");
+      const { connectToDatabase } = await import("../db/mongodb");
+      await connectToDatabase();
+      db = getDatabase();
+    }
     const {
       propertyType,
       subCategory,

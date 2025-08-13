@@ -94,14 +94,19 @@ export default function PackageManagement() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPackages(data.data);
-        } else {
-          setError(data.error || "Failed to fetch packages");
+        try {
+          const data = await response.json();
+          if (data.success) {
+            setPackages(data.data || []);
+          } else {
+            setError(data.error || "Failed to fetch packages");
+          }
+        } catch (parseError) {
+          console.error("Failed to parse packages response:", parseError);
+          setError("Invalid response format from server");
         }
       } else {
-        setError("Failed to fetch packages");
+        setError(`Failed to fetch packages (${response.status})`);
       }
     } catch (error) {
       console.error("Error fetching packages:", error);
@@ -124,8 +129,12 @@ export default function PackageManagement() {
         setPackages(packages.filter(pkg => pkg._id !== packageId));
         alert("Package deleted successfully! Changes will be visible to users immediately.");
       } else {
-        const data = await response.json();
-        setError(data.error || "Failed to delete package");
+        try {
+          const data = await response.json();
+          setError(data.error || `Failed to delete package (${response.status})`);
+        } catch (parseError) {
+          setError(`Failed to delete package (${response.status})`);
+        }
       }
     } catch (error) {
       console.error("Error deleting package:", error);
@@ -166,7 +175,7 @@ export default function PackageManagement() {
   };
 
   const handleSubmitPackage = async () => {
-    if (!token) return;
+    if (!token || saving) return; // Prevent double submission
 
     try {
       setSaving(true);
@@ -189,16 +198,24 @@ export default function PackageManagement() {
         }),
       });
 
-      const responseText = await response.text();
+      // Only read the response once
       let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        setError("Invalid response format");
-        return;
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const responseText = await response.text();
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("Failed to parse response:", responseText);
+          setError(`Server returned invalid response: ${response.status}`);
+          return;
+        }
       }
 
-      if (response.ok && data.success) {
+      if (response.ok && data?.success) {
         // Always refresh packages after create/update to get latest data
         await fetchPackages();
         setShowCreateDialog(false);
@@ -208,11 +225,17 @@ export default function PackageManagement() {
         const action = editingPackage ? "updated" : "created";
         alert(`Package ${action} successfully! Changes will be visible to users immediately.`);
       } else {
-        setError(data.error || "Failed to save package");
+        const errorMessage = data?.error || data?.message || `Failed to save package (${response.status})`;
+        setError(errorMessage);
+        console.error("Package save failed:", { status: response.status, data });
       }
     } catch (error) {
       console.error("Error saving package:", error);
-      setError("Failed to save package");
+      if (error instanceof TypeError && error.message.includes("body stream already read")) {
+        setError("Request failed due to network issue. Please try again.");
+      } else {
+        setError("Failed to save package. Please check your connection and try again.");
+      }
     } finally {
       setSaving(false);
     }
@@ -609,9 +632,16 @@ export default function PackageManagement() {
               <Button
                 onClick={handleSubmitPackage}
                 disabled={saving || !formData.name || !formData.description}
-                className="bg-[#C70000] hover:bg-[#A50000]"
+                className="bg-[#C70000] hover:bg-[#A50000] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? "Saving..." : editingPackage ? "Update Package" : "Create Package"}
+                {saving ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  editingPackage ? "Update Package" : "Create Package"
+                )}
               </Button>
             </div>
           </div>

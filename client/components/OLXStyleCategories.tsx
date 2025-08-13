@@ -15,16 +15,16 @@ import {
 import { withApiErrorBoundary } from "./ApiErrorBoundary";
 
 const categoryIcons: Record<string, any> = {
-  Cars: Car,
-  Properties: Building2,
-  Mobiles: Smartphone,
-  Jobs: Briefcase,
-  Fashion: Shirt,
-  Bikes: Bike,
-  "Electronics & Appliances": Tv,
-  "Commercial Vehicles & Spares": Truck,
-  Furniture: Sofa,
-  Pets: Heart,
+  Residential: Building2,
+  "Houses & Apartments": Building2,
+  Apartments: Building2,
+  Commercial: Briefcase,
+  Houses: Building2,
+  "Plot/Land": Sofa,
+  "Office Space": Briefcase,
+  Shops: Briefcase,
+  Villas: Building2,
+  Warehouse: Truck,
 };
 
 interface Category {
@@ -192,7 +192,7 @@ function OLXStyleCategories() {
 
       {/* Categories Grid */}
       <div className="px-4 pb-12">
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-5 gap-[15px] pt-[25px]">
           {(categories || []).slice(0, 10).map((category, index) => {
             if (!category || !category.name) return null;
 

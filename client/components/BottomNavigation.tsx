@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Grid3X3, MessageCircle, Plus, User } from "lucide-react";
+import { Home, FileText, MessageCircle, Plus, User } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useUnreadCount } from "../hooks/useUnreadCount";
 
@@ -15,10 +15,10 @@ export default function BottomNavigation() {
       active: location.pathname === "/",
     },
     {
-      icon: Grid3X3,
-      label: "Categories",
-      path: "/categories",
-      active: location.pathname === "/categories",
+      icon: FileText,
+      label: "My ads",
+      path: "/user-dashboard",
+      active: location.pathname === "/user-dashboard",
     },
     {
       icon: null, // Center button placeholder
