@@ -305,9 +305,25 @@ export default function Admin() {
       });
 
       clearTimeout(timeoutId);
+
+      // In production, log API errors more quietly
+      const isProduction = window.location.hostname.includes('.fly.dev');
+      if (!response.ok && !isProduction) {
+        console.warn(`Admin API call failed for ${url}: ${response.status}`);
+      }
+
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
+
+      // Better error handling for production
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`${label} request timed out`);
+        } else if (error.message.includes('Failed to fetch')) {
+          throw new Error(`${label} server unavailable`);
+        }
+      }
       throw error;
     }
   };
