@@ -192,10 +192,22 @@ export const deleteSellerNotification: RequestHandler = async (req, res) => {
       });
     }
 
-    await db.collection("notifications").deleteOne({
+    // Try to delete from user_notifications first (admin notifications)
+    const userNotifResult = await db.collection("user_notifications").deleteOne({
       _id: new ObjectId(notificationId),
-      sellerId: new ObjectId(sellerId),
+      userId: new ObjectId(sellerId),
     });
+
+    // If not found in user_notifications, try legacy notifications
+    if (userNotifResult.deletedCount === 0) {
+      await db.collection("notifications").deleteOne({
+        _id: new ObjectId(notificationId),
+        $or: [
+          { sellerId: new ObjectId(sellerId) },
+          { userId: new ObjectId(sellerId) }
+        ]
+      });
+    }
 
     res.json({
       success: true,
