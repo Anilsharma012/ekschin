@@ -78,13 +78,10 @@ if (isProduction()) {
     try {
       return await originalFetch(input, init);
     } catch (error) {
-      // Return a basic error response
-      return new Response(JSON.stringify({
+      // Return a basic error response using helper function
+      return createApiResponse({
         error: 'Network unavailable'
-      }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      }, 503);
     }
   };
 
