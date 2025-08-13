@@ -67,10 +67,20 @@ export const usePushNotifications = () => {
     if (!isAuthenticated || !user || wsRef.current) return;
 
     try {
+      // Better environment detection
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+      // Use the same host as the current page for WebSocket connection
       const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
 
       console.log('🔄 Connecting to push notification service at:', wsUrl);
+      console.log('🌍 Environment details:', {
+        isLocalhost,
+        hostname: window.location.hostname,
+        port: window.location.port,
+        protocol: window.location.protocol
+      });
       safeLog('log', '📊 Connection context:', {
         protocol,
         host: window.location.host,
