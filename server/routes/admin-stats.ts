@@ -243,7 +243,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
 });
 
 // Get detailed user analytics
-router.get('/users/analytics', authenticateAdmin, async (req, res) => {
+router.get('/users/analytics', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const db = getDatabase();
     const usersCollection = db.collection('users');
