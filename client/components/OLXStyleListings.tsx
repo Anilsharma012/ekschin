@@ -39,9 +39,9 @@ export default function OLXStyleListings() {
   const fetchProperties = async () => {
     try {
       // Check if we're in production and backend is unavailable
-      const isProduction = window.location.hostname.includes('.fly.dev');
+      const isProduction = window.location.hostname.includes(".fly.dev");
 
-      const { enhancedApi } = await import('../lib/api-enhanced');
+      const { enhancedApi } = await import("../lib/api-enhanced");
       const response = await enhancedApi.get("properties?limit=20");
       const data = response.data;
 
@@ -54,7 +54,12 @@ export default function OLXStyleListings() {
         return;
       }
 
-      if (data.success && data.data && data.data.properties && data.data.properties.length > 0) {
+      if (
+        data.success &&
+        data.data &&
+        data.data.properties &&
+        data.data.properties.length > 0
+      ) {
         setProperties(data.data.properties);
       } else if (data.success && data.data && Array.isArray(data.data)) {
         // Handle direct array response
@@ -66,179 +71,263 @@ export default function OLXStyleListings() {
             _id: "1",
             title: "3 BHK Flat for Sale in Rohtak",
             price: 4500000,
-            location: { city: "Rohtak", state: "Haryana", address: "Model Town" },
-            images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Model Town",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400",
+            ],
             propertyType: "apartment",
             premium: true,
             createdAt: new Date().toISOString(),
-            contactInfo: { name: "Rajesh Kumar" }
+            contactInfo: { name: "Rajesh Kumar" },
           },
           {
             _id: "2",
             title: "2 BHK Independent House",
             price: 3200000,
-            location: { city: "Rohtak", state: "Haryana", address: "Sector 14" },
-            images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Sector 14",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400",
+            ],
             propertyType: "house",
             createdAt: new Date(Date.now() - 86400000).toISOString(),
-            contactInfo: { name: "Priya Sharma" }
+            contactInfo: { name: "Priya Sharma" },
           },
           {
             _id: "3",
             title: "Commercial Shop for Rent",
             price: 25000,
-            location: { city: "Rohtak", state: "Haryana", address: "Railway Road" },
-            images: ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Railway Road",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400",
+            ],
             propertyType: "commercial",
             createdAt: new Date(Date.now() - 172800000).toISOString(),
-            contactInfo: { name: "Amit Singh" }
+            contactInfo: { name: "Amit Singh" },
           },
           {
             _id: "4",
             title: "1 BHK Apartment Near College",
             price: 1800000,
             location: { city: "Rohtak", state: "Haryana", address: "Near MDU" },
-            images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400"],
+            images: [
+              "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400",
+            ],
             propertyType: "apartment",
             createdAt: new Date(Date.now() - 259200000).toISOString(),
-            contactInfo: { name: "Sunita Devi" }
+            contactInfo: { name: "Sunita Devi" },
           },
           {
             _id: "5",
             title: "4 BHK Villa with Garden",
             price: 8500000,
-            location: { city: "Rohtak", state: "Haryana", address: "Civil Lines" },
-            images: ["https://images.unsplash.com/photo-1593696140826-c58b021acf8b?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Civil Lines",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?w=400",
+            ],
             propertyType: "villa",
             premium: true,
             createdAt: new Date(Date.now() - 345600000).toISOString(),
-            contactInfo: { name: "Vikash Yadav" }
+            contactInfo: { name: "Vikash Yadav" },
           },
           {
             _id: "6",
             title: "Plot for Sale 200 Sq Yard",
             price: 2800000,
-            location: { city: "Rohtak", state: "Haryana", address: "Bohar Road" },
-            images: ["https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Bohar Road",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
+            ],
             propertyType: "plot",
             createdAt: new Date(Date.now() - 432000000).toISOString(),
-            contactInfo: { name: "Mohan Lal" }
+            contactInfo: { name: "Mohan Lal" },
           },
           {
             _id: "7",
             title: "3 BHK Builder Floor",
             price: 5200000,
-            location: { city: "Rohtak", state: "Haryana", address: "Subhash Nagar" },
-            images: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Subhash Nagar",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400",
+            ],
             propertyType: "house",
             createdAt: new Date(Date.now() - 518400000).toISOString(),
-            contactInfo: { name: "Deepak Kumar" }
+            contactInfo: { name: "Deepak Kumar" },
           },
           {
             _id: "8",
             title: "Office Space for Rent",
             price: 35000,
-            location: { city: "Rohtak", state: "Haryana", address: "Delhi Road" },
-            images: ["https://images.unsplash.com/photo-1497366216548-37526070297c?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Delhi Road",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400",
+            ],
             propertyType: "commercial",
             createdAt: new Date(Date.now() - 604800000).toISOString(),
-            contactInfo: { name: "Ravi Gupta" }
+            contactInfo: { name: "Ravi Gupta" },
           },
           {
             _id: "9",
             title: "2 BHK Flat in Gated Society",
             price: 3800000,
             location: { city: "Rohtak", state: "Haryana", address: "Sector 3" },
-            images: ["https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=400"],
+            images: [
+              "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=400",
+            ],
             propertyType: "apartment",
             createdAt: new Date(Date.now() - 691200000).toISOString(),
-            contactInfo: { name: "Neha Sharma" }
+            contactInfo: { name: "Neha Sharma" },
           },
           {
             _id: "10",
             title: "5 BHK Luxury Villa",
             price: 12000000,
-            location: { city: "Rohtak", state: "Haryana", address: "Mansarovar Park" },
-            images: ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Mansarovar Park",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400",
+            ],
             propertyType: "villa",
             premium: true,
             createdAt: new Date(Date.now() - 777600000).toISOString(),
-            contactInfo: { name: "Sanjay Jindal" }
+            contactInfo: { name: "Sanjay Jindal" },
           },
           {
             _id: "11",
             title: "1 BHK Studio Apartment",
             price: 1500000,
-            location: { city: "Rohtak", state: "Haryana", address: "Krishan Nagar" },
-            images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Krishan Nagar",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400",
+            ],
             propertyType: "apartment",
             createdAt: new Date(Date.now() - 864000000).toISOString(),
-            contactInfo: { name: "Pooja Singh" }
+            contactInfo: { name: "Pooja Singh" },
           },
           {
             _id: "12",
             title: "Commercial Building for Sale",
             price: 25000000,
-            location: { city: "Rohtak", state: "Haryana", address: "Main Market" },
-            images: ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Main Market",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400",
+            ],
             propertyType: "commercial",
             createdAt: new Date(Date.now() - 950400000).toISOString(),
-            contactInfo: { name: "Ramesh Bansal" }
+            contactInfo: { name: "Ramesh Bansal" },
           },
           {
             _id: "13",
             title: "3 BHK Penthouse with Terrace",
             price: 7500000,
             location: { city: "Rohtak", state: "Haryana", address: "Sector 1" },
-            images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400"],
+            images: [
+              "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400",
+            ],
             propertyType: "apartment",
             createdAt: new Date(Date.now() - 1036800000).toISOString(),
-            contactInfo: { name: "Kavita Devi" }
+            contactInfo: { name: "Kavita Devi" },
           },
           {
             _id: "14",
             title: "Independent House with Parking",
             price: 4200000,
             location: { city: "Rohtak", state: "Haryana", address: "Old City" },
-            images: ["https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400"],
+            images: [
+              "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400",
+            ],
             propertyType: "house",
             createdAt: new Date(Date.now() - 1123200000).toISOString(),
-            contactInfo: { name: "Ashok Kumar" }
+            contactInfo: { name: "Ashok Kumar" },
           },
           {
             _id: "15",
             title: "Warehouse for Rent",
             price: 45000,
-            location: { city: "Rohtak", state: "Haryana", address: "Industrial Area" },
-            images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Industrial Area",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400",
+            ],
             propertyType: "commercial",
             createdAt: new Date(Date.now() - 1209600000).toISOString(),
-            contactInfo: { name: "Suresh Chand" }
-          }
+            contactInfo: { name: "Suresh Chand" },
+          },
         ];
         setProperties(mockProperties);
       }
     } catch (error) {
-      const isProduction = window.location.hostname.includes('.fly.dev');
+      const isProduction = window.location.hostname.includes(".fly.dev");
 
       if (!isProduction) {
         console.error("Error fetching properties:", error);
       }
 
       // In production, use mock data as fallback when backend is unavailable
-      if (isProduction && error instanceof Error && error.message.includes('Failed to fetch')) {
-        console.log('Backend unavailable, using mock data fallback');
+      if (
+        isProduction &&
+        error instanceof Error &&
+        error.message.includes("Failed to fetch")
+      ) {
+        console.log("Backend unavailable, using mock data fallback");
         setProperties([
           {
             _id: "fallback-1",
             title: "Property listings will load when server is available",
             price: 0,
-            location: { city: "Rohtak", state: "Haryana", address: "Coming Soon" },
-            images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"],
+            location: {
+              city: "Rohtak",
+              state: "Haryana",
+              address: "Coming Soon",
+            },
+            images: [
+              "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400",
+            ],
             propertyType: "apartment",
             createdAt: new Date().toISOString(),
-            contactInfo: { name: "Service Temporarily Unavailable" }
-          }
+            contactInfo: { name: "Service Temporarily Unavailable" },
+          },
         ]);
       } else {
         setProperties([]);
@@ -257,9 +346,9 @@ export default function OLXStyleListings() {
 
   const toggleFavorite = (propertyId: string) => {
     const newFavorites = favorites.includes(propertyId)
-      ? favorites.filter(id => id !== propertyId)
+      ? favorites.filter((id) => id !== propertyId)
       : [...favorites, propertyId];
-    
+
     setFavorites(newFavorites);
     localStorage.setItem("favorites", JSON.stringify(newFavorites));
   };
@@ -278,8 +367,10 @@ export default function OLXStyleListings() {
   const getTimeAgo = (dateString: string) => {
     const now = new Date();
     const date = new Date(dateString);
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -298,8 +389,10 @@ export default function OLXStyleListings() {
   return (
     <div className="bg-white">
       <div className="px-4 py-4">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Fresh recommendations</h2>
-        
+        <h2 className="text-lg font-bold text-gray-900 mb-4">
+          Fresh recommendations
+        </h2>
+
         <div className="grid grid-cols-2 gap-3">
           {properties.map((property) => (
             <div
@@ -310,15 +403,19 @@ export default function OLXStyleListings() {
               {/* Image */}
               <div className="relative aspect-square">
                 <img
-                  src={property.images[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"}
+                  src={
+                    property.images[0] ||
+                    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"
+                  }
                   alt={property.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400";
+                    target.src =
+                      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400";
                   }}
                 />
-                
+
                 {/* Premium Badge */}
                 {property.premium && (
                   <div className="absolute top-2 left-2 bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 py-1 rounded-md text-xs font-bold shadow-lg">
@@ -343,24 +440,24 @@ export default function OLXStyleListings() {
                   />
                 </button>
               </div>
-              
+
               {/* Content */}
               <div className="p-3">
                 <div className="text-lg font-bold text-gray-900 mb-1">
                   {formatPrice(property.price)}
                 </div>
-                
+
                 <h3 className="text-sm text-gray-700 mb-2 line-clamp-2 leading-tight">
                   {property.title}
                 </h3>
-                
+
                 <div className="flex items-center text-xs text-gray-500 mb-1">
                   <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                   <span className="truncate">
                     {property.location.city}, {property.location.state}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
                   <div className="flex items-center">
                     <Clock className="h-3 w-3 mr-1" />
@@ -377,7 +474,7 @@ export default function OLXStyleListings() {
                     e.preventDefault();
                     e.stopPropagation();
                     // Handle chat functionality
-                    const token = localStorage.getItem('token');
+                    const token = localStorage.getItem("token");
                     if (token) {
                       window.location.href = `/chat?propertyId=${property._id}&sellerId=${property.ownerId || property.contactInfo?.name}`;
                     } else {
@@ -393,14 +490,14 @@ export default function OLXStyleListings() {
             </div>
           ))}
         </div>
-        
+
         {properties.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <div className="text-4xl mb-2">����</div>
             <p>No properties available</p>
           </div>
         )}
-        
+
         {/* Load More Button */}
         {properties.length > 0 && (
           <div className="mt-6 text-center">

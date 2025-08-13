@@ -211,16 +211,18 @@ export default function Admin() {
       try {
         // Try a simple fetch with progressive timeout
         const controller = new AbortController();
-        const timeout = 5000 + (retryCount * 2000); // 5s, 7s, 9s
+        const timeout = 5000 + retryCount * 2000; // 5s, 7s, 9s
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-        console.log(`🔍 Testing connectivity (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+        console.log(
+          `🔍 Testing connectivity (attempt ${retryCount + 1}/${maxRetries + 1})...`,
+        );
 
         const response = await fetch("/api/admin/stats", {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
           },
           signal: controller.signal,
           cache: "no-cache",
@@ -230,7 +232,9 @@ export default function Admin() {
 
         if (!response.ok) {
           if (response.status === 503 && retryCount < maxRetries) {
-            console.log(`🔄 Server unavailable (503), retrying in ${retryDelay}ms...`);
+            console.log(
+              `🔄 Server unavailable (503), retrying in ${retryDelay}ms...`,
+            );
             setTimeout(() => testConnectivity(retryCount + 1), retryDelay);
             return;
           }
@@ -246,15 +250,18 @@ export default function Admin() {
           setLoading(false);
         }
       } catch (error) {
-        const isAbortError = error.name === 'AbortError';
-        const isNetworkError = error.message.includes('Failed to fetch');
+        const isAbortError = error.name === "AbortError";
+        const isNetworkError = error.message.includes("Failed to fetch");
 
-        console.warn(`⚠️ Connectivity test failed (attempt ${retryCount + 1}):`, {
-          error: error.message,
-          type: error.name,
-          isAbort: isAbortError,
-          isNetwork: isNetworkError
-        });
+        console.warn(
+          `⚠️ Connectivity test failed (attempt ${retryCount + 1}):`,
+          {
+            error: error.message,
+            type: error.name,
+            isAbort: isAbortError,
+            isNetwork: isNetworkError,
+          },
+        );
 
         if (retryCount < maxRetries && (isNetworkError || isAbortError)) {
           console.log(`🔄 Retrying connectivity test in ${retryDelay}ms...`);
@@ -262,7 +269,9 @@ export default function Admin() {
           return;
         }
 
-        console.log("🔄 Max retries reached, enabling offline mode with fallback");
+        console.log(
+          "🔄 Max retries reached, enabling offline mode with fallback",
+        );
         setOfflineMode(true);
 
         // Try to load real data anyway as a last resort
@@ -298,8 +307,8 @@ export default function Admin() {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
         },
         signal: controller.signal,
       });
@@ -307,7 +316,7 @@ export default function Admin() {
       clearTimeout(timeoutId);
 
       // In production, log API errors more quietly
-      const isProduction = window.location.hostname.includes('.fly.dev');
+      const isProduction = window.location.hostname.includes(".fly.dev");
       if (!response.ok && !isProduction) {
         console.warn(`Admin API call failed for ${url}: ${response.status}`);
       }
@@ -318,9 +327,9 @@ export default function Admin() {
 
       // Better error handling for production
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
+        if (error.name === "AbortError") {
           throw new Error(`${label} request timed out`);
-        } else if (error.message.includes('Failed to fetch')) {
+        } else if (error.message.includes("Failed to fetch")) {
           throw new Error(`${label} server unavailable`);
         }
       }
@@ -370,14 +379,14 @@ export default function Admin() {
         errors.push(`Stats API error: ${statsResponse.status}`);
       }
     } catch (error) {
-      const isAbortError = error.name === 'AbortError';
-      const isNetworkError = error.message?.includes('Failed to fetch');
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
 
       console.error("Error fetching stats:", {
         message: error.message,
         name: error.name,
         isAbort: isAbortError,
-        isNetwork: isNetworkError
+        isNetwork: isNetworkError,
       });
 
       if (isAbortError) {
@@ -385,14 +394,17 @@ export default function Admin() {
       } else if (isNetworkError) {
         errors.push("Stats API network error (check connection)");
       } else {
-        errors.push(`Stats API error: ${error.message || 'Unknown error'}`);
+        errors.push(`Stats API error: ${error.message || "Unknown error"}`);
       }
     }
 
     // Fetch users with enhanced error handling
     try {
       console.log("Fetching admin users...");
-      const usersResponse = await adminFetch("/api/admin/users?limit=10", "users");
+      const usersResponse = await adminFetch(
+        "/api/admin/users?limit=10",
+        "users",
+      );
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
@@ -415,14 +427,14 @@ export default function Admin() {
         errors.push(`Users API error: ${usersResponse.status}`);
       }
     } catch (error) {
-      const isAbortError = error.name === 'AbortError';
-      const isNetworkError = error.message?.includes('Failed to fetch');
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
 
       console.error("Error fetching users:", {
         message: error.message,
         name: error.name,
         isAbort: isAbortError,
-        isNetwork: isNetworkError
+        isNetwork: isNetworkError,
       });
 
       if (isAbortError) {
@@ -430,14 +442,17 @@ export default function Admin() {
       } else if (isNetworkError) {
         errors.push("Users API network error");
       } else {
-        errors.push(`Users API error: ${error.message || 'Unknown error'}`);
+        errors.push(`Users API error: ${error.message || "Unknown error"}`);
       }
     }
 
     // Fetch properties with enhanced error handling
     try {
       console.log("Fetching admin properties...");
-      const propertiesResponse = await adminFetch("/api/admin/properties?limit=10", "properties");
+      const propertiesResponse = await adminFetch(
+        "/api/admin/properties?limit=10",
+        "properties",
+      );
 
       if (propertiesResponse.ok) {
         const propertiesData = await propertiesResponse.json();
@@ -457,14 +472,14 @@ export default function Admin() {
         errors.push(`Properties API error: ${propertiesResponse.status}`);
       }
     } catch (error) {
-      const isAbortError = error.name === 'AbortError';
-      const isNetworkError = error.message?.includes('Failed to fetch');
+      const isAbortError = error.name === "AbortError";
+      const isNetworkError = error.message?.includes("Failed to fetch");
 
       console.error("Error fetching properties:", {
         message: error.message,
         name: error.name,
         isAbort: isAbortError,
-        isNetwork: isNetworkError
+        isNetwork: isNetworkError,
       });
 
       if (isAbortError) {
@@ -472,19 +487,24 @@ export default function Admin() {
       } else if (isNetworkError) {
         errors.push("Properties API network error");
       } else {
-        errors.push(`Properties API error: ${error.message || 'Unknown error'}`);
+        errors.push(
+          `Properties API error: ${error.message || "Unknown error"}`,
+        );
       }
     }
 
     setApiErrors(errors);
 
     // Check if errors are database connection related
-    const hasDbConnectionErrors = errors.some(error => error.includes("Database connecting"));
+    const hasDbConnectionErrors = errors.some((error) =>
+      error.includes("Database connecting"),
+    );
 
     if (hasDbConnectionErrors) {
       console.log("Database still connecting, retrying in 3 seconds...");
       setTimeout(() => {
-        if (!loading) { // Only retry if not already loading
+        if (!loading) {
+          // Only retry if not already loading
           console.log("Retrying admin data fetch...");
           fetchAdminData();
         }
@@ -521,8 +541,8 @@ export default function Admin() {
     try {
       // First test basic connectivity
       const testResponse = await fetch("/api/ping", {
-        headers: { 'Cache-Control': 'no-cache' },
-        cache: "no-cache"
+        headers: { "Cache-Control": "no-cache" },
+        cache: "no-cache",
       });
 
       if (testResponse.ok) {
@@ -533,7 +553,9 @@ export default function Admin() {
       }
     } catch (error) {
       console.error("❌ Connectivity test failed:", error);
-      setError("Cannot connect to server. Please check your internet connection.");
+      setError(
+        "Cannot connect to server. Please check your internet connection.",
+      );
       setLoading(false);
 
       // Still try to load data as fallback
@@ -671,12 +693,12 @@ export default function Admin() {
           <div className="flex items-center space-x-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-yellow-500" />
             <p className="text-yellow-700 font-medium">
-              {apiErrors.some(err => err.includes('network')) ?
-                'Network Connection Issues Detected' :
-                'Some Services Are Unavailable'}
+              {apiErrors.some((err) => err.includes("network"))
+                ? "Network Connection Issues Detected"
+                : "Some Services Are Unavailable"}
             </p>
           </div>
-          {apiErrors.some(err => err.includes('network')) && (
+          {apiErrors.some((err) => err.includes("network")) && (
             <div className="bg-yellow-100 rounded p-3 mb-3">
               <p className="text-sm text-yellow-700">
                 <strong>Troubleshooting:</strong>

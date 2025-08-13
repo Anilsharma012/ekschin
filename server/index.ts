@@ -387,29 +387,35 @@ export function createServer() {
     "http://localhost:5173", // dev
   ];
 
-  app.use(cors({
-    origin(origin, cb) {
-      // allow no-origin (curl/healthchecks) + allowed list
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-        return cb(null, true);
-      }
+  app.use(
+    cors({
+      origin(origin, cb) {
+        // allow no-origin (curl/healthchecks) + allowed list
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+          return cb(null, true);
+        }
 
-      // Allow localhost and development domains
-      if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('.fly.dev'))) {
-        return cb(null, true);
-      }
+        // Allow localhost and development domains
+        if (
+          origin &&
+          (origin.includes("localhost") ||
+            origin.includes("127.0.0.1") ||
+            origin.includes(".fly.dev"))
+        ) {
+          return cb(null, true);
+        }
 
-      console.log(`🔴 CORS blocked origin: ${origin}`);
-      return cb(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-    allowedHeaders: ["Content-Type","Authorization","X-Requested-With"],
-  }));
+        console.log(`🔴 CORS blocked origin: ${origin}`);
+        return cb(new Error("Not allowed by CORS"));
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    }),
+  );
 
   // Important: respond to preflight for all routes
   app.options("*", cors());
-
 
   app.use(express.json({ limit: "1gb" }));
   app.use(express.urlencoded({ extended: true, limit: "1gb" }));
@@ -421,7 +427,7 @@ export function createServer() {
       message: "CORS test successful",
       origin: req.headers.origin,
       allowedOrigins: ALLOWED_ORIGINS,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   });
 
@@ -806,19 +812,19 @@ export function createServer() {
     "/api/admin/payment-settings",
     authenticateToken,
     requireAdmin,
-    getPaymentSettings
+    getPaymentSettings,
   );
   app.put(
     "/api/admin/payment-settings",
     authenticateToken,
     requireAdmin,
-    updatePaymentSettings
+    updatePaymentSettings,
   );
   app.post(
     "/api/admin/payment-settings/test-razorpay",
     authenticateToken,
     requireAdmin,
-    testRazorpayConnection
+    testRazorpayConnection,
   );
   app.get("/api/payments/active-methods", getActivePaymentMethods);
 
@@ -900,13 +906,48 @@ export function createServer() {
   app.get("/api/locations/search", searchLocations);
 
   // Admin location routes
-  app.get("/api/admin/locations", authenticateToken, requireAdmin, getAllLocations);
-  app.get("/api/admin/locations/stats", authenticateToken, requireAdmin, getLocationStats);
-  app.post("/api/admin/locations", authenticateToken, requireAdmin, createLocation);
-  app.put("/api/admin/locations/:locationId", authenticateToken, requireAdmin, updateLocation);
-  app.delete("/api/admin/locations/:locationId", authenticateToken, requireAdmin, deleteLocation);
-  app.post("/api/admin/locations/bulk-import", authenticateToken, requireAdmin, bulkImportLocations);
-  app.post("/api/admin/locations/initialize", authenticateToken, requireAdmin, initializeRohtakLocations);
+  app.get(
+    "/api/admin/locations",
+    authenticateToken,
+    requireAdmin,
+    getAllLocations,
+  );
+  app.get(
+    "/api/admin/locations/stats",
+    authenticateToken,
+    requireAdmin,
+    getLocationStats,
+  );
+  app.post(
+    "/api/admin/locations",
+    authenticateToken,
+    requireAdmin,
+    createLocation,
+  );
+  app.put(
+    "/api/admin/locations/:locationId",
+    authenticateToken,
+    requireAdmin,
+    updateLocation,
+  );
+  app.delete(
+    "/api/admin/locations/:locationId",
+    authenticateToken,
+    requireAdmin,
+    deleteLocation,
+  );
+  app.post(
+    "/api/admin/locations/bulk-import",
+    authenticateToken,
+    requireAdmin,
+    bulkImportLocations,
+  );
+  app.post(
+    "/api/admin/locations/initialize",
+    authenticateToken,
+    requireAdmin,
+    initializeRohtakLocations,
+  );
 
   // Testimonials routes
   app.get("/api/testimonials", getPublicTestimonials);
@@ -1140,22 +1181,34 @@ export function createServer() {
     authenticateToken,
     async (req, res) => {
       try {
-        const { pushNotificationService } = await import("./services/pushNotificationService");
+        const { pushNotificationService } = await import(
+          "./services/pushNotificationService"
+        );
         const userId = (req as any).userId;
         const { notificationId } = req.params;
 
-        const success = await pushNotificationService.markNotificationAsRead(userId, notificationId);
+        const success = await pushNotificationService.markNotificationAsRead(
+          userId,
+          notificationId,
+        );
 
         if (success) {
           res.json({ success: true, message: "Notification marked as read" });
         } else {
-          res.status(404).json({ success: false, error: "Notification not found" });
+          res
+            .status(404)
+            .json({ success: false, error: "Notification not found" });
         }
       } catch (error) {
         console.error("Error marking notification as read:", error);
-        res.status(500).json({ success: false, error: "Failed to mark notification as read" });
+        res
+          .status(500)
+          .json({
+            success: false,
+            error: "Failed to mark notification as read",
+          });
       }
-    }
+    },
   );
 
   // Homepage slider management routes
@@ -1278,7 +1331,11 @@ export function createServer() {
   app.get("/api/seller/payments", authenticateToken, getSellerPayments);
   app.get("/api/seller/profile", authenticateToken, getSellerProfile);
   app.put("/api/seller/profile", authenticateToken, updateSellerProfile);
-  app.post("/api/seller/upload-profile-picture", authenticateToken, uploadProfilePicture);
+  app.post(
+    "/api/seller/upload-profile-picture",
+    authenticateToken,
+    uploadProfilePicture,
+  );
   app.put(
     "/api/seller/change-password",
     authenticateToken,
@@ -1405,22 +1462,75 @@ export function createServer() {
   app.get("/api/footer/test", testFooterData);
 
   // Custom fields routes
-  app.get("/api/admin/custom-fields", authenticateToken, requireAdmin, getAllCustomFields);
-  app.get("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, getCustomFieldById);
-  app.post("/api/admin/custom-fields", authenticateToken, requireAdmin, createCustomField);
-  app.put("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, updateCustomField);
-  app.delete("/api/admin/custom-fields/:fieldId", authenticateToken, requireAdmin, deleteCustomField);
-  app.put("/api/admin/custom-fields/:fieldId/status", authenticateToken, requireAdmin, updateCustomFieldStatus);
-  app.put("/api/admin/custom-fields/reorder", authenticateToken, requireAdmin, reorderCustomFields);
+  app.get(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    getAllCustomFields,
+  );
+  app.get(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    getCustomFieldById,
+  );
+  app.post(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    createCustomField,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    updateCustomField,
+  );
+  app.delete(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    deleteCustomField,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId/status",
+    authenticateToken,
+    requireAdmin,
+    updateCustomFieldStatus,
+  );
+  app.put(
+    "/api/admin/custom-fields/reorder",
+    authenticateToken,
+    requireAdmin,
+    reorderCustomFields,
+  );
   app.post("/api/custom-fields/initialize", initializeCustomFields);
 
   // Admin notification and package management routes
-  app.post("/api/admin/send-notification", authenticateToken, requireAdmin, sendNotification);
-  app.get("/api/admin/packages", authenticateToken, requireAdmin, getAdminPackages);
-  app.get("/api/admin/user-packages", authenticateToken, requireAdmin, getAdminUserPackages);
+  app.post(
+    "/api/admin/send-notification",
+    authenticateToken,
+    requireAdmin,
+    sendNotification,
+  );
+  app.get(
+    "/api/admin/packages",
+    authenticateToken,
+    requireAdmin,
+    getAdminPackages,
+  );
+  app.get(
+    "/api/admin/user-packages",
+    authenticateToken,
+    requireAdmin,
+    getAdminUserPackages,
+  );
 
   // WebSocket debug routes
-  const { getWebSocketStatus, testWebSocketConnection } = require("./routes/websocket-debug");
+  const {
+    getWebSocketStatus,
+    testWebSocketConnection,
+  } = require("./routes/websocket-debug");
   app.get("/api/debug/websocket-status", getWebSocketStatus);
   app.post("/api/debug/websocket-test", testWebSocketConnection);
 
@@ -1431,7 +1541,8 @@ export function createServer() {
   // WebSocket connection test endpoint
   app.get("/api/websocket/test", (req, res) => {
     try {
-      const connectedClients = pushNotificationService.getConnectedClientsCount();
+      const connectedClients =
+        pushNotificationService.getConnectedClientsCount();
       const clients = pushNotificationService.getConnectedClients();
 
       res.json({
@@ -1441,14 +1552,14 @@ export function createServer() {
             connected: true,
             connectedClients,
             clients,
-            endpoint: "/ws/notifications"
-          }
+            endpoint: "/ws/notifications",
+          },
         },
         server: {
           port: process.env.PORT || 3000,
           environment: process.env.NODE_ENV || "development",
-          uptime: process.uptime()
-        }
+          uptime: process.uptime(),
+        },
       });
     } catch (error) {
       res.status(500).json({
@@ -1457,16 +1568,19 @@ export function createServer() {
         websocket: {
           pushNotifications: {
             connected: false,
-            error: "Service not initialized"
-          }
-        }
+            error: "Service not initialized",
+          },
+        },
       });
     }
   });
 
   // Health check endpoint for network monitoring
   app.get("/api/health", databaseHealthCheck, (req, res) => {
-    const dbStatus = req.databaseStatus || { connected: false, responsive: false };
+    const dbStatus = req.databaseStatus || {
+      connected: false,
+      responsive: false,
+    };
 
     res.json({
       status: dbStatus.connected && dbStatus.responsive ? "ok" : "degraded",
@@ -1476,8 +1590,8 @@ export function createServer() {
       database: {
         connected: dbStatus.connected,
         responsive: dbStatus.responsive,
-        error: dbStatus.error
-      }
+        error: dbStatus.error,
+      },
     });
   });
 
@@ -1487,13 +1601,13 @@ export function createServer() {
 // Initialize push notification service
 export function initializePushNotifications(server: any) {
   pushNotificationService.initialize(server);
-  console.log('📱 Push notification service initialized');
+  console.log("📱 Push notification service initialized");
 }
 
 // Initialize package sync service
 export function initializePackageSync(server: any) {
   packageSyncService.initialize(server);
-  console.log('📦 Package sync service initialized');
+  console.log("📦 Package sync service initialized");
 }
 
 // For production

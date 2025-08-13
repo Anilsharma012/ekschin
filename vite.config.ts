@@ -38,14 +38,17 @@ function expressPlugin(): Plugin {
       server.middlewares.use(app);
 
       // Initialize WebSocket services for development
-      server.httpServer?.on('listening', () => {
+      server.httpServer?.on("listening", () => {
         try {
-          const { initializePushNotifications, initializePackageSync } = require("./server");
+          const {
+            initializePushNotifications,
+            initializePackageSync,
+          } = require("./server");
           initializePushNotifications(server.httpServer);
           initializePackageSync(server.httpServer);
-          console.log('✅ WebSocket services initialized for development');
+          console.log("✅ WebSocket services initialized for development");
         } catch (error) {
-          console.error('❌ Failed to initialize WebSocket services:', error);
+          console.error("❌ Failed to initialize WebSocket services:", error);
         }
       });
     },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface ServiceStatus {
   isOnline: boolean;
@@ -12,19 +12,19 @@ export const useServiceAvailability = () => {
     isOnline: navigator.onLine,
     apiAvailable: true,
     websocketAvailable: true,
-    lastChecked: new Date()
+    lastChecked: new Date(),
   });
 
   const checkApiAvailability = async (): Promise<boolean> => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch('/api/ping', {
+
+      const response = await fetch("/api/ping", {
         signal: controller.signal,
-        cache: 'no-cache'
+        cache: "no-cache",
       });
-      
+
       clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
@@ -34,10 +34,10 @@ export const useServiceAvailability = () => {
 
   const checkWebSocketAvailability = async (): Promise<boolean> => {
     try {
-      const response = await fetch('/api/websocket/test', {
-        cache: 'no-cache'
+      const response = await fetch("/api/websocket/test", {
+        cache: "no-cache",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         return data.success && data.websocket?.pushNotifications?.connected;
@@ -50,27 +50,27 @@ export const useServiceAvailability = () => {
 
   const checkAllServices = async () => {
     const isOnline = navigator.onLine;
-    
+
     if (!isOnline) {
       setStatus({
         isOnline: false,
         apiAvailable: false,
         websocketAvailable: false,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       });
       return;
     }
 
     const [apiAvailable, websocketAvailable] = await Promise.all([
       checkApiAvailability(),
-      checkWebSocketAvailability()
+      checkWebSocketAvailability(),
     ]);
 
     setStatus({
       isOnline,
       apiAvailable,
       websocketAvailable,
-      lastChecked: new Date()
+      lastChecked: new Date(),
     });
   };
 
@@ -83,7 +83,7 @@ export const useServiceAvailability = () => {
 
     // Listen for online/offline events
     const handleOnline = () => {
-      setStatus(prev => ({ ...prev, isOnline: true }));
+      setStatus((prev) => ({ ...prev, isOnline: true }));
       checkAllServices();
     };
 
@@ -92,17 +92,17 @@ export const useServiceAvailability = () => {
         isOnline: false,
         apiAvailable: false,
         websocketAvailable: false,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       });
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -110,6 +110,7 @@ export const useServiceAvailability = () => {
     ...status,
     refresh: checkAllServices,
     isFullyAvailable: status.isOnline && status.apiAvailable,
-    hasPartialService: status.isOnline && (status.apiAvailable || status.websocketAvailable)
+    hasPartialService:
+      status.isOnline && (status.apiAvailable || status.websocketAvailable),
   };
 };

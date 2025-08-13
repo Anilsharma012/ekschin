@@ -1,7 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface Props {
   children: ReactNode;
@@ -25,13 +25,13 @@ class ProductionErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
-    
+
     // Only log detailed errors in development
-    const isProduction = window.location.hostname.includes('.fly.dev');
+    const isProduction = window.location.hostname.includes(".fly.dev");
     if (!isProduction) {
-      console.error('Error caught by boundary:', error, errorInfo);
+      console.error("Error caught by boundary:", error, errorInfo);
     } else {
-      console.log('Application error occurred, check network connection');
+      console.log("Application error occurred, check network connection");
     }
   }
 
@@ -45,8 +45,8 @@ class ProductionErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      const isProduction = window.location.hostname.includes('.fly.dev');
-      
+      const isProduction = window.location.hostname.includes(".fly.dev");
+
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
@@ -55,29 +55,39 @@ class ProductionErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="h-12 w-12 text-orange-500" />
               </div>
               <CardTitle className="text-xl">
-                {isProduction ? 'Service Temporarily Unavailable' : 'Something went wrong'}
+                {isProduction
+                  ? "Service Temporarily Unavailable"
+                  : "Something went wrong"}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-gray-600">
-                {isProduction 
-                  ? 'The service is temporarily unavailable. Please try refreshing the page or check back later.'
-                  : 'An unexpected error occurred. Please refresh the page to continue.'
-                }
+                {isProduction
+                  ? "The service is temporarily unavailable. Please try refreshing the page or check back later."
+                  : "An unexpected error occurred. Please refresh the page to continue."}
               </p>
-              
+
               {!isProduction && this.state.error && (
                 <details className="text-left text-xs bg-gray-100 p-3 rounded">
-                  <summary className="cursor-pointer font-medium">Error Details</summary>
-                  <pre className="mt-2 whitespace-pre-wrap">{this.state.error.message}</pre>
+                  <summary className="cursor-pointer font-medium">
+                    Error Details
+                  </summary>
+                  <pre className="mt-2 whitespace-pre-wrap">
+                    {this.state.error.message}
+                  </pre>
                   {this.state.errorInfo && (
-                    <pre className="mt-2 text-xs">{this.state.errorInfo.componentStack}</pre>
+                    <pre className="mt-2 text-xs">
+                      {this.state.errorInfo.componentStack}
+                    </pre>
                   )}
                 </details>
               )}
-              
+
               <div className="flex gap-3 justify-center">
-                <Button onClick={this.handleReload} className="bg-red-600 hover:bg-red-700">
+                <Button
+                  onClick={this.handleReload}
+                  className="bg-red-600 hover:bg-red-700"
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Reload Page
                 </Button>
@@ -85,7 +95,7 @@ class ProductionErrorBoundary extends Component<Props, State> {
                   Try Again
                 </Button>
               </div>
-              
+
               {isProduction && (
                 <p className="text-xs text-gray-500 mt-4">
                   If the problem persists, the service may be under maintenance.
