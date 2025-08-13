@@ -188,18 +188,19 @@ export const usePushNotifications = () => {
         if (event.code === 1000 || event.code === 1001 || event.code === 1006) {
           console.log('📝 WebSocket closed, checking if server is available before reconnecting');
 
-          // In production, check if WebSocket endpoint exists before reconnecting
+          // In production, be more conservative about reconnection attempts
           if (window.location.hostname.includes('.fly.dev')) {
             // Don't aggressively reconnect in production to avoid spam
-            if (reconnectAttempts.current < 3) {
-              const delay = 10000; // 10 second delay for production
-              console.log(`🔄 Production environment: Reconnecting in ${delay}ms`);
+            if (reconnectAttempts.current < 2) { // Reduced from 3 to 2
+              const delay = 15000; // Increased delay for production
+              console.log(`🔄 Production environment: Will retry WebSocket in ${delay}ms`);
               setTimeout(() => {
                 reconnectAttempts.current++;
                 connectWebSocket();
               }, delay);
             } else {
-              console.warn('⚠️ WebSocket unavailable in production, disabling push notifications');
+              console.log('⚠️ WebSocket service unavailable in production, notifications disabled');
+              setIsConnected(false);
             }
           }
           return;
