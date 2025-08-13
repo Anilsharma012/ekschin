@@ -29,9 +29,22 @@ const WebSocketTest: React.FC = () => {
   ]);
 
   const testConnection = (endpoint: string) => {
-    setConnections(prev => 
-      prev.map(conn => 
-        conn.endpoint === endpoint 
+    // Skip WebSocket testing in production
+    const isProduction = window.location.hostname.includes(".fly.dev");
+    if (isProduction) {
+      setConnections(prev =>
+        prev.map(conn =>
+          conn.endpoint === endpoint
+            ? { ...conn, status: 'error', error: 'WebSocket testing disabled in production' }
+            : conn
+        )
+      );
+      return;
+    }
+
+    setConnections(prev =>
+      prev.map(conn =>
+        conn.endpoint === endpoint
           ? { ...conn, status: 'connecting', error: undefined }
           : conn
       )
@@ -40,7 +53,7 @@ const WebSocketTest: React.FC = () => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}${endpoint}`;
-      
+
       const ws = new WebSocket(wsUrl);
       
       const timeout = setTimeout(() => {
