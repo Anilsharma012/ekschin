@@ -293,7 +293,8 @@ const IntegratedSellerDashboard: React.FC = () => {
         fetchStats(),
         fetchProperties(),
         fetchConversations(),
-        fetchProfile()
+        fetchProfile(),
+        fetchSellerNotifications()
       ]);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
