@@ -231,9 +231,15 @@ export const usePushNotifications = () => {
             message: error instanceof Error ? error.message : (error as any)?.message || 'No message available'
           };
 
-          console.error('Raw error object:', JSON.stringify(rawErrorInfo, null, 2));
-          console.error('Error type:', typeof error);
-          console.error('Error constructor:', error.constructor?.name || 'Unknown');
+          // In production, reduce console spam
+          const isProduction = window.location.hostname.includes('.fly.dev');
+          if (!isProduction) {
+            console.error('Raw error object:', JSON.stringify(rawErrorInfo, null, 2));
+            console.error('Error type:', typeof error);
+            console.error('Error constructor:', error.constructor?.name || 'Unknown');
+          } else {
+            console.warn('WebSocket connection failed in production environment');
+          }
 
           // Try to extract all possible error information
           const errorAnalysis = {
