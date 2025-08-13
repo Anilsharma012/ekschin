@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getDatabase } from '../db/mongodb';
-import { authenticateAdmin } from '../middleware/auth';
+import { authenticateToken, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
