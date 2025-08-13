@@ -9,8 +9,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Initialize error suppression for production
-import "./utils/errorSuppression";
+// Initialize simple production error handling
+import "./utils/productionErrorHandler";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Properties from "./pages/Properties";
