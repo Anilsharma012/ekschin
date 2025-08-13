@@ -16,7 +16,7 @@ export default function HomepageBanner({
 
   useEffect(() => {
     // Use fallback data immediately if in production
-    const { shouldUseFallbackData, fallbackBanners } = require('../utils/fallbackData');
+    const { shouldUseFallbackData, fallbackBanners } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setBanners(fallbackBanners);

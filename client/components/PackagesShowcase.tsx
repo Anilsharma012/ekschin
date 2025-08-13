@@ -25,7 +25,7 @@ export default function PackagesShowcase() {
 
   useEffect(() => {
     // Use fallback data immediately
-    const { shouldUseFallbackData, fallbackPackages } = require('../utils/fallbackData');
+    const { shouldUseFallbackData, fallbackPackages } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setPackages(fallbackPackages);

@@ -70,7 +70,7 @@ function OLXStyleCategories() {
 
   useEffect(() => {
     // Use fallback data immediately
-    const { shouldUseFallbackData, fallbackCategories } = require('../utils/fallbackData');
+    const { shouldUseFallbackData, fallbackCategories } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setCategories(fallbackCategories);

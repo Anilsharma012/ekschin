@@ -28,7 +28,7 @@ export default function OLXStyleListings() {
 
   useEffect(() => {
     // Load fallback data immediately for production
-    const { shouldUseFallbackData, fallbackProperties } = require('../utils/fallbackData');
+    const { shouldUseFallbackData, fallbackProperties } = await import('../utils/fallbackData');
 
     if (shouldUseFallbackData()) {
       setProperties(fallbackProperties);
@@ -312,7 +312,7 @@ export default function OLXStyleListings() {
       }
 
       // Use fallback data immediately on any error
-      const { fallbackProperties } = require('../utils/fallbackData');
+      const { fallbackProperties } = await import('../utils/fallbackData');
       setProperties(fallbackProperties);
     } finally {
       setLoading(false);
