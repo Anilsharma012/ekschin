@@ -219,9 +219,30 @@ export default function OLXStyleListings() {
         setProperties(mockProperties);
       }
     } catch (error) {
-      console.error("Error fetching properties:", error);
-      // Use mock data as fallback
-      setProperties([]);
+      const isProduction = window.location.hostname.includes('.fly.dev');
+
+      if (!isProduction) {
+        console.error("Error fetching properties:", error);
+      }
+
+      // In production, use mock data as fallback when backend is unavailable
+      if (isProduction && error instanceof Error && error.message.includes('Failed to fetch')) {
+        console.log('Backend unavailable, using mock data fallback');
+        setProperties([
+          {
+            _id: "fallback-1",
+            title: "Property listings will load when server is available",
+            price: 0,
+            location: { city: "Rohtak", state: "Haryana", address: "Coming Soon" },
+            images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"],
+            propertyType: "apartment",
+            createdAt: new Date().toISOString(),
+            contactInfo: { name: "Service Temporarily Unavailable" }
+          }
+        ]);
+      } else {
+        setProperties([]);
+      }
     } finally {
       setLoading(false);
     }
