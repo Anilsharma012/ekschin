@@ -112,18 +112,23 @@ const DashboardDemo: React.FC = () => {
       const apiResponse = await fetch('/api/health');
       setConnectionStatus(prev => ({ ...prev, api: apiResponse.ok }));
 
-      // Test WebSocket (simulate)
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/packages`;
-      
-      const testWs = new WebSocket(wsUrl);
-      testWs.onopen = () => {
-        setConnectionStatus(prev => ({ ...prev, websocket: true }));
-        testWs.close();
-      };
-      testWs.onerror = () => {
+      // Test WebSocket (simulate) - disabled in production
+      const isProduction = window.location.hostname.includes(".fly.dev");
+      if (isProduction) {
         setConnectionStatus(prev => ({ ...prev, websocket: false }));
-      };
+      } else {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/packages`;
+
+        const testWs = new WebSocket(wsUrl);
+        testWs.onopen = () => {
+          setConnectionStatus(prev => ({ ...prev, websocket: true }));
+          testWs.close();
+        };
+        testWs.onerror = () => {
+          setConnectionStatus(prev => ({ ...prev, websocket: false }));
+        };
+      }
 
       // Database test (via API)
       setConnectionStatus(prev => ({ ...prev, database: true }));
