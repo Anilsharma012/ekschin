@@ -15,6 +15,15 @@ export default function HomepageBanner({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // Use fallback data immediately if in production
+    const { shouldUseFallbackData, fallbackBanners } = require('../utils/fallbackData');
+
+    if (shouldUseFallbackData()) {
+      setBanners(fallbackBanners);
+      setLoading(false);
+      return;
+    }
+
     fetchBanners();
   }, [position]);
 
