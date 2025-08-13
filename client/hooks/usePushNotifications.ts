@@ -81,32 +81,40 @@ export const usePushNotifications = () => {
       const isProduction = window.location.hostname.includes(".fly.dev");
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-      // Circuit breaker logic for production
+      // Disable WebSocket in production environment completely
       if (isProduction) {
-        const now = Date.now();
-        if (circuitBreakerOpen.current) {
-          // Check if we should retry (circuit breaker timeout)
-          if (now - lastErrorTime.current < 60000) {
-            // 1 minute circuit breaker
-            return;
-          } else {
-            circuitBreakerOpen.current = false;
-            errorCount.current = 0;
-          }
+        if (!sessionStorage.getItem("production-ws-disabled-logged")) {
+          console.log("🚫 WebSocket notifications disabled in production environment");
+          sessionStorage.setItem("production-ws-disabled-logged", "true");
         }
+        setIsConnected(false);
+        return;
+      }
 
-        // If too many errors recently, open circuit breaker
-        if (errorCount.current >= 3 && now - lastErrorTime.current < 30000) {
-          circuitBreakerOpen.current = true;
-
-          if (!sessionStorage.getItem("circuit-breaker-logged")) {
-            console.log(
-              "WebSocket circuit breaker activated - notifications disabled temporarily",
-            );
-            sessionStorage.setItem("circuit-breaker-logged", "true");
-          }
+      // Circuit breaker logic for development only
+      const now = Date.now();
+      if (circuitBreakerOpen.current) {
+        // Check if we should retry (circuit breaker timeout)
+        if (now - lastErrorTime.current < 60000) {
+          // 1 minute circuit breaker
           return;
+        } else {
+          circuitBreakerOpen.current = false;
+          errorCount.current = 0;
         }
+      }
+
+      // If too many errors recently, open circuit breaker
+      if (errorCount.current >= 3 && now - lastErrorTime.current < 30000) {
+        circuitBreakerOpen.current = true;
+
+        if (!sessionStorage.getItem("circuit-breaker-logged")) {
+          console.log(
+            "WebSocket circuit breaker activated - notifications disabled temporarily",
+          );
+          sessionStorage.setItem("circuit-breaker-logged", "true");
+        }
+        return;
       }
 
       // Use the same host as the current page for WebSocket connection
