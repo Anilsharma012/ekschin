@@ -86,7 +86,8 @@ export const usePushNotifications = () => {
         const now = Date.now();
         if (circuitBreakerOpen.current) {
           // Check if we should retry (circuit breaker timeout)
-          if (now - lastErrorTime.current < 60000) { // 1 minute circuit breaker
+          if (now - lastErrorTime.current < 60000) {
+            // 1 minute circuit breaker
             return;
           } else {
             circuitBreakerOpen.current = false;
@@ -95,12 +96,14 @@ export const usePushNotifications = () => {
         }
 
         // If too many errors recently, open circuit breaker
-        if (errorCount.current >= 3 && (now - lastErrorTime.current) < 30000) {
+        if (errorCount.current >= 3 && now - lastErrorTime.current < 30000) {
           circuitBreakerOpen.current = true;
 
-          if (!sessionStorage.getItem('circuit-breaker-logged')) {
-            console.log('WebSocket circuit breaker activated - notifications disabled temporarily');
-            sessionStorage.setItem('circuit-breaker-logged', 'true');
+          if (!sessionStorage.getItem("circuit-breaker-logged")) {
+            console.log(
+              "WebSocket circuit breaker activated - notifications disabled temporarily",
+            );
+            sessionStorage.setItem("circuit-breaker-logged", "true");
           }
           return;
         }
@@ -314,9 +317,9 @@ export const usePushNotifications = () => {
             );
           } else {
             // In production, only log once per session to avoid spam
-            if (!sessionStorage.getItem('ws-error-logged')) {
-              console.log('Push notifications temporarily unavailable');
-              sessionStorage.setItem('ws-error-logged', 'true');
+            if (!sessionStorage.getItem("ws-error-logged")) {
+              console.log("Push notifications temporarily unavailable");
+              sessionStorage.setItem("ws-error-logged", "true");
             }
           }
 
