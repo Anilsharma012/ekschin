@@ -67,7 +67,7 @@ export default function Footer() {
     socialLinks: {},
     contactInfo: {},
     showLocations: true,
-    locations: ["Kolkata", "Mumbai", "Chennai", "Pune", "Delhi", "Bangalore"]
+    locations: getAllRohtakLocations().slice(0, 15) // Show first 15 locations
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>('');
