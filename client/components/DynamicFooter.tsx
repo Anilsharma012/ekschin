@@ -88,6 +88,7 @@ export default function DynamicFooter() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "offline" | "error">("connected");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     initializeFooter();
