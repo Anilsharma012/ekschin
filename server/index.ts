@@ -310,6 +310,17 @@ import {
 } from "./routes/footer";
 import { testFooterData } from "./routes/footerTest";
 
+// Custom fields routes
+import {
+  getAllCustomFields,
+  createCustomField,
+  updateCustomField,
+  deleteCustomField,
+  updateCustomFieldStatus,
+  getCustomFieldById,
+  getActiveCustomFields,
+} from "./routes/custom-fields";
+
 export function createServer() {
   const app = express();
 
@@ -338,7 +349,7 @@ export function createServer() {
   // Initialize MongoDB connection
   connectToDatabase()
     .then(() => {
-      console.log("✅ MongoDB Atlas connected successfully");
+      console.log("�� MongoDB Atlas connected successfully");
     })
     .catch((error) => {
       console.error("�� MongoDB connection failed:", error);
