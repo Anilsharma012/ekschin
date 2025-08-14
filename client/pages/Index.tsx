@@ -1,6 +1,6 @@
 import React from "react";
 import OLXStyleHeader from "../components/OLXStyleHeader";
-import OLXStyleCategories from "../components/OLXStyleCategories";
+import CategoryBar from "../components/CategoryBar";
 import OLXStyleListings from "../components/OLXStyleListings";
 import PackagesShowcase from "../components/PackagesShowcase";
 import PWAInstallPrompt from "../components/PWAInstallPrompt";
