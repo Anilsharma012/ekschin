@@ -87,6 +87,14 @@ export const trackPropertyInquiry: RequestHandler = async (req, res) => {
     const { propertyId } = req.params;
     const userId = (req as any).userId;
 
+    // Validate property ID
+    if (!ObjectId.isValid(propertyId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid property ID",
+      });
+    }
+
     // Update property inquiry count
     await db.collection("properties").updateOne(
       { _id: new ObjectId(propertyId) },
