@@ -180,7 +180,7 @@ export default function Header() {
                 : "bg-white bg-opacity-20 text-white"
             }`}
           >
-            Mohallas
+            Colonies
           </button>
           <button
             onClick={() => setSearchType("landmarks")}
