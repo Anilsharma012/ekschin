@@ -115,14 +115,14 @@ export default function DynamicFooter() {
       clearTimeout(visibilityTimeout);
       visibilityTimeout = setTimeout(() => {
         if (!document.hidden && navigator.onLine && !isRefreshing) {
-          // Only refresh if it's been more than 2 minutes since last update
+          // Only refresh if it's been more than 5 minutes since last update
           const now = Date.now();
           const lastUpdateTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
-          if (now - lastUpdateTime > 2 * 60 * 1000) {
+          if (now - lastUpdateTime > 5 * 60 * 1000) {
             refreshFooterData(true);
           }
         }
-      }, 2000); // 2 second debounce
+      }, 5000); // 5 second debounce (increased from 2s)
     };
 
     // Listen for online/offline events
