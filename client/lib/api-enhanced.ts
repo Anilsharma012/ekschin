@@ -82,7 +82,14 @@ export const safeApiRequest = async (
   const url = createApiUrl(endpoint);
   const controller = new AbortController();
 
-  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+  // Don't use timeout for Fly.dev as it can cause premature aborts
+  let timeoutId: NodeJS.Timeout | null = null;
+  if (API_CONFIG.environment !== "fly") {
+    timeoutId = setTimeout(() => {
+      console.warn(`⏰ Request timeout for ${url}`);
+      controller.abort();
+    }, API_CONFIG.timeout);
+  }
 
   try {
     console.log(
@@ -98,7 +105,9 @@ export const safeApiRequest = async (
       },
     });
 
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     let responseData;
     try {
