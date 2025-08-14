@@ -39,28 +39,7 @@ import {
 } from "../ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-
-interface CustomField {
-  _id: string;
-  name: string;
-  slug: string;
-  type:
-    | "text"
-    | "number"
-    | "select"
-    | "multiselect"
-    | "checkbox"
-    | "date"
-    | "textarea";
-  label: string;
-  placeholder?: string;
-  required: boolean;
-  active: boolean;
-  order: number;
-  options?: string[];
-  categories: string[];
-  description?: string;
-}
+import { CustomField } from "@shared/types";
 
 export default function CustomFieldsManagement() {
   const { token } = useAuth();
