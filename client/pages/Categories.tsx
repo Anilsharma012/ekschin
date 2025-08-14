@@ -88,7 +88,11 @@ export default function Categories() {
   };
 
   const handleBackClick = () => {
-    setSelectedCategory(null);
+    if (selectedSubcategory) {
+      setSelectedSubcategory(null);
+    } else {
+      setSelectedCategory(null);
+    }
   };
 
   const handleSubcategoryClick = (subcategory: Subcategory) => {
