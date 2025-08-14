@@ -349,7 +349,7 @@ export function createServer() {
   // Initialize MongoDB connection
   connectToDatabase()
     .then(() => {
-      console.log("�� MongoDB Atlas connected successfully");
+      console.log("✅ MongoDB Atlas connected successfully");
     })
     .catch((error) => {
       console.error("�� MongoDB connection failed:", error);
@@ -1235,6 +1235,45 @@ export function createServer() {
 
   app.post("/api/footer/initialize", initializeFooterData);
   app.get("/api/footer/test", testFooterData);
+
+  // Custom fields routes
+  app.get("/api/custom-fields", getActiveCustomFields); // Public endpoint for active fields
+  app.get(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    getAllCustomFields,
+  );
+  app.post(
+    "/api/admin/custom-fields",
+    authenticateToken,
+    requireAdmin,
+    createCustomField,
+  );
+  app.get(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    getCustomFieldById,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    updateCustomField,
+  );
+  app.delete(
+    "/api/admin/custom-fields/:fieldId",
+    authenticateToken,
+    requireAdmin,
+    deleteCustomField,
+  );
+  app.put(
+    "/api/admin/custom-fields/:fieldId/status",
+    authenticateToken,
+    requireAdmin,
+    updateCustomFieldStatus,
+  );
 
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {
