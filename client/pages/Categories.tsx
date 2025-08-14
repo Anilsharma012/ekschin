@@ -28,6 +28,9 @@ export default function Categories() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
+  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [subcategoryCounts, setSubcategoryCounts] = useState<
     Record<string, number>
