@@ -28,6 +28,11 @@ const NetworkStatusComponent: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
+  // Temporarily disable network status to prevent fetch errors
+  if (process.env.NODE_ENV === 'development') {
+    return null;
+  }
+
   const checkConnection = async () => {
     if (isChecking) return; // Prevent overlapping checks
 
