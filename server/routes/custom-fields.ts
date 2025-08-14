@@ -1,23 +1,7 @@
 import { RequestHandler } from "express";
 import { getDatabase } from "../db/mongodb";
 import { ObjectId } from "mongodb";
-
-export interface CustomField {
-  _id?: string;
-  name: string;
-  slug: string;
-  type: "text" | "number" | "select" | "multiselect" | "checkbox" | "date" | "textarea";
-  label: string;
-  placeholder?: string;
-  required: boolean;
-  active: boolean;
-  order: number;
-  options?: string[];
-  categories: string[];
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { CustomField } from "@shared/types";
 
 // Get all custom fields
 export const getAllCustomFields: RequestHandler = async (req, res) => {
