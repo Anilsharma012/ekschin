@@ -110,12 +110,23 @@ export default function CustomFieldsManagement() {
         } else {
           setError(data.error || "Failed to fetch custom fields");
         }
+      } else if (response.status === 404) {
+        // API endpoint doesn't exist yet - show empty state instead of error
+        console.warn("Custom fields API endpoint not implemented yet");
+        setFields([]);
       } else {
         setError("Failed to fetch custom fields");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching custom fields:", error);
-      setError("Failed to fetch custom fields");
+
+      // Check if error is due to invalid JSON (HTML response)
+      if (error.message?.includes('Unexpected token') || error.message?.includes('<!doctype')) {
+        console.warn("Custom fields API endpoint not implemented - received HTML instead of JSON");
+        setFields([]); // Show empty state instead of error
+      } else {
+        setError("Failed to fetch custom fields");
+      }
     } finally {
       setLoading(false);
     }
@@ -145,12 +156,19 @@ export default function CustomFieldsManagement() {
         } else {
           setError(data.error || "Failed to create custom field");
         }
+      } else if (response.status === 404) {
+        setError("Custom fields API not yet implemented. Contact administrator.");
       } else {
         setError("Failed to create custom field");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating custom field:", error);
-      setError("Failed to create custom field");
+
+      if (error.message?.includes('Unexpected token') || error.message?.includes('<!doctype')) {
+        setError("Custom fields API not yet implemented. Contact administrator.");
+      } else {
+        setError("Failed to create custom field");
+      }
     } finally {
       setSaving(false);
     }
