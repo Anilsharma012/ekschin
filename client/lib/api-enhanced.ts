@@ -62,10 +62,13 @@ export const createApiUrl = (endpoint: string): string => {
 
   if (API_CONFIG.baseUrl) {
     const fullUrl = `${API_CONFIG.baseUrl}/api/${cleanEndpoint.replace("api/", "")}`;
+    console.log(`🔗 API URL: ${fullUrl} (Environment: ${API_CONFIG.environment})`);
     return fullUrl;
   }
 
-  return `/api/${cleanEndpoint.replace("api/", "")}`;
+  const relativeUrl = `/api/${cleanEndpoint.replace("api/", "")}`;
+  console.log(`🔗 API URL: ${relativeUrl} (Environment: ${API_CONFIG.environment})`);
+  return relativeUrl;
 };
 
 // Enhanced fetch with retry and fallback
