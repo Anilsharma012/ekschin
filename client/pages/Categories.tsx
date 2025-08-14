@@ -96,8 +96,20 @@ export default function Categories() {
   };
 
   const handleSubcategoryClick = (subcategory: Subcategory) => {
-    // Navigate to filtered property list
-    window.location.href = `/categories/${selectedCategory?.slug}/${subcategory.slug}`;
+    const propertyTypes = getPropertyTypesForSubcategory(subcategory.slug);
+
+    if (propertyTypes.length > 0) {
+      // Show property types for this subcategory
+      setSelectedSubcategory(subcategory);
+    } else {
+      // Navigate directly to filtered property list
+      window.location.href = `/categories/${selectedCategory?.slug}/${subcategory.slug}`;
+    }
+  };
+
+  const handlePropertyTypeClick = (propertyType: PropertyType) => {
+    // Navigate to filtered property list with property type
+    window.location.href = `/categories/${selectedCategory?.slug}/${selectedSubcategory?.slug}/${propertyType.slug}`;
   };
 
   if (loading) {
