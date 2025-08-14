@@ -92,14 +92,25 @@ export default function DynamicFooter() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    initializeFooter();
+    // Initialize footer with error handling
+    const initialize = async () => {
+      try {
+        await initializeFooter();
+      } catch (error) {
+        console.error('Footer initialization failed:', error);
+        setLoading(false);
+        setConnectionStatus('error');
+      }
+    };
 
-    // Auto-refresh every 15 minutes to pick up admin changes (reduced frequency)
+    initialize();
+
+    // Auto-refresh every 20 minutes (further reduced frequency)
     const interval = setInterval(() => {
       if (navigator.onLine && !document.hidden && !isRefreshing) {
         refreshFooterData(true);
       }
-    }, 15 * 60 * 1000);
+    }, 20 * 60 * 1000);
 
     // Listen for admin updates
     const handleFooterUpdate = () => {
@@ -109,20 +120,20 @@ export default function DynamicFooter() {
       }
     };
 
-    // Debounced visibility change handler
+    // Debounced visibility change handler with better error handling
     let visibilityTimeout: NodeJS.Timeout;
     const handleVisibilityChange = () => {
       clearTimeout(visibilityTimeout);
       visibilityTimeout = setTimeout(() => {
         if (!document.hidden && navigator.onLine && !isRefreshing) {
-          // Only refresh if it's been more than 5 minutes since last update
+          // Only refresh if it's been more than 10 minutes since last update
           const now = Date.now();
           const lastUpdateTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
-          if (now - lastUpdateTime > 5 * 60 * 1000) {
+          if (now - lastUpdateTime > 10 * 60 * 1000) {
             refreshFooterData(true);
           }
         }
-      }, 5000); // 5 second debounce (increased from 2s)
+      }, 8000); // 8 second debounce (further increased)
     };
 
     // Listen for online/offline events
@@ -157,9 +168,24 @@ export default function DynamicFooter() {
   const initializeFooter = async () => {
     setLoading(true);
     try {
+      // Try to initialize footer data first
+      try {
+        const initResponse = await enhancedApi.get("footer/initialize");
+        if (initResponse.ok && initResponse.data?.success) {
+          console.log('🔧 Footer data initialization checked/completed');
+        }
+      } catch (initError) {
+        console.warn('⚠️ Footer initialization endpoint failed:', initError);
+      }
+
+      // Always attempt to refresh data regardless of initialization result
       await refreshFooterData();
-    } catch (error) {
-      console.warn("Footer initialization failed, using defaults:", error);
+    } catch (error: any) {
+      console.warn("Footer initialization failed, using defaults:", {
+        message: error.message,
+        name: error.name
+      });
+      setConnectionStatus('error');
     } finally {
       setLoading(false);
     }
@@ -182,74 +208,116 @@ export default function DynamicFooter() {
         return;
       }
 
-      // Add timeout wrapper for enhanced API calls
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Request timeout")), 8000)
+      // Enhanced timeout wrapper with better error handling
+      const createTimeoutPromise = (ms: number) => new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), ms)
       );
 
-      const [pagesResponse, linksResponse, settingsResponse] = await Promise.allSettled([
-        Promise.race([enhancedApi.get("content/pages"), timeoutPromise]),
-        Promise.race([enhancedApi.get("footer/links"), timeoutPromise]),
-        Promise.race([enhancedApi.get("footer/settings"), timeoutPromise])
+      // Wrap API calls with comprehensive error handling
+      const safeApiCall = async (apiCall: Promise<any>, name: string) => {
+        try {
+          const result = await Promise.race([
+            apiCall,
+            createTimeoutPromise(12000) // 12 second timeout
+          ]);
+          return { success: true, data: result, name };
+        } catch (error: any) {
+          console.warn(`⚠️ ${name} API call failed:`, error.message);
+          return { success: false, error: error.message, name };
+        }
+      };
+
+      // Make all API calls with better error isolation
+      const [pagesResult, linksResult, settingsResult] = await Promise.all([
+        safeApiCall(enhancedApi.get("content/pages"), "Pages"),
+        safeApiCall(enhancedApi.get("footer/links"), "Links"),
+        safeApiCall(enhancedApi.get("footer/settings"), "Settings")
       ]);
 
       let hasErrors = false;
+      let successCount = 0;
 
-      // Handle pages
-      if (pagesResponse.status === 'fulfilled' && pagesResponse.value.ok && pagesResponse.value.data?.success && pagesResponse.value.data?.data) {
-        const publishedPages = pagesResponse.value.data.data.filter((page: FooterPage) =>
-          page.status === 'published'
-        ).sort((a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0));
-        if (!silent) console.log('📄 Footer Pages Loaded:', publishedPages.length);
-        setFooterPages(publishedPages);
+      // Handle pages with better error checking
+      if (pagesResult.success && pagesResult.data?.ok && pagesResult.data?.data?.success) {
+        try {
+          const publishedPages = (pagesResult.data.data.data || []).filter((page: FooterPage) =>
+            page.status === 'published'
+          ).sort((a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0));
+          setFooterPages(publishedPages);
+          if (!silent) console.log('📄 Footer Pages Loaded:', publishedPages.length);
+          successCount++;
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse pages data:', parseError);
+          hasErrors = true;
+        }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Pages Failed:', pagesResponse.status === 'fulfilled' ? pagesResponse.value : pagesResponse.reason);
+        if (!silent) console.log('❌ Footer Pages Failed:', pagesResult.error || 'Unknown error');
       }
 
-      // Handle links
-      if (linksResponse.status === 'fulfilled' && linksResponse.value.ok && linksResponse.value.data?.success && linksResponse.value.data?.data) {
-        const activeLinks = linksResponse.value.data.data.filter((link: FooterLink) =>
-          link.isActive
-        ).sort((a: FooterLink, b: FooterLink) => a.order - b.order);
-        if (!silent) console.log('🔗 Footer Links Loaded:', activeLinks.length);
-        setFooterLinks(activeLinks);
+      // Handle links with better error checking
+      if (linksResult.success && linksResult.data?.ok && linksResult.data?.data?.success) {
+        try {
+          const activeLinks = (linksResult.data.data.data || []).filter((link: FooterLink) =>
+            link.isActive
+          ).sort((a: FooterLink, b: FooterLink) => a.order - b.order);
+          setFooterLinks(activeLinks);
+          if (!silent) console.log('🔗 Footer Links Loaded:', activeLinks.length);
+          successCount++;
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse links data:', parseError);
+          hasErrors = true;
+        }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Links Failed:', linksResponse.status === 'fulfilled' ? linksResponse.value : linksResponse.reason);
+        if (!silent) console.log('❌ Footer Links Failed:', linksResult.error || 'Unknown error');
       }
 
-      // Handle settings
-      if (settingsResponse.status === 'fulfilled' && settingsResponse.value.ok && settingsResponse.value.data?.success && settingsResponse.value.data?.data) {
-        setFooterSettings(prev => ({
-          ...prev,
-          ...settingsResponse.value.data.data
-        }));
-        setLastUpdated(new Date().toISOString());
+      // Handle settings with better error checking
+      if (settingsResult.success && settingsResult.data?.ok && settingsResult.data?.data?.success) {
+        try {
+          const settingsData = settingsResult.data.data.data || {};
+          setFooterSettings(prev => ({
+            ...prev,
+            ...settingsData
+          }));
+          setLastUpdated(new Date().toISOString());
+          if (!silent) console.log('⚙️ Footer Settings Loaded');
+          successCount++;
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse settings data:', parseError);
+          hasErrors = true;
+        }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Settings Failed:', settingsResponse.status === 'fulfilled' ? settingsResponse.value : settingsResponse.reason);
+        if (!silent) console.log('❌ Footer Settings Failed:', settingsResult.error || 'Unknown error');
       }
 
       // Update connection status based on results
-      if (hasErrors) {
+      if (successCount === 0) {
         setConnectionStatus("error");
-        // If all requests failed, ensure we have basic footer content
-        if (footerPages.length === 0 && footerLinks.length === 0) {
-          console.log("📂 Using minimal footer fallback due to API failures");
-        }
+        if (!silent) console.log("📂 All footer APIs failed, using default content");
+      } else if (hasErrors) {
+        setConnectionStatus("error");
+        if (!silent) console.log(`📂 Partial footer data loaded (${successCount}/3 APIs successful)`);
       } else {
         setConnectionStatus("connected");
         if (!silent) console.log("✅ Footer data refreshed successfully");
       }
 
-    } catch (error) {
-      console.error("❌ Error refreshing footer data:", error);
+    } catch (error: any) {
+      console.error("❌ Critical error refreshing footer data:", {
+        message: error.message,
+        name: error.name,
+        stack: error.stack?.split('\n')?.[0]
+      });
       setConnectionStatus("error");
       // Ensure footer still renders with default content
-      if (!silent) console.log("📂 Footer will continue with default content");
+      if (!silent) console.log("📂 Footer will continue with default content due to critical error");
     } finally {
       setIsRefreshing(false);
+      // Ensure loading state is cleared
+      setLoading(false);
     }
   };
 
