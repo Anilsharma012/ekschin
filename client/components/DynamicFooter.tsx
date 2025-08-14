@@ -92,31 +92,44 @@ export default function DynamicFooter() {
 
   useEffect(() => {
     initializeFooter();
-    
-    // Auto-refresh every 5 minutes to pick up admin changes
+
+    // Auto-refresh every 10 minutes to pick up admin changes (increased from 5 minutes)
     const interval = setInterval(() => {
-      if (navigator.onLine && !document.hidden) {
+      if (navigator.onLine && !document.hidden && !isRefreshing) {
         refreshFooterData(true);
       }
-    }, 5 * 60 * 1000);
+    }, 10 * 60 * 1000);
 
     // Listen for admin updates
     const handleFooterUpdate = () => {
       console.log("🔄 Footer update triggered by admin");
-      refreshFooterData();
+      if (!isRefreshing) {
+        refreshFooterData();
+      }
     };
 
-    // Listen for page visibility changes
+    // Debounced visibility change handler
+    let visibilityTimeout: NodeJS.Timeout;
     const handleVisibilityChange = () => {
-      if (!document.hidden && navigator.onLine) {
-        refreshFooterData(true);
-      }
+      clearTimeout(visibilityTimeout);
+      visibilityTimeout = setTimeout(() => {
+        if (!document.hidden && navigator.onLine && !isRefreshing) {
+          // Only refresh if it's been more than 2 minutes since last update
+          const now = Date.now();
+          const lastUpdateTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
+          if (now - lastUpdateTime > 2 * 60 * 1000) {
+            refreshFooterData(true);
+          }
+        }
+      }, 2000); // 2 second debounce
     };
 
     // Listen for online/offline events
     const handleOnline = () => {
       setConnectionStatus("connected");
-      refreshFooterData();
+      if (!isRefreshing) {
+        setTimeout(() => refreshFooterData(true), 1000); // Small delay when coming online
+      }
     };
 
     const handleOffline = () => {
@@ -131,12 +144,14 @@ export default function DynamicFooter() {
 
     return () => {
       clearInterval(interval);
+      clearTimeout(visibilityTimeout);
       window.removeEventListener('footerUpdate', handleFooterUpdate);
+      window.removeEventListener('footerRefresh', handleFooterUpdate);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [isRefreshing, lastUpdated]);
 
   const initializeFooter = async () => {
     setLoading(true);
