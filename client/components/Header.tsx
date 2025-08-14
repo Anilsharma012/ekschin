@@ -9,59 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-
-const rohtakSectors = [
-  "Sector 1",
-  "Sector 2",
-  "Sector 3",
-  "Sector 4",
-  "Sector 5",
-  "Sector 6",
-  "Sector 7",
-  "Sector 8",
-  "Sector 9",
-  "Sector 10",
-  "Sector 11",
-  "Sector 12",
-  "Sector 13",
-  "Sector 14",
-  "Sector 15",
-  "Sector 16",
-  "Sector 17",
-  "Sector 18",
-  "Sector 19",
-  "Sector 20",
-  "Sector 21",
-  "Sector 22",
-  "Sector 23",
-];
-
-const mohallas = [
-  "Prem Nagar",
-  "Shastri Nagar",
-  "DLF Colony",
-  "Model Town",
-  "Subhash Nagar",
-  "Civil Lines",
-  "Ram Nagar",
-  "Industrial Area",
-  "Huda Sector",
-  "Old City",
-  "Railway Road",
-  "Jail Road",
-];
-
-const landmarks = [
-  "PGI Rohtak",
-  "Bus Stand",
-  "Railway Station",
-  "AIIMS Rohtak",
-  "Maharshi Dayanand University",
-  "Rohtak Medical College",
-  "District Court",
-  "Mini Secretariat",
-  "Government Hospital",
-];
+import { getRohtakSectors, getRohtakColonies, getRohtakLandmarks } from "../data/rohtakLocations";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
