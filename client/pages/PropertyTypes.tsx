@@ -3,7 +3,10 @@ import { useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
-import { getPropertyTypesForSubcategory, PropertyType } from "../data/propertyTypes";
+import {
+  getPropertyTypesForSubcategory,
+  PropertyType,
+} from "../data/propertyTypes";
 
 interface Category {
   _id?: string;
@@ -24,7 +27,9 @@ interface Subcategory {
 export default function PropertyTypes() {
   const { category, subcategory } = useParams();
   const [categoryData, setCategoryData] = useState<Category | null>(null);
-  const [subcategoryData, setSubcategoryData] = useState<Subcategory | null>(null);
+  const [subcategoryData, setSubcategoryData] = useState<Subcategory | null>(
+    null,
+  );
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,17 +42,19 @@ export default function PropertyTypes() {
       setLoading(true);
       const response = await fetch("/api/categories");
       const data = await response.json();
-      
+
       if (data.success) {
-        const foundCategory = data.data.find((cat: Category) => cat.slug === category);
+        const foundCategory = data.data.find(
+          (cat: Category) => cat.slug === category,
+        );
         setCategoryData(foundCategory);
-        
+
         if (foundCategory && subcategory) {
           const foundSubcategory = foundCategory.subcategories.find(
-            (sub: Subcategory) => sub.slug === subcategory
+            (sub: Subcategory) => sub.slug === subcategory,
           );
           setSubcategoryData(foundSubcategory);
-          
+
           if (foundSubcategory) {
             const types = getPropertyTypesForSubcategory(foundSubcategory.slug);
             setPropertyTypes(types);
@@ -124,9 +131,7 @@ export default function PropertyTypes() {
             <h1 className="text-xl font-medium text-gray-900">
               {subcategoryData.name}
             </h1>
-            <p className="text-sm text-gray-500">
-              Choose property type
-            </p>
+            <p className="text-sm text-gray-500">Choose property type</p>
           </div>
         </div>
 
@@ -140,7 +145,9 @@ export default function PropertyTypes() {
             >
               <div className="flex items-center space-x-4">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-lg">{propertyType.icon || categoryData?.icon || '🏠'}</span>
+                  <span className="text-lg">
+                    {propertyType.icon || categoryData?.icon || "🏠"}
+                  </span>
                 </div>
                 <div className="text-left">
                   <h3 className="font-medium text-gray-900 text-base">

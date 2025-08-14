@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
-import { getPropertyTypesForSubcategory, PropertyType } from "../data/propertyTypes";
+import {
+  getPropertyTypesForSubcategory,
+  PropertyType,
+} from "../data/propertyTypes";
 
 interface Category {
   _id?: string;
@@ -28,9 +31,8 @@ export default function Categories() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
-  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(
-    null,
-  );
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState<Subcategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [subcategoryCounts, setSubcategoryCounts] = useState<
     Record<string, number>
@@ -129,7 +131,9 @@ export default function Categories() {
 
   // Property Types View
   if (selectedSubcategory && selectedCategory) {
-    const propertyTypes = getPropertyTypesForSubcategory(selectedSubcategory.slug);
+    const propertyTypes = getPropertyTypesForSubcategory(
+      selectedSubcategory.slug,
+    );
 
     return (
       <div className="min-h-screen bg-white">
@@ -145,9 +149,7 @@ export default function Categories() {
               <h1 className="text-xl font-medium text-gray-900">
                 {selectedSubcategory.name}
               </h1>
-              <p className="text-sm text-gray-500">
-                Choose property type
-              </p>
+              <p className="text-sm text-gray-500">Choose property type</p>
             </div>
           </div>
 
@@ -161,7 +163,9 @@ export default function Categories() {
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-lg">{propertyType.icon || selectedCategory.icon}</span>
+                    <span className="text-lg">
+                      {propertyType.icon || selectedCategory.icon}
+                    </span>
                   </div>
                   <div className="text-left">
                     <h3 className="font-medium text-gray-900 text-base">

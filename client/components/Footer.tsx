@@ -62,38 +62,43 @@ export default function Footer() {
   const [footerLinks, setFooterLinks] = useState<FooterLink[]>([]);
   const [footerSettings, setFooterSettings] = useState<FooterSettings>({
     companyName: "POSTTRR",
-    companyDescription: "Share your unique properties, boost your sales online and connect with verified buyers. It's a community where your control is a priority.",
+    companyDescription:
+      "Share your unique properties, boost your sales online and connect with verified buyers. It's a community where your control is a priority.",
     companyLogo: "P",
     socialLinks: {},
     contactInfo: {},
     showLocations: true,
-    locations: getAllRohtakLocations().slice(0, 15) // Show first 15 locations
+    locations: getAllRohtakLocations().slice(0, 15), // Show first 15 locations
   });
   const [loading, setLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [lastUpdated, setLastUpdated] = useState<string>("");
 
   // Initialize with fallback data
   const initializeFallbackData = () => {
     // Set fallback footer settings if nothing is loaded
-    if (!footerSettings.companyName || footerSettings.companyName === "POSTTRR") {
-      setFooterSettings(prev => ({
+    if (
+      !footerSettings.companyName ||
+      footerSettings.companyName === "POSTTRR"
+    ) {
+      setFooterSettings((prev) => ({
         ...prev,
         companyName: "POSTTRR",
-        companyDescription: "Share your unique properties, boost your sales online and connect with verified buyers. It's a community where your comfort is a priority.",
+        companyDescription:
+          "Share your unique properties, boost your sales online and connect with verified buyers. It's a community where your comfort is a priority.",
         companyLogo: "P",
         socialLinks: {
           facebook: "https://facebook.com/posttrr",
           twitter: "https://twitter.com/posttrr",
           instagram: "https://instagram.com/posttrr",
-          youtube: "https://youtube.com/posttrr"
+          youtube: "https://youtube.com/posttrr",
         },
         contactInfo: {
           phone: "+91 98765 43210",
           email: "info@posttrr.com",
-          address: "Mumbai, Maharashtra, India"
+          address: "Mumbai, Maharashtra, India",
         },
         showLocations: true,
-        locations: getAllRohtakLocations().slice(0, 12) // Show first 12 locations as fallback
+        locations: getAllRohtakLocations().slice(0, 12), // Show first 12 locations as fallback
       }));
     }
 
@@ -108,7 +113,7 @@ export default function Footer() {
           section: "quick_links",
           order: 1,
           isActive: true,
-          isExternal: false
+          isExternal: false,
         },
         {
           _id: "fallback-2",
@@ -117,7 +122,7 @@ export default function Footer() {
           section: "quick_links",
           order: 2,
           isActive: true,
-          isExternal: false
+          isExternal: false,
         },
         {
           _id: "fallback-3",
@@ -126,7 +131,7 @@ export default function Footer() {
           section: "legal",
           order: 1,
           isActive: true,
-          isExternal: false
+          isExternal: false,
         },
         {
           _id: "fallback-4",
@@ -135,8 +140,8 @@ export default function Footer() {
           section: "legal",
           order: 2,
           isActive: true,
-          isExternal: false
-        }
+          isExternal: false,
+        },
       ]);
     }
   };
@@ -148,8 +153,11 @@ export default function Footer() {
       initializeFallbackData();
 
       // Then try to fetch real data with error protection
-      fetchFooterData().catch(error => {
-        console.warn("🚨 useEffect fetchFooterData failed:", error?.message || 'Unknown error');
+      fetchFooterData().catch((error) => {
+        console.warn(
+          "🚨 useEffect fetchFooterData failed:",
+          error?.message || "Unknown error",
+        );
         // Ensure loading state is cleared even if fetch fails
         try {
           setLoading(false);
@@ -158,7 +166,10 @@ export default function Footer() {
         }
       });
     } catch (effectError) {
-      console.warn("💥 useEffect initialization error:", effectError?.message || 'Unknown effect error');
+      console.warn(
+        "💥 useEffect initialization error:",
+        effectError?.message || "Unknown effect error",
+      );
       try {
         setLoading(false);
       } catch (e) {
@@ -167,24 +178,27 @@ export default function Footer() {
     }
 
     // Auto-refresh footer data every 10 minutes to pick up admin changes (reduced frequency)
-    const interval = setInterval(() => {
-      try {
-        // Only auto-refresh if online and document is visible
-        if (navigator.onLine && !document.hidden) {
-          fetchFooterData().catch(error => {
-            console.warn("🚨 Interval fetch failed:", error?.message);
-          });
+    const interval = setInterval(
+      () => {
+        try {
+          // Only auto-refresh if online and document is visible
+          if (navigator.onLine && !document.hidden) {
+            fetchFooterData().catch((error) => {
+              console.warn("🚨 Interval fetch failed:", error?.message);
+            });
+          }
+        } catch (intervalError) {
+          console.warn("❌ Interval callback error:", intervalError?.message);
         }
-      } catch (intervalError) {
-        console.warn("❌ Interval callback error:", intervalError?.message);
-      }
-    }, 10 * 60 * 1000); // 10 minutes
+      },
+      10 * 60 * 1000,
+    ); // 10 minutes
 
     // Listen for custom refresh events from admin panel
     const handleFooterRefresh = () => {
       try {
         console.log("🔄 Footer refresh triggered by admin");
-        fetchFooterData().catch(error => {
+        fetchFooterData().catch((error) => {
           console.warn("🚨 Admin refresh fetch failed:", error?.message);
         });
       } catch (refreshError) {
@@ -196,7 +210,7 @@ export default function Footer() {
     const handleOnline = () => {
       try {
         console.log("🌐 Connection restored, refreshing footer data");
-        fetchFooterData().catch(error => {
+        fetchFooterData().catch((error) => {
           console.warn("🚨 Online fetch failed:", error?.message);
         });
       } catch (onlineError) {
@@ -217,20 +231,23 @@ export default function Footer() {
       try {
         if (!document.hidden && navigator.onLine) {
           console.log("👁️ Page became visible, refreshing footer data");
-          fetchFooterData().catch(error => {
+          fetchFooterData().catch((error) => {
             console.warn("🚨 Visibility change fetch failed:", error?.message);
           });
         }
       } catch (visibilityError) {
-        console.warn("❌ Visibility change handler error:", visibilityError?.message);
+        console.warn(
+          "❌ Visibility change handler error:",
+          visibilityError?.message,
+        );
       }
     };
 
     try {
-      window.addEventListener('footerRefresh', handleFooterRefresh);
-      window.addEventListener('online', handleOnline);
-      window.addEventListener('offline', handleOffline);
-      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener("footerRefresh", handleFooterRefresh);
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
     } catch (listenerError) {
       console.warn("❌ Error adding event listeners:", listenerError?.message);
     }
@@ -238,12 +255,18 @@ export default function Footer() {
     return () => {
       try {
         clearInterval(interval);
-        window.removeEventListener('footerRefresh', handleFooterRefresh);
-        window.removeEventListener('online', handleOnline);
-        window.removeEventListener('offline', handleOffline);
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener("footerRefresh", handleFooterRefresh);
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       } catch (cleanupError) {
-        console.warn("❌ Error cleaning up event listeners:", cleanupError?.message);
+        console.warn(
+          "❌ Error cleaning up event listeners:",
+          cleanupError?.message,
+        );
       }
     };
   }, []);
@@ -284,12 +307,12 @@ export default function Footer() {
             try {
               const response = await fetch(url, {
                 signal: controller.signal,
-                method: 'GET',
+                method: "GET",
                 headers: {
-                  'Accept': 'application/json',
-                  'Cache-Control': 'no-cache',
-                  'Pragma': 'no-cache'
-                }
+                  Accept: "application/json",
+                  "Cache-Control": "no-cache",
+                  Pragma: "no-cache",
+                },
               });
 
               clearTimeout(timeoutId);
@@ -300,27 +323,41 @@ export default function Footer() {
                   console.log(`✅ ${name} loaded successfully`);
                   resolve(data);
                 } catch (jsonError) {
-                  console.warn(`❌ ${name} JSON parse failed:`, jsonError?.message || 'Unknown JSON error');
+                  console.warn(
+                    `❌ ${name} JSON parse failed:`,
+                    jsonError?.message || "Unknown JSON error",
+                  );
                   resolve(null);
                 }
               } else {
-                console.warn(`⚠️ ${name} HTTP error: ${response?.status || 'Unknown status'}`);
+                console.warn(
+                  `⚠️ ${name} HTTP error: ${response?.status || "Unknown status"}`,
+                );
                 resolve(null);
               }
             } catch (fetchError) {
               clearTimeout(timeoutId);
 
-              if (fetchError?.name === 'AbortError') {
+              if (fetchError?.name === "AbortError") {
                 console.warn(`⏱️ ${name} fetch timeout after 3 seconds`);
-              } else if (fetchError?.name === 'TypeError' && fetchError?.message?.includes('fetch')) {
-                console.warn(`🌐 ${name} network error: ${fetchError?.message || 'Network unavailable'}`);
+              } else if (
+                fetchError?.name === "TypeError" &&
+                fetchError?.message?.includes("fetch")
+              ) {
+                console.warn(
+                  `🌐 ${name} network error: ${fetchError?.message || "Network unavailable"}`,
+                );
               } else {
-                console.warn(`❌ ${name} fetch error: ${fetchError?.message || 'Unknown fetch error'}`);
+                console.warn(
+                  `❌ ${name} fetch error: ${fetchError?.message || "Unknown fetch error"}`,
+                );
               }
               resolve(null);
             }
           } catch (unexpectedError) {
-            console.warn(`💥 ${name} unexpected error: ${unexpectedError?.message || 'Unknown error'}`);
+            console.warn(
+              `💥 ${name} unexpected error: ${unexpectedError?.message || "Unknown error"}`,
+            );
             resolve(null);
           }
         });
@@ -330,38 +367,71 @@ export default function Footer() {
       if (navigator.onLine && !document.hidden) {
         try {
           // Attempt to fetch footer settings with bulletproof protection
-          const settingsData = await bulletproofFetch("/api/footer/settings", "Footer settings");
+          const settingsData = await bulletproofFetch(
+            "/api/footer/settings",
+            "Footer settings",
+          );
           if (settingsData && settingsData.success && settingsData.data) {
             try {
-              setFooterSettings(prev => ({ ...prev, ...settingsData.data }));
-              setLastUpdated(settingsData.data.updatedAt || new Date().toISOString());
+              setFooterSettings((prev) => ({ ...prev, ...settingsData.data }));
+              setLastUpdated(
+                settingsData.data.updatedAt || new Date().toISOString(),
+              );
             } catch (stateError) {
-              console.warn("❌ Error updating footer settings state:", stateError?.message);
+              console.warn(
+                "❌ Error updating footer settings state:",
+                stateError?.message,
+              );
             }
           }
 
           // Attempt to fetch footer links with bulletproof protection
-          const linksData = await bulletproofFetch("/api/footer/links", "Footer links");
-          if (linksData && linksData.success && linksData.data && Array.isArray(linksData.data)) {
+          const linksData = await bulletproofFetch(
+            "/api/footer/links",
+            "Footer links",
+          );
+          if (
+            linksData &&
+            linksData.success &&
+            linksData.data &&
+            Array.isArray(linksData.data)
+          ) {
             try {
               // Replace fallback links with real data to prevent duplicates
               setFooterLinks(linksData.data);
             } catch (stateError) {
-              console.warn("❌ Error updating footer links state:", stateError?.message);
+              console.warn(
+                "❌ Error updating footer links state:",
+                stateError?.message,
+              );
             }
           }
 
           // Attempt to fetch pages with bulletproof protection
-          const pagesData = await bulletproofFetch("/api/content/pages", "Footer pages");
-          if (pagesData && pagesData.success && pagesData.data && Array.isArray(pagesData.data)) {
+          const pagesData = await bulletproofFetch(
+            "/api/content/pages",
+            "Footer pages",
+          );
+          if (
+            pagesData &&
+            pagesData.success &&
+            pagesData.data &&
+            Array.isArray(pagesData.data)
+          ) {
             try {
               setFooterPages(pagesData.data);
             } catch (stateError) {
-              console.warn("❌ Error updating footer pages state:", stateError?.message);
+              console.warn(
+                "❌ Error updating footer pages state:",
+                stateError?.message,
+              );
             }
           }
         } catch (apiError) {
-          console.warn("❌ API calls failed:", apiError?.message || 'Unknown API error');
+          console.warn(
+            "❌ API calls failed:",
+            apiError?.message || "Unknown API error",
+          );
         }
       } else {
         console.log("📴 Skipping API calls - offline or page hidden");
@@ -369,7 +439,10 @@ export default function Footer() {
 
       console.log("🏁 Bulletproof footer data fetch completed");
     } catch (outerError) {
-      console.warn("💥 Outer error in fetchFooterData:", outerError?.message || 'Unknown outer error');
+      console.warn(
+        "💥 Outer error in fetchFooterData:",
+        outerError?.message || "Unknown outer error",
+      );
       // Continue with fallback data - absolutely nothing should break the footer
     } finally {
       try {
@@ -382,24 +455,28 @@ export default function Footer() {
 
   // Organize pages by type and remove duplicates
   const getPagesByType = (type: string) => {
-    return footerPages.filter(page => page.type === type && page.status === 'published')
+    return footerPages
+      .filter((page) => page.type === type && page.status === "published")
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
   const getLinksBySection = (section: string) => {
-    return footerLinks.filter(link => link.section === section && link.isActive)
+    return footerLinks
+      .filter((link) => link.section === section && link.isActive)
       .sort((a, b) => a.order - b.order);
   };
 
   // Get unique quick links - avoid duplicates by checking slug/url
   const getAllQuickLinks = () => {
-    const policyPages = getPagesByType('policy');
-    const pagePages = getPagesByType('page');
+    const policyPages = getPagesByType("policy");
+    const pagePages = getPagesByType("page");
     const allPages = [...policyPages, ...pagePages];
 
     // Remove duplicates based on slug or url
-    const uniquePages = allPages.filter((page, index, self) =>
-      index === self.findIndex(p => p.slug === page.slug || p.url === page.url)
+    const uniquePages = allPages.filter(
+      (page, index, self) =>
+        index ===
+        self.findIndex((p) => p.slug === page.slug || p.url === page.url),
     );
 
     return uniquePages.slice(0, 6);
@@ -407,14 +484,16 @@ export default function Footer() {
 
   // Get unique legal pages - avoid duplicates
   const getAllLegalPages = () => {
-    const termsPages = getPagesByType('terms');
-    const faqPages = getPagesByType('faq');
-    const legalTypePages = getPagesByType('legal');
+    const termsPages = getPagesByType("terms");
+    const faqPages = getPagesByType("faq");
+    const legalTypePages = getPagesByType("legal");
     const allPages = [...termsPages, ...faqPages, ...legalTypePages];
 
     // Remove duplicates based on slug or url
-    const uniquePages = allPages.filter((page, index, self) =>
-      index === self.findIndex(p => p.slug === page.slug || p.url === page.url)
+    const uniquePages = allPages.filter(
+      (page, index, self) =>
+        index ===
+        self.findIndex((p) => p.slug === page.slug || p.url === page.url),
     );
 
     return uniquePages.slice(0, 6);
@@ -441,26 +520,33 @@ export default function Footer() {
       <div className="absolute inset-0 opacity-10">
         <div className="grid grid-cols-12 gap-4 h-full">
           {Array.from({ length: 48 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-full w-2 h-2 animate-pulse" style={{
-              animationDelay: `${i * 0.1}s`,
-              animationDuration: '3s'
-            }}></div>
+            <div
+              key={i}
+              className="bg-white rounded-full w-2 h-2 animate-pulse"
+              style={{
+                animationDelay: `${i * 0.1}s`,
+                animationDuration: "3s",
+              }}
+            ></div>
           ))}
         </div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-[#C70000] font-bold text-xl">{footerSettings.companyLogo}</span>
+                <span className="text-[#C70000] font-bold text-xl">
+                  {footerSettings.companyLogo}
+                </span>
               </div>
-              <h3 className="text-2xl font-bold">{footerSettings.companyName}</h3>
+              <h3 className="text-2xl font-bold">
+                {footerSettings.companyName}
+              </h3>
             </div>
-            
+
             <p className="text-red-100 text-sm leading-relaxed">
               {footerSettings.companyDescription}
             </p>
@@ -468,9 +554,9 @@ export default function Footer() {
             {/* Social Links */}
             <div className="flex space-x-4">
               {footerSettings.socialLinks?.facebook && (
-                <a 
-                  href={footerSettings.socialLinks.facebook} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.facebook}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 >
@@ -478,9 +564,9 @@ export default function Footer() {
                 </a>
               )}
               {footerSettings.socialLinks?.twitter && (
-                <a 
-                  href={footerSettings.socialLinks.twitter} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.twitter}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 >
@@ -488,9 +574,9 @@ export default function Footer() {
                 </a>
               )}
               {footerSettings.socialLinks?.instagram && (
-                <a 
-                  href={footerSettings.socialLinks.instagram} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.instagram}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 >
@@ -498,9 +584,9 @@ export default function Footer() {
                 </a>
               )}
               {footerSettings.socialLinks?.youtube && (
-                <a 
-                  href={footerSettings.socialLinks.youtube} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.youtube}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 >
@@ -510,7 +596,8 @@ export default function Footer() {
             </div>
 
             {/* Contact Info */}
-            {(footerSettings.contactInfo?.phone || footerSettings.contactInfo?.email) && (
+            {(footerSettings.contactInfo?.phone ||
+              footerSettings.contactInfo?.email) && (
               <div className="space-y-2 text-sm">
                 {footerSettings.contactInfo?.phone && (
                   <div className="flex items-center space-x-2">
@@ -538,7 +625,7 @@ export default function Footer() {
               <ul className="space-y-3">
                 {footerSettings.locations?.map((location) => (
                   <li key={location}>
-                    <Link 
+                    <Link
                       to={`/properties?location=${location.toLowerCase()}`}
                       className="text-red-100 hover:text-white transition-all duration-300 text-sm flex items-center space-x-2 group"
                     >
@@ -559,7 +646,7 @@ export default function Footer() {
             </div>
             <ul className="space-y-3">
               {/* Dynamic footer links from admin panel */}
-              {getLinksBySection('quick_links').map((link) => (
+              {getLinksBySection("quick_links").map((link) => (
                 <li key={`link-${link._id}`}>
                   <Link
                     to={link.url}
@@ -575,27 +662,30 @@ export default function Footer() {
               ))}
 
               {/* Dynamic admin-created pages (only if not already covered by links) */}
-              {quickLinks.filter(page => {
-                // Only show pages that don't conflict with existing links
-                const existingLinks = getLinksBySection('quick_links');
-                return !existingLinks.some(link =>
-                  link.url === (page.url || `/${page.slug}`) ||
-                  link.title.toLowerCase() === page.title.toLowerCase()
-                );
-              }).map((page) => (
-                <li key={`page-${page._id}`}>
-                  <Link
-                    to={page.url || `/${page.slug}`}
-                    className="text-red-100 hover:text-white transition-all duration-300 text-sm flex items-center space-x-2 group"
-                    target={page.isExternal ? "_blank" : "_self"}
-                    rel={page.isExternal ? "noopener noreferrer" : ""}
-                  >
-                    <span className="w-2 h-2 bg-red-300 rounded-full group-hover:bg-white transition-colors"></span>
-                    <span>{page.title}</span>
-                    {page.isExternal && <ExternalLink className="h-3 w-3" />}
-                  </Link>
-                </li>
-              ))}
+              {quickLinks
+                .filter((page) => {
+                  // Only show pages that don't conflict with existing links
+                  const existingLinks = getLinksBySection("quick_links");
+                  return !existingLinks.some(
+                    (link) =>
+                      link.url === (page.url || `/${page.slug}`) ||
+                      link.title.toLowerCase() === page.title.toLowerCase(),
+                  );
+                })
+                .map((page) => (
+                  <li key={`page-${page._id}`}>
+                    <Link
+                      to={page.url || `/${page.slug}`}
+                      className="text-red-100 hover:text-white transition-all duration-300 text-sm flex items-center space-x-2 group"
+                      target={page.isExternal ? "_blank" : "_self"}
+                      rel={page.isExternal ? "noopener noreferrer" : ""}
+                    >
+                      <span className="w-2 h-2 bg-red-300 rounded-full group-hover:bg-white transition-colors"></span>
+                      <span>{page.title}</span>
+                      {page.isExternal && <ExternalLink className="h-3 w-3" />}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -607,7 +697,7 @@ export default function Footer() {
             </div>
             <ul className="space-y-3">
               {/* Dynamic legal links from admin panel */}
-              {getLinksBySection('legal').map((link) => (
+              {getLinksBySection("legal").map((link) => (
                 <li key={`legal-link-${link._id}`}>
                   <Link
                     to={link.url}
@@ -623,27 +713,30 @@ export default function Footer() {
               ))}
 
               {/* Dynamic legal pages (only if not already covered by links) */}
-              {legalPages.filter(page => {
-                // Only show pages that don't conflict with existing legal links
-                const existingLegalLinks = getLinksBySection('legal');
-                return !existingLegalLinks.some(link =>
-                  link.url === (page.url || `/${page.slug}`) ||
-                  link.title.toLowerCase() === page.title.toLowerCase()
-                );
-              }).map((page) => (
-                <li key={`legal-page-${page._id}`}>
-                  <Link
-                    to={page.url || `/${page.slug}`}
-                    className="text-red-100 hover:text-white transition-all duration-300 text-sm flex items-center space-x-2 group"
-                    target={page.isExternal ? "_blank" : "_self"}
-                    rel={page.isExternal ? "noopener noreferrer" : ""}
-                  >
-                    <span className="w-2 h-2 bg-red-300 rounded-full group-hover:bg-white transition-colors"></span>
-                    <span>{page.title}</span>
-                    {page.isExternal && <ExternalLink className="h-3 w-3" />}
-                  </Link>
-                </li>
-              ))}
+              {legalPages
+                .filter((page) => {
+                  // Only show pages that don't conflict with existing legal links
+                  const existingLegalLinks = getLinksBySection("legal");
+                  return !existingLegalLinks.some(
+                    (link) =>
+                      link.url === (page.url || `/${page.slug}`) ||
+                      link.title.toLowerCase() === page.title.toLowerCase(),
+                  );
+                })
+                .map((page) => (
+                  <li key={`legal-page-${page._id}`}>
+                    <Link
+                      to={page.url || `/${page.slug}`}
+                      className="text-red-100 hover:text-white transition-all duration-300 text-sm flex items-center space-x-2 group"
+                      target={page.isExternal ? "_blank" : "_self"}
+                      rel={page.isExternal ? "noopener noreferrer" : ""}
+                    >
+                      <span className="w-2 h-2 bg-red-300 rounded-full group-hover:bg-white transition-colors"></span>
+                      <span>{page.title}</span>
+                      {page.isExternal && <ExternalLink className="h-3 w-3" />}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
@@ -653,24 +746,28 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-red-100 flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
-              <span>All rights reserved © 2006-{new Date().getFullYear()} {footerSettings.companyName}</span>
+              <span>
+                All rights reserved © 2006-{new Date().getFullYear()}{" "}
+                {footerSettings.companyName}
+              </span>
             </div>
-            
+
             <div className="flex items-center space-x-6 text-sm">
-              <Link 
-                to="/sitemap" 
+              <Link
+                to="/sitemap"
                 className="text-red-100 hover:text-white transition-colors"
               >
                 Sitemap
               </Link>
-              <Link 
-                to="/help" 
+              <Link
+                to="/help"
                 className="text-red-100 hover:text-white transition-colors"
               >
                 Help Center
               </Link>
               <span className="text-red-200">
-                {footerPages.length > 0 && `${footerPages.length} pages available`}
+                {footerPages.length > 0 &&
+                  `${footerPages.length} pages available`}
               </span>
             </div>
           </div>
@@ -678,34 +775,45 @@ export default function Footer() {
           {/* Admin Info (visible to admins) */}
           <div className="mt-4 text-center">
             <p className="text-xs text-red-200/70">
-              Footer content managed dynamically • Last updated: {lastUpdated ? new Date(lastUpdated).toLocaleString() : new Date().toLocaleDateString()}
+              Footer content managed dynamically • Last updated:{" "}
+              {lastUpdated
+                ? new Date(lastUpdated).toLocaleString()
+                : new Date().toLocaleDateString()}
             </p>
             {/* Debug info - remove in production */}
             <div className="text-xs text-red-200/50 mt-2 space-y-2">
               <div>
-                Debug: Links: {footerLinks.length} | Pages: {footerPages.length} |
-                Company: {footerSettings.companyName || 'Not loaded'} | Social: {Object.keys(footerSettings.socialLinks || {}).length}
+                Debug: Links: {footerLinks.length} | Pages: {footerPages.length}{" "}
+                | Company: {footerSettings.companyName || "Not loaded"} |
+                Social: {Object.keys(footerSettings.socialLinks || {}).length}
               </div>
               <div>
-                Status: {navigator.onLine ? '🌐 Online' : '📴 Offline'} |
-                Page: {document.hidden ? '👁️‍🗨️ Hidden' : '👁️ Visible'} |
-                Updated: {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : 'Never'}
+                Status: {navigator.onLine ? "🌐 Online" : "📴 Offline"} | Page:{" "}
+                {document.hidden ? "👁️‍🗨️ Hidden" : "👁️ Visible"} | Updated:{" "}
+                {lastUpdated
+                  ? new Date(lastUpdated).toLocaleTimeString()
+                  : "Never"}
               </div>
               <button
                 onClick={() => {
                   try {
                     console.log("🔄 Manual footer refresh triggered");
-                    fetchFooterData().catch(error => {
+                    fetchFooterData().catch((error) => {
                       console.warn("🚨 Manual refresh failed:", error?.message);
                     });
                   } catch (buttonError) {
-                    console.warn("❌ Manual refresh button error:", buttonError?.message);
+                    console.warn(
+                      "❌ Manual refresh button error:",
+                      buttonError?.message,
+                    );
                   }
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded"
                 disabled={!navigator.onLine}
               >
-                {navigator.onLine ? 'Force Refresh Footer' : 'Offline - Can\'t Refresh'}
+                {navigator.onLine
+                  ? "Force Refresh Footer"
+                  : "Offline - Can't Refresh"}
               </button>
             </div>
           </div>

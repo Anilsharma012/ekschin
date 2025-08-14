@@ -4,11 +4,12 @@ import { Button } from "./ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
 const PWAInstallButton = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -17,17 +18,18 @@ const PWAInstallButton = () => {
     // Check if already installed
     const checkInstalled = () => {
       // Check if running in standalone mode (PWA is installed)
-      if (window.matchMedia('(display-mode: standalone)').matches) {
+      if (window.matchMedia("(display-mode: standalone)").matches) {
         setIsInstalled(true);
         return;
       }
-      
+
       // Check if already dismissed
-      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      const dismissed = localStorage.getItem("pwa-install-dismissed");
       if (dismissed) {
         const dismissedTime = parseInt(dismissed);
-        const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
-        
+        const daysSinceDismissed =
+          (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
+
         // Show again after 7 days
         if (daysSinceDismissed < 7) {
           setIsVisible(false);
@@ -52,12 +54,15 @@ const PWAInstallButton = () => {
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
@@ -74,11 +79,11 @@ const PWAInstallButton = () => {
     // Wait for the user to respond to the prompt
     const choiceResult = await deferredPrompt.userChoice;
 
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
+    if (choiceResult.outcome === "accepted") {
+      console.log("User accepted the install prompt");
       setIsInstalled(true);
     } else {
-      console.log('User dismissed the install prompt');
+      console.log("User dismissed the install prompt");
     }
 
     // Clear the saved prompt since it can only be used once
@@ -88,33 +93,33 @@ const PWAInstallButton = () => {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    localStorage.setItem("pwa-install-dismissed", Date.now().toString());
   };
 
   const handleAPKDownload = async () => {
     try {
       // Check if APK is available
-      const infoResponse = await fetch('/api/app/info');
+      const infoResponse = await fetch("/api/app/info");
       const infoData = await infoResponse.json();
 
       if (!infoData.success || !infoData.data.available) {
-        alert('APK file is not available. Please contact admin.');
+        alert("APK file is not available. Please contact admin.");
         return;
       }
 
       // Create a download link for the APK file
-      const link = document.createElement('a');
-      link.href = '/api/app/download';
-      link.download = 'AashishProperty.apk';
+      const link = document.createElement("a");
+      link.href = "/api/app/download";
+      link.download = "AashishProperty.apk";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       // Track the download
-      console.log('APK download initiated');
+      console.log("APK download initiated");
     } catch (error) {
-      console.error('Error downloading APK:', error);
-      alert('Failed to download APK. Please try again.');
+      console.error("Error downloading APK:", error);
+      alert("Failed to download APK. Please try again.");
     }
   };
 
@@ -135,7 +140,9 @@ const PWAInstallButton = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-bold">Install App</h3>
-                <p className="text-xs text-red-100">Add to home screen for better experience</p>
+                <p className="text-xs text-red-100">
+                  Add to home screen for better experience
+                </p>
               </div>
             </div>
             <button
@@ -145,7 +152,7 @@ const PWAInstallButton = () => {
               <X className="h-4 w-4 text-white" />
             </button>
           </div>
-          
+
           <div className="mt-3 flex space-x-2">
             <Button
               onClick={handleInstallClick}
@@ -189,7 +196,9 @@ const PWAInstallButton = () => {
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-bold">Install App</h3>
-              <p className="text-xs text-red-100">Better experience on mobile</p>
+              <p className="text-xs text-red-100">
+                Better experience on mobile
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">

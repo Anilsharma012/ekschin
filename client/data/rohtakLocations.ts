@@ -9,9 +9,9 @@ export interface RohtakLocationData {
 }
 
 export const rohtakLocations: RohtakLocationData = {
-  "city": "Rohtak",
-  "categories": {
-    "colonies_nagars": [
+  city: "Rohtak",
+  categories: {
+    colonies_nagars: [
       "Adarsh Nagar",
       "Ambedkar Colony",
       "Amrit Colony",
@@ -82,17 +82,17 @@ export const rohtakLocations: RohtakLocationData = {
       "Vikas Nagar",
       "Vinay Nagar",
       "Vaish Colony",
-      "Yuva Kendra Colony"
+      "Yuva Kendra Colony",
     ],
-    "chowks_landmarks": [
+    chowks_landmarks: [
       "Chawla Chowk",
       "Chhotu Ram Chowk",
       "Prem Nagar Chowk",
       "Mata Mandir Chowk",
       "Sunaria Chowk",
-      "Sukhpura Chowk"
+      "Sukhpura Chowk",
     ],
-    "sectors": [
+    sectors: [
       "Sector-1",
       "Sector-2",
       "Sector-3",
@@ -114,9 +114,9 @@ export const rohtakLocations: RohtakLocationData = {
       "Sector-33",
       "Sector-33A",
       "Sector-36A",
-      "Sector-37"
+      "Sector-37",
     ],
-    "other_popular_localities": [
+    other_popular_localities: [
       "Bara Bazar",
       "Gohana Road (commercial stretch)",
       "Railway Colony",
@@ -124,15 +124,25 @@ export const rohtakLocations: RohtakLocationData = {
       "H.U.D.A. Complex",
       "Sugar Mill Colony",
       "Industrial Model Township",
-      "HSIIDC Industrial Area"
-    ]
-  }
+      "HSIIDC Industrial Area",
+    ],
+  },
 };
 
 // Helper functions to get location data
 export const getAllRohtakLocations = (): string[] => {
-  const { colonies_nagars, chowks_landmarks, sectors, other_popular_localities } = rohtakLocations.categories;
-  return [...colonies_nagars, ...chowks_landmarks, ...sectors, ...other_popular_localities];
+  const {
+    colonies_nagars,
+    chowks_landmarks,
+    sectors,
+    other_popular_localities,
+  } = rohtakLocations.categories;
+  return [
+    ...colonies_nagars,
+    ...chowks_landmarks,
+    ...sectors,
+    ...other_popular_localities,
+  ];
 };
 
 export const getRohtakSectors = (): string[] => {
@@ -144,5 +154,8 @@ export const getRohtakColonies = (): string[] => {
 };
 
 export const getRohtakLandmarks = (): string[] => {
-  return [...rohtakLocations.categories.chowks_landmarks, ...rohtakLocations.categories.other_popular_localities];
+  return [
+    ...rohtakLocations.categories.chowks_landmarks,
+    ...rohtakLocations.categories.other_popular_localities,
+  ];
 };

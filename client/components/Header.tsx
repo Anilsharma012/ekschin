@@ -9,7 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { getRohtakSectors, getRohtakColonies, getRohtakLandmarks } from "../data/rohtakLocations";
+import {
+  getRohtakSectors,
+  getRohtakColonies,
+  getRohtakLandmarks,
+} from "../data/rohtakLocations";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -77,7 +81,6 @@ export default function Header() {
             Post Property
           </a>
         </nav>
-
       </div>
 
       {/* Mobile Menu */}
@@ -180,7 +183,6 @@ export default function Header() {
             <Bell className="h-5 w-5" />
           </button>
         </div>
-
       </div>
     </header>
   );
