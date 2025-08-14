@@ -25,12 +25,6 @@ const HeroImageSlider: React.FC = () => {
       subtitle: "Discover amazing properties in your area",
     },
     {
-      url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2Fdcba62406a134729a34be08c488ddbab?format=webp&width=800",
-      alt: "Property showcase 2",
-      title: "Premium Properties",
-      subtitle: "Luxury homes and commercial spaces",
-    },
-    {
       url: "https://cdn.builder.io/api/v1/image/assets%2F4993b79b8ae445d4ae5618117571cced%2Feb795a9f70554d888ddf9669d4b3441d?format=webp&width=800",
       alt: "Property showcase 3",
       title: "Your Dream Home Awaits",
