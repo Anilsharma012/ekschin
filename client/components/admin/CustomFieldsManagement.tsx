@@ -525,7 +525,10 @@ export default function CustomFieldsManagement() {
               {fields.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                    No custom fields found. Create your first custom field to get started.
+                    <div className="space-y-2">
+                      <p>No custom fields found.</p>
+                      <p className="text-xs text-gray-400">Custom fields API is not yet implemented. This feature will be available in a future update.</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
