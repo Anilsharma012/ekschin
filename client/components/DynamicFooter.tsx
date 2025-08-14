@@ -237,43 +237,6 @@ export default function DynamicFooter() {
     }
   };
 
-  const safeApiCall = async (url: string): Promise<ApiResponse<any>> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-    try {
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        return { success: true, data };
-      } else {
-        console.warn(`API call failed for ${url}: HTTP ${response.status}`);
-        return { success: false, data: null, error: `HTTP ${response.status}` };
-      }
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          console.warn(`API call timeout for ${url}`);
-          return { success: false, data: null, error: 'Request timeout' };
-        }
-        console.warn(`API call failed for ${url}:`, error.message);
-        return { success: false, data: null, error: error.message };
-      }
-
-      console.warn(`API call failed for ${url}:`, error);
-      return { success: false, data: null, error: 'Network error' };
-    }
-  };
 
   const getPagesByType = (type: string) => {
     return footerPages.filter(page => page.type === type)
