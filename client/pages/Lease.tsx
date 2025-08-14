@@ -3,6 +3,7 @@ import OLXStyleHeader from "../components/OLXStyleHeader";
 import CategoryBar from "../components/CategoryBar";
 import BottomNavigation from "../components/BottomNavigation";
 import DynamicFooter from "../components/DynamicFooter";
+import FooterErrorBoundary from "../components/FooterErrorBoundary";
 
 export default function Lease() {
   return (
@@ -25,7 +26,9 @@ export default function Lease() {
       </main>
 
       <BottomNavigation />
-      <DynamicFooter />
+      <FooterErrorBoundary>
+        <DynamicFooter />
+      </FooterErrorBoundary>
     </div>
   );
 }
