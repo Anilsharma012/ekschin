@@ -127,6 +127,63 @@ export default function Categories() {
     );
   }
 
+  // Property Types View
+  if (selectedSubcategory && selectedCategory) {
+    const propertyTypes = getPropertyTypesForSubcategory(selectedSubcategory.slug);
+
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+
+        <div className="px-4 py-6">
+          {/* Header with Back Button */}
+          <div className="flex items-center mb-6">
+            <button onClick={handleBackClick} className="mr-4 p-2">
+              <ArrowLeft className="h-6 w-6 text-gray-700" />
+            </button>
+            <div>
+              <h1 className="text-xl font-medium text-gray-900">
+                {selectedSubcategory.name}
+              </h1>
+              <p className="text-sm text-gray-500">
+                Choose property type
+              </p>
+            </div>
+          </div>
+
+          {/* Property Types List */}
+          <div className="space-y-2">
+            {propertyTypes.map((propertyType) => (
+              <button
+                key={propertyType.id}
+                onClick={() => handlePropertyTypeClick(propertyType)}
+                className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-lg">{propertyType.icon || selectedCategory.icon}</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-medium text-gray-900 text-base">
+                      {propertyType.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {propertyType.description}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  // Subcategories View
   if (selectedCategory) {
     return (
       <div className="min-h-screen bg-white">
