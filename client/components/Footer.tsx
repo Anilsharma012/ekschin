@@ -93,7 +93,7 @@ export default function Footer() {
           address: "Mumbai, Maharashtra, India"
         },
         showLocations: true,
-        locations: ["Kolkata", "Mumbai", "Delhi", "Bangalore", "Chennai", "Pune"]
+        locations: getAllRohtakLocations().slice(0, 12) // Show first 12 locations as fallback
       }));
     }
 
