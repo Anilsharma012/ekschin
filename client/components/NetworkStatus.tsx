@@ -117,8 +117,8 @@ const NetworkStatusComponent: React.FC = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodic check
-    const interval = setInterval(checkConnection, 30000);
+    // Periodic check - reduced frequency to avoid spam
+    const interval = setInterval(checkConnection, 60000); // Changed from 30s to 60s
 
     // Show status if connection is poor
     if (!status.isOnline || !status.serverReachable || status.connectionQuality === 'poor') {
