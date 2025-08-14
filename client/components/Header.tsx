@@ -18,13 +18,13 @@ export default function Header() {
   const getSearchOptions = () => {
     switch (searchType) {
       case "sectors":
-        return rohtakSectors;
+        return getRohtakSectors();
       case "mohallas":
-        return mohallas;
+        return getRohtakColonies();
       case "landmarks":
-        return landmarks;
+        return getRohtakLandmarks();
       default:
-        return rohtakSectors;
+        return getRohtakSectors();
     }
   };
 
