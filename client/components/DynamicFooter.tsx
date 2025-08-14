@@ -94,12 +94,12 @@ export default function DynamicFooter() {
   useEffect(() => {
     initializeFooter();
 
-    // Auto-refresh every 10 minutes to pick up admin changes (increased from 5 minutes)
+    // Auto-refresh every 15 minutes to pick up admin changes (reduced frequency)
     const interval = setInterval(() => {
       if (navigator.onLine && !document.hidden && !isRefreshing) {
         refreshFooterData(true);
       }
-    }, 10 * 60 * 1000);
+    }, 15 * 60 * 1000);
 
     // Listen for admin updates
     const handleFooterUpdate = () => {
