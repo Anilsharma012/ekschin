@@ -8,6 +8,7 @@ import PWAInstallButton from "../components/PWAInstallButton";
 import BottomNavigation from "../components/BottomNavigation";
 import HomepageBanner from "../components/HomepageBanner";
 import DynamicFooter from "../components/DynamicFooter";
+import FooterErrorBoundary from "../components/FooterErrorBoundary";
 import HeroImageSlider from "../components/HeroImageSlider";
 
 export default function Index() {
@@ -38,7 +39,9 @@ export default function Index() {
       <BottomNavigation />
       <PWAInstallPrompt />
       <PWAInstallButton />
-      <DynamicFooter />
+      <FooterErrorBoundary>
+        <DynamicFooter />
+      </FooterErrorBoundary>
     </div>
   );
 }
