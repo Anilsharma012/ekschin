@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
+import { getPropertyTypesForSubcategory, PropertyType } from "../data/propertyTypes";
 
 interface Category {
   _id?: string;
