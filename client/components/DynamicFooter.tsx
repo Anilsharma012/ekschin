@@ -78,17 +78,27 @@ export default function DynamicFooter() {
   const [footerLinks, setFooterLinks] = useState<FooterLink[]>([]);
   const [footerSettings, setFooterSettings] = useState<FooterSettings>({
     companyName: "Aashish Properties",
-    companyDescription: "Your trusted property partner in Rohtak. Find your dream home with verified listings and expert guidance.",
+    companyDescription:
+      "Your trusted property partner in Rohtak. Find your dream home with verified listings and expert guidance.",
     companyLogo: "AP",
     socialLinks: {},
     contactInfo: {},
     showLocations: true,
-    locations: ["Model Town", "Sector 14", "Civil Lines", "Old City", "Industrial Area", "Bohar"],
+    locations: [
+      "Model Town",
+      "Sector 14",
+      "Civil Lines",
+      "Old City",
+      "Industrial Area",
+      "Bohar",
+    ],
     customSections: {},
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
-  const [connectionStatus, setConnectionStatus] = useState<"connected" | "offline" | "error">("connected");
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connected" | "offline" | "error"
+  >("connected");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -97,20 +107,23 @@ export default function DynamicFooter() {
       try {
         await initializeFooter();
       } catch (error) {
-        console.error('Footer initialization failed:', error);
+        console.error("Footer initialization failed:", error);
         setLoading(false);
-        setConnectionStatus('error');
+        setConnectionStatus("error");
       }
     };
 
     initialize();
 
     // Auto-refresh every 20 minutes (further reduced frequency)
-    const interval = setInterval(() => {
-      if (navigator.onLine && !document.hidden && !isRefreshing) {
-        refreshFooterData(true);
-      }
-    }, 20 * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        if (navigator.onLine && !document.hidden && !isRefreshing) {
+          refreshFooterData(true);
+        }
+      },
+      20 * 60 * 1000,
+    );
 
     // Listen for admin updates
     const handleFooterUpdate = () => {
@@ -128,7 +141,9 @@ export default function DynamicFooter() {
         if (!document.hidden && navigator.onLine && !isRefreshing) {
           // Only refresh if it's been more than 10 minutes since last update
           const now = Date.now();
-          const lastUpdateTime = lastUpdated ? new Date(lastUpdated).getTime() : 0;
+          const lastUpdateTime = lastUpdated
+            ? new Date(lastUpdated).getTime()
+            : 0;
           if (now - lastUpdateTime > 10 * 60 * 1000) {
             refreshFooterData(true);
           }
@@ -148,20 +163,20 @@ export default function DynamicFooter() {
       setConnectionStatus("offline");
     };
 
-    window.addEventListener('footerUpdate', handleFooterUpdate);
-    window.addEventListener('footerRefresh', handleFooterUpdate);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener("footerUpdate", handleFooterUpdate);
+    window.addEventListener("footerRefresh", handleFooterUpdate);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearInterval(interval);
       clearTimeout(visibilityTimeout);
-      window.removeEventListener('footerUpdate', handleFooterUpdate);
-      window.removeEventListener('footerRefresh', handleFooterUpdate);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener("footerUpdate", handleFooterUpdate);
+      window.removeEventListener("footerRefresh", handleFooterUpdate);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isRefreshing, lastUpdated]);
 
@@ -172,10 +187,10 @@ export default function DynamicFooter() {
       try {
         const initResponse = await enhancedApi.get("footer/initialize");
         if (initResponse.ok && initResponse.data?.success) {
-          console.log('🔧 Footer data initialization checked/completed');
+          console.log("🔧 Footer data initialization checked/completed");
         }
       } catch (initError) {
-        console.warn('⚠️ Footer initialization endpoint failed:', initError);
+        console.warn("⚠️ Footer initialization endpoint failed:", initError);
       }
 
       // Always attempt to refresh data regardless of initialization result
@@ -183,9 +198,9 @@ export default function DynamicFooter() {
     } catch (error: any) {
       console.warn("Footer initialization failed, using defaults:", {
         message: error.message,
-        name: error.name
+        name: error.name,
       });
-      setConnectionStatus('error');
+      setConnectionStatus("error");
     } finally {
       setLoading(false);
     }
@@ -194,7 +209,8 @@ export default function DynamicFooter() {
   const refreshFooterData = async (silent = false) => {
     // Prevent multiple simultaneous refreshes
     if (isRefreshing) {
-      if (!silent) console.log("🔄 Footer refresh already in progress, skipping...");
+      if (!silent)
+        console.log("🔄 Footer refresh already in progress, skipping...");
       return;
     }
 
@@ -209,16 +225,17 @@ export default function DynamicFooter() {
       }
 
       // Enhanced timeout wrapper with better error handling
-      const createTimeoutPromise = (ms: number) => new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Request timeout")), ms)
-      );
+      const createTimeoutPromise = (ms: number) =>
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timeout")), ms),
+        );
 
       // Wrap API calls with comprehensive error handling
       const safeApiCall = async (apiCall: Promise<any>, name: string) => {
         try {
           const result = await Promise.race([
             apiCall,
-            createTimeoutPromise(12000) // 12 second timeout
+            createTimeoutPromise(12000), // 12 second timeout
           ]);
           return { success: true, data: result, name };
         } catch (error: any) {
@@ -231,89 +248,123 @@ export default function DynamicFooter() {
       const [pagesResult, linksResult, settingsResult] = await Promise.all([
         safeApiCall(enhancedApi.get("content/pages"), "Pages"),
         safeApiCall(enhancedApi.get("footer/links"), "Links"),
-        safeApiCall(enhancedApi.get("footer/settings"), "Settings")
+        safeApiCall(enhancedApi.get("footer/settings"), "Settings"),
       ]);
 
       let hasErrors = false;
       let successCount = 0;
 
       // Handle pages with better error checking
-      if (pagesResult.success && pagesResult.data?.ok && pagesResult.data?.data?.success) {
+      if (
+        pagesResult.success &&
+        pagesResult.data?.ok &&
+        pagesResult.data?.data?.success
+      ) {
         try {
-          const publishedPages = (pagesResult.data.data.data || []).filter((page: FooterPage) =>
-            page.status === 'published'
-          ).sort((a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0));
+          const publishedPages = (pagesResult.data.data.data || [])
+            .filter((page: FooterPage) => page.status === "published")
+            .sort(
+              (a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0),
+            );
           setFooterPages(publishedPages);
-          if (!silent) console.log('📄 Footer Pages Loaded:', publishedPages.length);
+          if (!silent)
+            console.log("📄 Footer Pages Loaded:", publishedPages.length);
           successCount++;
         } catch (parseError) {
-          console.warn('⚠️ Failed to parse pages data:', parseError);
+          console.warn("⚠️ Failed to parse pages data:", parseError);
           hasErrors = true;
         }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Pages Failed:', pagesResult.error || 'Unknown error');
+        if (!silent)
+          console.log(
+            "❌ Footer Pages Failed:",
+            pagesResult.error || "Unknown error",
+          );
       }
 
       // Handle links with better error checking
-      if (linksResult.success && linksResult.data?.ok && linksResult.data?.data?.success) {
+      if (
+        linksResult.success &&
+        linksResult.data?.ok &&
+        linksResult.data?.data?.success
+      ) {
         try {
-          const activeLinks = (linksResult.data.data.data || []).filter((link: FooterLink) =>
-            link.isActive
-          ).sort((a: FooterLink, b: FooterLink) => a.order - b.order);
+          const activeLinks = (linksResult.data.data.data || [])
+            .filter((link: FooterLink) => link.isActive)
+            .sort((a: FooterLink, b: FooterLink) => a.order - b.order);
           setFooterLinks(activeLinks);
-          if (!silent) console.log('🔗 Footer Links Loaded:', activeLinks.length);
+          if (!silent)
+            console.log("🔗 Footer Links Loaded:", activeLinks.length);
           successCount++;
         } catch (parseError) {
-          console.warn('⚠️ Failed to parse links data:', parseError);
+          console.warn("⚠️ Failed to parse links data:", parseError);
           hasErrors = true;
         }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Links Failed:', linksResult.error || 'Unknown error');
+        if (!silent)
+          console.log(
+            "❌ Footer Links Failed:",
+            linksResult.error || "Unknown error",
+          );
       }
 
       // Handle settings with better error checking
-      if (settingsResult.success && settingsResult.data?.ok && settingsResult.data?.data?.success) {
+      if (
+        settingsResult.success &&
+        settingsResult.data?.ok &&
+        settingsResult.data?.data?.success
+      ) {
         try {
           const settingsData = settingsResult.data.data.data || {};
-          setFooterSettings(prev => ({
+          setFooterSettings((prev) => ({
             ...prev,
-            ...settingsData
+            ...settingsData,
           }));
           setLastUpdated(new Date().toISOString());
-          if (!silent) console.log('⚙️ Footer Settings Loaded');
+          if (!silent) console.log("⚙️ Footer Settings Loaded");
           successCount++;
         } catch (parseError) {
-          console.warn('⚠️ Failed to parse settings data:', parseError);
+          console.warn("⚠️ Failed to parse settings data:", parseError);
           hasErrors = true;
         }
       } else {
         hasErrors = true;
-        if (!silent) console.log('❌ Footer Settings Failed:', settingsResult.error || 'Unknown error');
+        if (!silent)
+          console.log(
+            "❌ Footer Settings Failed:",
+            settingsResult.error || "Unknown error",
+          );
       }
 
       // Update connection status based on results
       if (successCount === 0) {
         setConnectionStatus("error");
-        if (!silent) console.log("📂 All footer APIs failed, using default content");
+        if (!silent)
+          console.log("📂 All footer APIs failed, using default content");
       } else if (hasErrors) {
         setConnectionStatus("error");
-        if (!silent) console.log(`📂 Partial footer data loaded (${successCount}/3 APIs successful)`);
+        if (!silent)
+          console.log(
+            `📂 Partial footer data loaded (${successCount}/3 APIs successful)`,
+          );
       } else {
         setConnectionStatus("connected");
         if (!silent) console.log("✅ Footer data refreshed successfully");
       }
-
     } catch (error: any) {
       console.error("❌ Critical error refreshing footer data:", {
         message: error.message,
         name: error.name,
-        stack: error.stack?.split('\n')?.[0]
+        stack: error.stack?.split("\n")?.[0],
       });
       setConnectionStatus("error");
       // Ensure footer still renders with default content
-      if (!silent) console.log("📂 Footer will continue with default content due to critical error");
+      if (!silent)
+        console.log(
+          "📂 Footer will continue with default content due to critical error",
+        );
     } finally {
       setIsRefreshing(false);
       // Ensure loading state is cleared
@@ -321,29 +372,32 @@ export default function DynamicFooter() {
     }
   };
 
-
   const getPagesByType = (type: string) => {
-    return footerPages.filter(page => page.type === type)
+    return footerPages
+      .filter((page) => page.type === type)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
   const getLinksBySection = (section: string) => {
-    return footerLinks.filter(link => link.section === section)
+    return footerLinks
+      .filter((link) => link.section === section)
       .sort((a, b) => a.order - b.order);
   };
 
   const renderPageLink = (page: FooterPage) => {
     const url = page.isExternal ? page.url : `/page/${page.slug}`;
-    const linkProps = page.isExternal 
-      ? { 
-          href: page.url, 
-          target: "_blank", 
+    const linkProps = page.isExternal
+      ? {
+          href: page.url,
+          target: "_blank",
           rel: "noopener noreferrer",
-          className: "text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center"
+          className:
+            "text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center",
         }
       : {
           to: `/page/${page.slug}`,
-          className: "text-red-200 hover:text-white transition-colors duration-200 text-sm"
+          className:
+            "text-red-200 hover:text-white transition-colors duration-200 text-sm",
         };
 
     const content = (
@@ -356,29 +410,27 @@ export default function DynamicFooter() {
     return (
       <li key={page._id}>
         {page.isExternal ? (
-          <a {...linkProps}>
-            {content}
-          </a>
+          <a {...linkProps}>{content}</a>
         ) : (
-          <Link {...linkProps}>
-            {content}
-          </Link>
+          <Link {...linkProps}>{content}</Link>
         )}
       </li>
     );
   };
 
   const renderFooterLink = (link: FooterLink) => {
-    const linkProps = link.isExternal 
-      ? { 
-          href: link.url, 
-          target: "_blank", 
+    const linkProps = link.isExternal
+      ? {
+          href: link.url,
+          target: "_blank",
           rel: "noopener noreferrer",
-          className: "text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center"
+          className:
+            "text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center",
         }
       : {
           to: link.url,
-          className: "text-red-200 hover:text-white transition-colors duration-200 text-sm"
+          className:
+            "text-red-200 hover:text-white transition-colors duration-200 text-sm",
         };
 
     const content = (
@@ -391,13 +443,9 @@ export default function DynamicFooter() {
     return (
       <li key={link._id}>
         {link.isExternal ? (
-          <a {...linkProps}>
-            {content}
-          </a>
+          <a {...linkProps}>{content}</a>
         ) : (
-          <Link {...linkProps}>
-            {content}
-          </Link>
+          <Link {...linkProps}>{content}</Link>
         )}
       </li>
     );
@@ -425,16 +473,19 @@ export default function DynamicFooter() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-[#C70000] font-bold text-xl">{footerSettings.companyLogo}</span>
+                <span className="text-[#C70000] font-bold text-xl">
+                  {footerSettings.companyLogo}
+                </span>
               </div>
-              <h3 className="text-2xl font-bold">{footerSettings.companyName}</h3>
+              <h3 className="text-2xl font-bold">
+                {footerSettings.companyName}
+              </h3>
             </div>
-            
+
             <p className="text-red-100 text-sm leading-relaxed">
               {footerSettings.companyDescription}
             </p>
@@ -442,9 +493,9 @@ export default function DynamicFooter() {
             {/* Social Links */}
             <div className="flex space-x-4">
               {footerSettings.socialLinks?.facebook && (
-                <a 
-                  href={footerSettings.socialLinks.facebook} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.facebook}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all"
                 >
@@ -452,9 +503,9 @@ export default function DynamicFooter() {
                 </a>
               )}
               {footerSettings.socialLinks?.twitter && (
-                <a 
-                  href={footerSettings.socialLinks.twitter} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.twitter}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all"
                 >
@@ -462,9 +513,9 @@ export default function DynamicFooter() {
                 </a>
               )}
               {footerSettings.socialLinks?.instagram && (
-                <a 
-                  href={footerSettings.socialLinks.instagram} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.instagram}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all"
                 >
@@ -472,9 +523,9 @@ export default function DynamicFooter() {
                 </a>
               )}
               {footerSettings.socialLinks?.youtube && (
-                <a 
-                  href={footerSettings.socialLinks.youtube} 
-                  target="_blank" 
+                <a
+                  href={footerSettings.socialLinks.youtube}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all"
                 >
@@ -484,7 +535,8 @@ export default function DynamicFooter() {
             </div>
 
             {/* Contact Info */}
-            {(footerSettings.contactInfo?.phone || footerSettings.contactInfo?.email) && (
+            {(footerSettings.contactInfo?.phone ||
+              footerSettings.contactInfo?.email) && (
               <div className="space-y-2 text-sm">
                 {footerSettings.contactInfo?.phone && (
                   <div className="flex items-center space-x-2">
@@ -509,52 +561,66 @@ export default function DynamicFooter() {
           </div>
 
           {/* Popular Locations */}
-          {footerSettings.showLocations && footerSettings.locations && footerSettings.locations.length > 0 && (
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold">Popular Locations</h4>
-              <ul className="space-y-3">
-                {footerSettings.locations.slice(0, 6).map((location) => (
-                  <li key={location}>
-                    <Link 
-                      to={`/properties?location=${encodeURIComponent(location)}`}
-                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center"
-                    >
-                      <MapPin className="h-3 w-3 mr-2" />
-                      Properties in {location}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {footerSettings.showLocations &&
+            footerSettings.locations &&
+            footerSettings.locations.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold">Popular Locations</h4>
+                <ul className="space-y-3">
+                  {footerSettings.locations.slice(0, 6).map((location) => (
+                    <li key={location}>
+                      <Link
+                        to={`/properties?location=${encodeURIComponent(location)}`}
+                        className="text-red-200 hover:text-white transition-colors duration-200 text-sm flex items-center"
+                      >
+                        <MapPin className="h-3 w-3 mr-2" />
+                        Properties in {location}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
           {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-3">
               {/* Dynamic footer links from admin panel */}
-              {getLinksBySection('quick_links').map(renderFooterLink)}
-              
+              {getLinksBySection("quick_links").map(renderFooterLink)}
+
               {/* Default quick links if no custom ones */}
-              {getLinksBySection('quick_links').length === 0 && (
+              {getLinksBySection("quick_links").length === 0 && (
                 <>
                   <li>
-                    <Link to="/properties" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/properties"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       All Properties
                     </Link>
                   </li>
                   <li>
-                    <Link to="/post-property" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/post-property"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       Post Property
                     </Link>
                   </li>
                   <li>
-                    <Link to="/agents" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/agents"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       Find Agents
                     </Link>
                   </li>
                   <li>
-                    <Link to="/contact" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/contact"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       Contact Us
                     </Link>
                   </li>
@@ -568,25 +634,35 @@ export default function DynamicFooter() {
             <h4 className="text-lg font-semibold">Legal & Support</h4>
             <ul className="space-y-3">
               {/* Dynamic pages created from admin */}
-              {getPagesByType('policy').map(renderPageLink)}
-              {getPagesByType('terms').map(renderPageLink)}
-              {getPagesByType('page').map(renderPageLink)}
-              
+              {getPagesByType("policy").map(renderPageLink)}
+              {getPagesByType("terms").map(renderPageLink)}
+              {getPagesByType("page").map(renderPageLink)}
+
               {/* Custom footer links from admin */}
-              {getLinksBySection('support').map(renderFooterLink)}
-              {getLinksBySection('legal').map(renderFooterLink)}
-              
+              {getLinksBySection("support").map(renderFooterLink)}
+              {getLinksBySection("legal").map(renderFooterLink)}
+
               {/* Default links if no custom ones exist */}
-              {(getPagesByType('policy').length + getPagesByType('terms').length + getPagesByType('page').length + 
-                getLinksBySection('support').length + getLinksBySection('legal').length) === 0 && (
+              {getPagesByType("policy").length +
+                getPagesByType("terms").length +
+                getPagesByType("page").length +
+                getLinksBySection("support").length +
+                getLinksBySection("legal").length ===
+                0 && (
                 <>
                   <li>
-                    <Link to="/about" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/about"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       About Us
                     </Link>
                   </li>
                   <li>
-                    <Link to="/help" className="text-red-200 hover:text-white transition-colors duration-200 text-sm">
+                    <Link
+                      to="/help"
+                      className="text-red-200 hover:text-white transition-colors duration-200 text-sm"
+                    >
                       Help Center
                     </Link>
                   </li>
@@ -601,22 +677,31 @@ export default function DynamicFooter() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2 text-sm">
               <Calendar className="h-4 w-4" />
-              <span>All rights reserved © 2006-{new Date().getFullYear()} {footerSettings.companyName}</span>
+              <span>
+                All rights reserved © 2006-{new Date().getFullYear()}{" "}
+                {footerSettings.companyName}
+              </span>
             </div>
-            
+
             <div className="flex items-center space-x-4 text-xs text-red-200">
               {/* Connection Status */}
               <div className="flex items-center space-x-2">
-                {connectionStatus === "connected" && <Check className="h-3 w-3 text-green-400" />}
-                {connectionStatus === "offline" && <AlertCircle className="h-3 w-3 text-yellow-400" />}
-                {connectionStatus === "error" && <AlertCircle className="h-3 w-3 text-red-400" />}
+                {connectionStatus === "connected" && (
+                  <Check className="h-3 w-3 text-green-400" />
+                )}
+                {connectionStatus === "offline" && (
+                  <AlertCircle className="h-3 w-3 text-yellow-400" />
+                )}
+                {connectionStatus === "error" && (
+                  <AlertCircle className="h-3 w-3 text-red-400" />
+                )}
                 <span>
                   {connectionStatus === "connected" && "Live"}
                   {connectionStatus === "offline" && "Offline"}
                   {connectionStatus === "error" && "Error"}
                 </span>
               </div>
-              
+
               {/* Content count */}
               <span className="text-red-200">
                 {footerPages.length + footerLinks.length} dynamic items
@@ -624,10 +709,17 @@ export default function DynamicFooter() {
             </div>
 
             {/* Debug info for development */}
-            {process.env.NODE_ENV === 'development' && (
+            {process.env.NODE_ENV === "development" && (
               <div className="text-xs text-red-200/50">
-                <p>Last updated: {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : 'Never'}</p>
-                <p>Pages: {footerPages.length} | Links: {footerLinks.length}</p>
+                <p>
+                  Last updated:{" "}
+                  {lastUpdated
+                    ? new Date(lastUpdated).toLocaleTimeString()
+                    : "Never"}
+                </p>
+                <p>
+                  Pages: {footerPages.length} | Links: {footerLinks.length}
+                </p>
               </div>
             )}
           </div>

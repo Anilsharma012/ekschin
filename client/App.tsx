@@ -86,7 +86,10 @@ const App = () => (
               <Route path="/user-dashboard" element={<UserDashboard />} />
               <Route path="/post-property" element={<PostProperty />} />
               <Route path="/seller-dashboard" element={<SellerDashboard />} />
-              <Route path="/enhanced-seller-dashboard" element={<EnhancedSellerDashboard />} />
+              <Route
+                path="/enhanced-seller-dashboard"
+                element={<EnhancedSellerDashboard />}
+              />
               <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
               <Route path="/agent-dashboard" element={<AgentDashboard />} />
               <Route path="/admin" element={<Admin />} />

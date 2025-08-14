@@ -25,7 +25,7 @@ export default function CategoryBar() {
         <div className="flex flex-wrap gap-3 justify-center">
           {categoryButtons.map((category) => {
             const isActive = location.pathname === category.path;
-            
+
             return (
               <Link
                 key={category.path}
@@ -36,7 +36,7 @@ export default function CategoryBar() {
                   "active:scale-95 transform",
                   isActive
                     ? "bg-[#C70000] text-white border-[#C70000] font-bold shadow-lg"
-                    : "bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                    : "bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300",
                 )}
               >
                 <span className={isActive ? "underline" : ""}>

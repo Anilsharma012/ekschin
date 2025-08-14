@@ -313,10 +313,10 @@ import { testFooterData } from "./routes/footerTest";
 export function createServer() {
   const app = express();
 
- const allowedOrigins = [
+  const allowedOrigins = [
     "https://aproperty.netlify.app",
     "http://localhost:5173",
-    "https://295329d1a890466f9bcbc004dd730a35-0776d79bc1304d9390d1d56e1.fly.dev"
+    "https://295329d1a890466f9bcbc004dd730a35-0776d79bc1304d9390d1d56e1.fly.dev",
   ];
 
   app.use(
@@ -329,9 +329,8 @@ export function createServer() {
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-    })
+    }),
   );
-
 
   app.use(express.json({ limit: "1gb" }));
   app.use(express.urlencoded({ extended: true, limit: "1gb" }));
