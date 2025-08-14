@@ -160,53 +160,79 @@ export default function DynamicFooter() {
   };
 
   const refreshFooterData = async (silent = false) => {
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshing) {
+      if (!silent) console.log("🔄 Footer refresh already in progress, skipping...");
+      return;
+    }
+
     try {
+      setIsRefreshing(true);
       if (!silent) setConnectionStatus("connected");
 
-      const [pagesResponse, linksResponse, settingsResponse] = await Promise.all([
+      // Check if we're online before making requests
+      if (!navigator.onLine) {
+        setConnectionStatus("offline");
+        return;
+      }
+
+      const [pagesResponse, linksResponse, settingsResponse] = await Promise.allSettled([
         safeApiCall("/api/content/pages"),
         safeApiCall("/api/footer/links"),
         safeApiCall("/api/footer/settings")
       ]);
 
+      let hasErrors = false;
+
       // Handle pages
-      if (pagesResponse.success && pagesResponse.data) {
-        const publishedPages = pagesResponse.data.filter((page: FooterPage) =>
+      if (pagesResponse.status === 'fulfilled' && pagesResponse.value.success && pagesResponse.value.data) {
+        const publishedPages = pagesResponse.value.data.filter((page: FooterPage) =>
           page.status === 'published'
         ).sort((a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0));
-        console.log('📄 Footer Pages Loaded:', publishedPages);
+        if (!silent) console.log('📄 Footer Pages Loaded:', publishedPages.length);
         setFooterPages(publishedPages);
       } else {
-        console.log('❌ Footer Pages Failed:', pagesResponse);
+        hasErrors = true;
+        if (!silent) console.log('❌ Footer Pages Failed:', pagesResponse.status === 'fulfilled' ? pagesResponse.value : pagesResponse.reason);
       }
 
       // Handle links
-      if (linksResponse.success && linksResponse.data) {
-        const activeLinks = linksResponse.data.filter((link: FooterLink) =>
+      if (linksResponse.status === 'fulfilled' && linksResponse.value.success && linksResponse.value.data) {
+        const activeLinks = linksResponse.value.data.filter((link: FooterLink) =>
           link.isActive
         ).sort((a: FooterLink, b: FooterLink) => a.order - b.order);
-        console.log('🔗 Footer Links Loaded:', activeLinks);
+        if (!silent) console.log('🔗 Footer Links Loaded:', activeLinks.length);
         setFooterLinks(activeLinks);
       } else {
-        console.log('❌ Footer Links Failed:', linksResponse);
+        hasErrors = true;
+        if (!silent) console.log('❌ Footer Links Failed:', linksResponse.status === 'fulfilled' ? linksResponse.value : linksResponse.reason);
       }
 
       // Handle settings
-      if (settingsResponse.success && settingsResponse.data) {
+      if (settingsResponse.status === 'fulfilled' && settingsResponse.value.success && settingsResponse.value.data) {
         setFooterSettings(prev => ({
           ...prev,
-          ...settingsResponse.data
+          ...settingsResponse.value.data
         }));
-        setLastUpdated(settingsResponse.data.updatedAt || new Date().toISOString());
+        setLastUpdated(new Date().toISOString());
+      } else {
+        hasErrors = true;
+        if (!silent) console.log('❌ Footer Settings Failed:', settingsResponse.status === 'fulfilled' ? settingsResponse.value : settingsResponse.reason);
       }
 
-      if (!silent) {
-        console.log("✅ Footer data refreshed successfully");
+      // Update connection status based on results
+      if (hasErrors) {
+        setConnectionStatus("error");
+      } else {
+        setConnectionStatus("connected");
+        if (!silent) console.log("✅ Footer data refreshed successfully");
       }
 
     } catch (error) {
       console.error("❌ Error refreshing footer data:", error);
       setConnectionStatus("error");
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
