@@ -78,32 +78,6 @@ export default function Header() {
           </a>
         </nav>
 
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/login?type=seller")}
-          >
-            Login as Seller
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/login?type=agent")}
-          >
-            Login as Agent
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/admin/login")}
-          >
-            Admin
-          </Button>
-        </div>
       </div>
 
       {/* Mobile Menu */}
