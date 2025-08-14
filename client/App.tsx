@@ -33,6 +33,7 @@ import AgentDashboard from "./pages/AgentDashboard";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import CategoryProperties from "./pages/CategoryProperties";
+import PropertyTypes from "./pages/PropertyTypes";
 import PropertyDetail from "./pages/PropertyDetail";
 import ContentPage from "./pages/ContentPage";
 import DynamicPage from "./pages/DynamicPage";
