@@ -140,7 +140,9 @@ export const safeApiRequest = async (
       ok: response.ok,
     };
   } catch (error: any) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     const isRetryableError =
       error.name === "AbortError" ||
