@@ -19,7 +19,7 @@ export default function Index() {
         {/* Hero Image Slider */}
         <HeroImageSlider />
 
-        <OLXStyleCategories />
+        <CategoryBar />
 
         {/* Mid-size banner below categories */}
         <div className="px-4 mb-6 bg-white py-6">
