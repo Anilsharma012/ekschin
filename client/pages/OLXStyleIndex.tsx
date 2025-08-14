@@ -10,7 +10,7 @@ export default function OLXStyleIndex() {
       <OLXStyleHeader />
       
       <main className="pb-16">
-        <OLXStyleCategories />
+        <CategoryBar />
         <OLXStyleListings />
       </main>
 
