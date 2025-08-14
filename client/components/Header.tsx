@@ -102,32 +102,6 @@ export default function Header() {
             >
               Post Property
             </a>
-            <div className="flex flex-col space-y-2 pt-4 border-t border-red-300">
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/login?type=seller")}
-              >
-                Login as Seller
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/login?type=agent")}
-              >
-                Login as Agent
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/admin/login")}
-              >
-                Admin
-              </Button>
-            </div>
           </nav>
         </div>
       )}
