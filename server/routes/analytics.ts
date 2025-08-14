@@ -146,6 +146,14 @@ export const trackPhoneClick: RequestHandler = async (req, res) => {
     const db = getDatabase();
     const { propertyId } = req.params;
 
+    // Validate property ID
+    if (!ObjectId.isValid(propertyId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid property ID",
+      });
+    }
+
     // Track in analytics collection
     const today = new Date();
     today.setHours(0, 0, 0, 0);
