@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
+import {
+  getPropertyTypesForSubcategory,
+  PropertyType,
+} from "../data/propertyTypes";
 
 interface Category {
   _id?: string;
@@ -27,6 +31,8 @@ export default function Categories() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState<Subcategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [subcategoryCounts, setSubcategoryCounts] = useState<
     Record<string, number>
@@ -84,12 +90,28 @@ export default function Categories() {
   };
 
   const handleBackClick = () => {
-    setSelectedCategory(null);
+    if (selectedSubcategory) {
+      setSelectedSubcategory(null);
+    } else {
+      setSelectedCategory(null);
+    }
   };
 
   const handleSubcategoryClick = (subcategory: Subcategory) => {
-    // Navigate to filtered property list
-    window.location.href = `/categories/${selectedCategory?.slug}/${subcategory.slug}`;
+    const propertyTypes = getPropertyTypesForSubcategory(subcategory.slug);
+
+    if (propertyTypes.length > 0) {
+      // Show property types for this subcategory
+      setSelectedSubcategory(subcategory);
+    } else {
+      // Navigate directly to filtered property list
+      window.location.href = `/categories/${selectedCategory?.slug}/${subcategory.slug}`;
+    }
+  };
+
+  const handlePropertyTypeClick = (propertyType: PropertyType) => {
+    // Navigate to filtered property list with property type
+    window.location.href = `/categories/${selectedCategory?.slug}/${selectedSubcategory?.slug}/${propertyType.slug}`;
   };
 
   if (loading) {
@@ -107,6 +129,65 @@ export default function Categories() {
     );
   }
 
+  // Property Types View
+  if (selectedSubcategory && selectedCategory) {
+    const propertyTypes = getPropertyTypesForSubcategory(
+      selectedSubcategory.slug,
+    );
+
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+
+        <div className="px-4 py-6">
+          {/* Header with Back Button */}
+          <div className="flex items-center mb-6">
+            <button onClick={handleBackClick} className="mr-4 p-2">
+              <ArrowLeft className="h-6 w-6 text-gray-700" />
+            </button>
+            <div>
+              <h1 className="text-xl font-medium text-gray-900">
+                {selectedSubcategory.name}
+              </h1>
+              <p className="text-sm text-gray-500">Choose property type</p>
+            </div>
+          </div>
+
+          {/* Property Types List */}
+          <div className="space-y-2">
+            {propertyTypes.map((propertyType) => (
+              <button
+                key={propertyType.id}
+                onClick={() => handlePropertyTypeClick(propertyType)}
+                className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-lg">
+                      {propertyType.icon || selectedCategory.icon}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-medium text-gray-900 text-base">
+                      {propertyType.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {propertyType.description}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  // Subcategories View
   if (selectedCategory) {
     return (
       <div className="min-h-screen bg-white">

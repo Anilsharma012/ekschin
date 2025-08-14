@@ -67,7 +67,7 @@ const mohallas = [
 ];
 
 export default function CategoryProperties() {
-  const { category, subcategory } = useParams();
+  const { category, subcategory, propertyType } = useParams();
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +107,7 @@ export default function CategoryProperties() {
 
       if (category) params.append("propertyType", category);
       if (subcategory) params.append("subCategory", subcategory);
+      if (propertyType) params.append("propertyTypeSlug", propertyType);
 
       // Add filter parameters
       Object.entries(filters).forEach(([key, value]) => {
@@ -141,14 +142,19 @@ export default function CategoryProperties() {
   };
 
   const getCategoryTitle = () => {
+    if (propertyType) {
+      return propertyType
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
+    }
     if (subcategory) {
       return subcategory
-        .replace("-", " ")
+        .replace(/-/g, " ")
         .replace(/\b\w/g, (l) => l.toUpperCase());
     }
     if (category) {
       return category
-        .replace("-", " ")
+        .replace(/-/g, " ")
         .replace(/\b\w/g, (l) => l.toUpperCase());
     }
     return "Properties";

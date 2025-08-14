@@ -9,59 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-
-const rohtakSectors = [
-  "Sector 1",
-  "Sector 2",
-  "Sector 3",
-  "Sector 4",
-  "Sector 5",
-  "Sector 6",
-  "Sector 7",
-  "Sector 8",
-  "Sector 9",
-  "Sector 10",
-  "Sector 11",
-  "Sector 12",
-  "Sector 13",
-  "Sector 14",
-  "Sector 15",
-  "Sector 16",
-  "Sector 17",
-  "Sector 18",
-  "Sector 19",
-  "Sector 20",
-  "Sector 21",
-  "Sector 22",
-  "Sector 23",
-];
-
-const mohallas = [
-  "Prem Nagar",
-  "Shastri Nagar",
-  "DLF Colony",
-  "Model Town",
-  "Subhash Nagar",
-  "Civil Lines",
-  "Ram Nagar",
-  "Industrial Area",
-  "Huda Sector",
-  "Old City",
-  "Railway Road",
-  "Jail Road",
-];
-
-const landmarks = [
-  "PGI Rohtak",
-  "Bus Stand",
-  "Railway Station",
-  "AIIMS Rohtak",
-  "Maharshi Dayanand University",
-  "Rohtak Medical College",
-  "District Court",
-  "Mini Secretariat",
-  "Government Hospital",
-];
+import {
+  getRohtakSectors,
+  getRohtakColonies,
+  getRohtakLandmarks,
+} from "../data/rohtakLocations";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -70,13 +22,13 @@ export default function Header() {
   const getSearchOptions = () => {
     switch (searchType) {
       case "sectors":
-        return rohtakSectors;
-      case "mohallas":
-        return mohallas;
+        return getRohtakSectors();
+      case "colonies":
+        return getRohtakColonies();
       case "landmarks":
-        return landmarks;
+        return getRohtakLandmarks();
       default:
-        return rohtakSectors;
+        return getRohtakSectors();
     }
   };
 
@@ -129,33 +81,6 @@ export default function Header() {
             Post Property
           </a>
         </nav>
-
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/login?type=seller")}
-          >
-            Login as Seller
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/login?type=agent")}
-          >
-            Login as Agent
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-            onClick={() => (window.location.href = "/admin/login")}
-          >
-            Admin
-          </Button>
-        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -180,32 +105,6 @@ export default function Header() {
             >
               Post Property
             </a>
-            <div className="flex flex-col space-y-2 pt-4 border-t border-red-300">
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/login?type=seller")}
-              >
-                Login as Seller
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/login?type=agent")}
-              >
-                Login as Agent
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white text-[#C70000] border-white hover:bg-gray-100"
-                onClick={() => (window.location.href = "/admin/login")}
-              >
-                Admin
-              </Button>
-            </div>
           </nav>
         </div>
       )}
@@ -225,14 +124,14 @@ export default function Header() {
             Sectors
           </button>
           <button
-            onClick={() => setSearchType("mohallas")}
+            onClick={() => setSearchType("colonies")}
             className={`px-3 py-1 rounded-full text-xs font-medium ${
-              searchType === "mohallas"
+              searchType === "colonies"
                 ? "bg-white text-[#C70000]"
                 : "bg-white bg-opacity-20 text-white"
             }`}
           >
-            Mohallas
+            Colonies
           </button>
           <button
             onClick={() => setSearchType("landmarks")}
@@ -283,33 +182,6 @@ export default function Header() {
           <button className="p-2 bg-white bg-opacity-20 rounded-lg">
             <Bell className="h-5 w-5" />
           </button>
-        </div>
-
-        <div className="md:hidden flex space-x-1">
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100 text-xs px-2"
-            onClick={() => (window.location.href = "/login?type=seller")}
-          >
-            Seller
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100 text-xs px-2"
-            onClick={() => (window.location.href = "/login?type=agent")}
-          >
-            Agent
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-[#C70000] border-white hover:bg-gray-100 text-xs px-1"
-            onClick={() => (window.location.href = "/admin/login")}
-          >
-            Admin
-          </Button>
         </div>
       </div>
     </header>
