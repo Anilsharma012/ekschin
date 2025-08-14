@@ -19,7 +19,7 @@ export default function Header() {
     switch (searchType) {
       case "sectors":
         return getRohtakSectors();
-      case "mohallas":
+      case "colonies":
         return getRohtakColonies();
       case "landmarks":
         return getRohtakLandmarks();
