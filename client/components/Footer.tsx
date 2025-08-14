@@ -14,6 +14,7 @@ import {
   Users,
   Building,
 } from "lucide-react";
+import { getAllRohtakLocations } from "../data/rohtakLocations";
 
 interface FooterPage {
   _id: string;
