@@ -156,8 +156,13 @@ export default function DynamicFooter() {
 
   const initializeFooter = async () => {
     setLoading(true);
-    await refreshFooterData();
-    setLoading(false);
+    try {
+      await refreshFooterData();
+    } catch (error) {
+      console.warn("Footer initialization failed, using defaults:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const refreshFooterData = async (silent = false) => {
