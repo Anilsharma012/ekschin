@@ -186,8 +186,8 @@ export default function DynamicFooter() {
       let hasErrors = false;
 
       // Handle pages
-      if (pagesResponse.status === 'fulfilled' && pagesResponse.value.success && pagesResponse.value.data) {
-        const publishedPages = pagesResponse.value.data.filter((page: FooterPage) =>
+      if (pagesResponse.status === 'fulfilled' && pagesResponse.value.ok && pagesResponse.value.data?.success && pagesResponse.value.data?.data) {
+        const publishedPages = pagesResponse.value.data.data.filter((page: FooterPage) =>
           page.status === 'published'
         ).sort((a: FooterPage, b: FooterPage) => (a.order || 0) - (b.order || 0));
         if (!silent) console.log('📄 Footer Pages Loaded:', publishedPages.length);
@@ -198,8 +198,8 @@ export default function DynamicFooter() {
       }
 
       // Handle links
-      if (linksResponse.status === 'fulfilled' && linksResponse.value.success && linksResponse.value.data) {
-        const activeLinks = linksResponse.value.data.filter((link: FooterLink) =>
+      if (linksResponse.status === 'fulfilled' && linksResponse.value.ok && linksResponse.value.data?.success && linksResponse.value.data?.data) {
+        const activeLinks = linksResponse.value.data.data.filter((link: FooterLink) =>
           link.isActive
         ).sort((a: FooterLink, b: FooterLink) => a.order - b.order);
         if (!silent) console.log('🔗 Footer Links Loaded:', activeLinks.length);
@@ -210,10 +210,10 @@ export default function DynamicFooter() {
       }
 
       // Handle settings
-      if (settingsResponse.status === 'fulfilled' && settingsResponse.value.success && settingsResponse.value.data) {
+      if (settingsResponse.status === 'fulfilled' && settingsResponse.value.ok && settingsResponse.value.data?.success && settingsResponse.value.data?.data) {
         setFooterSettings(prev => ({
           ...prev,
-          ...settingsResponse.value.data
+          ...settingsResponse.value.data.data
         }));
         setLastUpdated(new Date().toISOString());
       } else {
