@@ -2,8 +2,7 @@ import React from "react";
 import OLXStyleHeader from "../components/OLXStyleHeader";
 import CategoryBar from "../components/CategoryBar";
 import BottomNavigation from "../components/BottomNavigation";
-import DynamicFooter from "../components/DynamicFooter";
-import FooterErrorBoundary from "../components/FooterErrorBoundary";
+import StaticFooter from "../components/StaticFooter";
 
 export default function Sale() {
   return (
@@ -26,9 +25,7 @@ export default function Sale() {
       </main>
 
       <BottomNavigation />
-      <FooterErrorBoundary>
-        <DynamicFooter />
-      </FooterErrorBoundary>
+      <StaticFooter />
     </div>
   );
 }
