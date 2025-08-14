@@ -178,9 +178,9 @@ export default function DynamicFooter() {
       }
 
       const [pagesResponse, linksResponse, settingsResponse] = await Promise.allSettled([
-        safeApiCall("/api/content/pages"),
-        safeApiCall("/api/footer/links"),
-        safeApiCall("/api/footer/settings")
+        enhancedApi.get("content/pages"),
+        enhancedApi.get("footer/links"),
+        enhancedApi.get("footer/settings")
       ]);
 
       let hasErrors = false;
