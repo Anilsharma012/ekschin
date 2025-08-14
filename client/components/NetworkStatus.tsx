@@ -74,6 +74,13 @@ const NetworkStatusComponent: React.FC = () => {
       });
 
     } catch (error) {
+      // Handle different error types more gracefully
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('NetworkStatus: Connection check timed out');
+      } else {
+        console.warn('NetworkStatus: Connection check failed:', error);
+      }
+
       setStatus({
         isOnline: navigator.onLine,
         serverReachable: false,
