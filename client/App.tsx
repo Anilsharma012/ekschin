@@ -68,6 +68,10 @@ const App = () => (
                 path="/categories/:category/:subcategory"
                 element={<CategoryProperties />}
               />
+              <Route
+                path="/categories/:category/:subcategory/:propertyType"
+                element={<CategoryProperties />}
+              />
               <Route path="/properties" element={<Properties />} />
               {/* New Category Routes */}
               <Route path="/buy" element={<Buy />} />
