@@ -173,9 +173,9 @@ export default function Header() {
             Sectors
           </button>
           <button
-            onClick={() => setSearchType("mohallas")}
+            onClick={() => setSearchType("colonies")}
             className={`px-3 py-1 rounded-full text-xs font-medium ${
-              searchType === "mohallas"
+              searchType === "colonies"
                 ? "bg-white text-[#C70000]"
                 : "bg-white bg-opacity-20 text-white"
             }`}
