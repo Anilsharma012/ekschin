@@ -142,14 +142,19 @@ export default function CategoryProperties() {
   };
 
   const getCategoryTitle = () => {
+    if (propertyType) {
+      return propertyType
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
+    }
     if (subcategory) {
       return subcategory
-        .replace("-", " ")
+        .replace(/-/g, " ")
         .replace(/\b\w/g, (l) => l.toUpperCase());
     }
     if (category) {
       return category
-        .replace("-", " ")
+        .replace(/-/g, " ")
         .replace(/\b\w/g, (l) => l.toUpperCase());
     }
     return "Properties";
