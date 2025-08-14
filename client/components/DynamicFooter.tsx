@@ -182,10 +182,15 @@ export default function DynamicFooter() {
         return;
       }
 
+      // Add timeout wrapper for enhanced API calls
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 8000)
+      );
+
       const [pagesResponse, linksResponse, settingsResponse] = await Promise.allSettled([
-        enhancedApi.get("content/pages"),
-        enhancedApi.get("footer/links"),
-        enhancedApi.get("footer/settings")
+        Promise.race([enhancedApi.get("content/pages"), timeoutPromise]),
+        Promise.race([enhancedApi.get("footer/links"), timeoutPromise]),
+        Promise.race([enhancedApi.get("footer/settings"), timeoutPromise])
       ]);
 
       let hasErrors = false;
