@@ -198,6 +198,14 @@ export const getPropertyAnalytics: RequestHandler = async (req, res) => {
     const userId = (req as any).userId;
     const { days = "30" } = req.query;
 
+    // Validate property ID
+    if (!ObjectId.isValid(propertyId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid property ID",
+      });
+    }
+
     // Verify property ownership
     const property = await db.collection("properties").findOne({
       _id: new ObjectId(propertyId),
