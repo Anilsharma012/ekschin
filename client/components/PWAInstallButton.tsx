@@ -188,7 +188,7 @@ const PWAInstallButton = () => {
               <Smartphone className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-bold">Get the App</h3>
+              <h3 className="text-sm font-bold">Install App</h3>
               <p className="text-xs text-red-100">Better experience on mobile</p>
             </div>
           </div>
