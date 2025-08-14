@@ -234,6 +234,10 @@ export default function DynamicFooter() {
       // Update connection status based on results
       if (hasErrors) {
         setConnectionStatus("error");
+        // If all requests failed, ensure we have basic footer content
+        if (footerPages.length === 0 && footerLinks.length === 0) {
+          console.log("📂 Using minimal footer fallback due to API failures");
+        }
       } else {
         setConnectionStatus("connected");
         if (!silent) console.log("✅ Footer data refreshed successfully");
@@ -242,6 +246,8 @@ export default function DynamicFooter() {
     } catch (error) {
       console.error("❌ Error refreshing footer data:", error);
       setConnectionStatus("error");
+      // Ensure footer still renders with default content
+      if (!silent) console.log("📂 Footer will continue with default content");
     } finally {
       setIsRefreshing(false);
     }
