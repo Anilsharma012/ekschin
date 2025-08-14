@@ -11,6 +11,12 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Properties from "./pages/Properties";
+import Buy from "./pages/Buy";
+import Sale from "./pages/Sale";
+import Rent from "./pages/Rent";
+import Lease from "./pages/Lease";
+import PG from "./pages/PG";
+import Services from "./pages/Services";
 import Chat from "./pages/Chat";
 import MyAccount from "./pages/MyAccount";
 import Agents from "./pages/Agents";
@@ -62,6 +68,13 @@ const App = () => (
                 element={<CategoryProperties />}
               />
               <Route path="/properties" element={<Properties />} />
+              {/* New Category Routes */}
+              <Route path="/buy" element={<Buy />} />
+              <Route path="/sale" element={<Sale />} />
+              <Route path="/rent" element={<Rent />} />
+              <Route path="/lease" element={<Lease />} />
+              <Route path="/pg" element={<PG />} />
+              <Route path="/services" element={<Services />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/my-account" element={<MyAccount />} />
@@ -73,7 +86,10 @@ const App = () => (
               <Route path="/user-dashboard" element={<UserDashboard />} />
               <Route path="/post-property" element={<PostProperty />} />
               <Route path="/seller-dashboard" element={<SellerDashboard />} />
-              <Route path="/enhanced-seller-dashboard" element={<EnhancedSellerDashboard />} />
+              <Route
+                path="/enhanced-seller-dashboard"
+                element={<EnhancedSellerDashboard />}
+              />
               <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
               <Route path="/agent-dashboard" element={<AgentDashboard />} />
               <Route path="/admin" element={<Admin />} />

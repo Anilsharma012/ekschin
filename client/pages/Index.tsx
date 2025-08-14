@@ -1,13 +1,13 @@
 import React from "react";
 import OLXStyleHeader from "../components/OLXStyleHeader";
-import OLXStyleCategories from "../components/OLXStyleCategories";
+import CategoryBar from "../components/CategoryBar";
 import OLXStyleListings from "../components/OLXStyleListings";
 import PackagesShowcase from "../components/PackagesShowcase";
 import PWAInstallPrompt from "../components/PWAInstallPrompt";
 import PWAInstallButton from "../components/PWAInstallButton";
 import BottomNavigation from "../components/BottomNavigation";
 import HomepageBanner from "../components/HomepageBanner";
-import DynamicFooter from "../components/DynamicFooter";
+import StaticFooter from "../components/StaticFooter";
 import HeroImageSlider from "../components/HeroImageSlider";
 
 export default function Index() {
@@ -19,7 +19,7 @@ export default function Index() {
         {/* Hero Image Slider */}
         <HeroImageSlider />
 
-        <OLXStyleCategories />
+        <CategoryBar />
 
         {/* Mid-size banner below categories */}
         <div className="px-4 mb-6 bg-white py-6">
@@ -38,7 +38,7 @@ export default function Index() {
       <BottomNavigation />
       <PWAInstallPrompt />
       <PWAInstallButton />
-      <DynamicFooter />
+      <StaticFooter />
     </div>
   );
 }

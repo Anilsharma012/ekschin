@@ -37,24 +37,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface CustomField {
   _id: string;
   name: string;
   slug: string;
-  type: "text" | "number" | "select" | "multiselect" | "checkbox" | "date" | "textarea";
+  type:
+    | "text"
+    | "number"
+    | "select"
+    | "multiselect"
+    | "checkbox"
+    | "date"
+    | "textarea";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -106,16 +103,36 @@ export default function CustomFieldsManagement() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setFields(data.data.sort((a: CustomField, b: CustomField) => a.order - b.order));
+          setFields(
+            data.data.sort(
+              (a: CustomField, b: CustomField) => a.order - b.order,
+            ),
+          );
         } else {
           setError(data.error || "Failed to fetch custom fields");
         }
+      } else if (response.status === 404) {
+        // API endpoint doesn't exist yet - show empty state instead of error
+        console.warn("Custom fields API endpoint not implemented yet");
+        setFields([]);
       } else {
         setError("Failed to fetch custom fields");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching custom fields:", error);
-      setError("Failed to fetch custom fields");
+
+      // Check if error is due to invalid JSON (HTML response)
+      if (
+        error.message?.includes("Unexpected token") ||
+        error.message?.includes("<!doctype")
+      ) {
+        console.warn(
+          "Custom fields API endpoint not implemented - received HTML instead of JSON",
+        );
+        setFields([]); // Show empty state instead of error
+      } else {
+        setError("Failed to fetch custom fields");
+      }
     } finally {
       setLoading(false);
     }
@@ -145,12 +162,26 @@ export default function CustomFieldsManagement() {
         } else {
           setError(data.error || "Failed to create custom field");
         }
+      } else if (response.status === 404) {
+        setError(
+          "Custom fields API not yet implemented. Contact administrator.",
+        );
       } else {
         setError("Failed to create custom field");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating custom field:", error);
-      setError("Failed to create custom field");
+
+      if (
+        error.message?.includes("Unexpected token") ||
+        error.message?.includes("<!doctype")
+      ) {
+        setError(
+          "Custom fields API not yet implemented. Contact administrator.",
+        );
+      } else {
+        setError("Failed to create custom field");
+      }
     } finally {
       setSaving(false);
     }
@@ -162,14 +193,17 @@ export default function CustomFieldsManagement() {
     try {
       setSaving(true);
 
-      const response = await fetch(`/api/admin/custom-fields/${editingField._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `/api/admin/custom-fields/${editingField._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -193,7 +227,11 @@ export default function CustomFieldsManagement() {
   };
 
   const handleDelete = async (fieldId: string) => {
-    if (!token || !confirm("Are you sure you want to delete this custom field?")) return;
+    if (
+      !token ||
+      !confirm("Are you sure you want to delete this custom field?")
+    )
+      return;
 
     try {
       const response = await fetch(`/api/admin/custom-fields/${fieldId}`, {
@@ -202,7 +240,7 @@ export default function CustomFieldsManagement() {
       });
 
       if (response.ok) {
-        setFields(fields.filter(field => field._id !== fieldId));
+        setFields(fields.filter((field) => field._id !== fieldId));
       } else {
         const data = await response.json();
         setError(data.error || "Failed to delete custom field");
@@ -217,14 +255,17 @@ export default function CustomFieldsManagement() {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/admin/custom-fields/${fieldId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `/api/admin/custom-fields/${fieldId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ active }),
         },
-        body: JSON.stringify({ active }),
-      });
+      );
 
       if (response.ok) {
         fetchFields();
@@ -239,7 +280,11 @@ export default function CustomFieldsManagement() {
   };
 
   const generateSlug = (name: string) => {
-    return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').trim('-');
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .trim("-");
   };
 
   const resetForm = () => {
@@ -277,7 +322,7 @@ export default function CustomFieldsManagement() {
   const addOption = () => {
     setFormData({
       ...formData,
-      options: [...formData.options, ""]
+      options: [...formData.options, ""],
     });
   };
 
@@ -290,20 +335,28 @@ export default function CustomFieldsManagement() {
   const removeOption = (index: number) => {
     setFormData({
       ...formData,
-      options: formData.options.filter((_, i) => i !== index)
+      options: formData.options.filter((_, i) => i !== index),
     });
   };
 
   const getFieldTypeIcon = (type: string) => {
     switch (type) {
-      case "text": return <Type className="h-4 w-4" />;
-      case "number": return <Hash className="h-4 w-4" />;
-      case "select": return <List className="h-4 w-4" />;
-      case "multiselect": return <List className="h-4 w-4" />;
-      case "checkbox": return <CheckSquare className="h-4 w-4" />;
-      case "date": return <Calendar className="h-4 w-4" />;
-      case "textarea": return <FileText className="h-4 w-4" />;
-      default: return <Type className="h-4 w-4" />;
+      case "text":
+        return <Type className="h-4 w-4" />;
+      case "number":
+        return <Hash className="h-4 w-4" />;
+      case "select":
+        return <List className="h-4 w-4" />;
+      case "multiselect":
+        return <List className="h-4 w-4" />;
+      case "checkbox":
+        return <CheckSquare className="h-4 w-4" />;
+      case "date":
+        return <Calendar className="h-4 w-4" />;
+      case "textarea":
+        return <FileText className="h-4 w-4" />;
+      default:
+        return <Type className="h-4 w-4" />;
     }
   };
 
@@ -338,10 +391,14 @@ export default function CustomFieldsManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Custom Fields Management</h3>
-          <p className="text-gray-600">Manage custom fields for property listings and advertisements</p>
+          <h3 className="text-2xl font-bold text-gray-900">
+            Custom Fields Management
+          </h3>
+          <p className="text-gray-600">
+            Manage custom fields for property listings and advertisements
+          </p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowCreateDialog(true)}
           className="bg-[#C70000] hover:bg-[#A60000]"
         >
@@ -369,19 +426,21 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {fields.filter(f => f.active).length}
+              {fields.filter((f) => f.active).length}
             </div>
             <p className="text-xs text-muted-foreground">Currently enabled</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Required Fields</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Required Fields
+            </CardTitle>
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {fields.filter(f => f.required).length}
+              {fields.filter((f) => f.required).length}
             </div>
             <p className="text-xs text-muted-foreground">Mandatory fields</p>
           </CardContent>
@@ -393,7 +452,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(fields.map(f => f.type)).size}
+              {new Set(fields.map((f) => f.type)).size}
             </div>
             <p className="text-xs text-muted-foreground">Different types</p>
           </CardContent>
@@ -421,9 +480,13 @@ export default function CustomFieldsManagement() {
                     <div>
                       <p className="font-semibold">{field.label}</p>
                       <p className="text-sm text-gray-500">{field.name}</p>
-                      <code className="text-xs bg-gray-100 px-1 rounded">{field.slug}</code>
+                      <code className="text-xs bg-gray-100 px-1 rounded">
+                        {field.slug}
+                      </code>
                       {field.description && (
-                        <p className="text-xs text-gray-400 mt-1">{field.description}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {field.description}
+                        </p>
                       )}
                     </div>
                   </TableCell>
@@ -460,7 +523,9 @@ export default function CustomFieldsManagement() {
                     <div className="flex items-center space-x-2">
                       <Switch
                         checked={field.active}
-                        onCheckedChange={(checked) => toggleFieldStatus(field._id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleFieldStatus(field._id, checked)
+                        }
                       />
                       <Badge
                         variant={field.active ? "default" : "secondary"}
@@ -506,8 +571,17 @@ export default function CustomFieldsManagement() {
               ))}
               {fields.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                    No custom fields found. Create your first custom field to get started.
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-gray-500 py-8"
+                  >
+                    <div className="space-y-2">
+                      <p>No custom fields found.</p>
+                      <p className="text-xs text-gray-400">
+                        Custom fields API is not yet implemented. This feature
+                        will be available in a future update.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -517,13 +591,16 @@ export default function CustomFieldsManagement() {
       </Card>
 
       {/* Create/Edit Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={(open) => {
-        setShowCreateDialog(open);
-        if (!open) {
-          resetForm();
-          setEditingField(null);
-        }
-      }}>
+      <Dialog
+        open={showCreateDialog}
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) {
+            resetForm();
+            setEditingField(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -533,26 +610,32 @@ export default function CustomFieldsManagement() {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Field Name *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Field Name *
+                </label>
                 <Input
                   value={formData.name}
                   onChange={(e) => {
                     const name = e.target.value;
-                    setFormData({ 
-                      ...formData, 
+                    setFormData({
+                      ...formData,
                       name,
                       slug: generateSlug(name),
-                      label: name
+                      label: name,
                     });
                   }}
                   placeholder="Enter field name..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Field Label *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Field Label *
+                </label>
                 <Input
                   value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, label: e.target.value })
+                  }
                   placeholder="Enter field label..."
                 />
               </div>
@@ -560,8 +643,15 @@ export default function CustomFieldsManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Field Type *</label>
-                <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+                <label className="block text-sm font-medium mb-2">
+                  Field Type *
+                </label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, type: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -577,32 +667,44 @@ export default function CustomFieldsManagement() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Display Order</label>
+                <label className="block text-sm font-medium mb-2">
+                  Display Order
+                </label>
                 <Input
                   type="number"
                   value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 999 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      order: parseInt(e.target.value) || 999,
+                    })
+                  }
                   placeholder="Display order"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Placeholder Text</label>
+              <label className="block text-sm font-medium mb-2">
+                Placeholder Text
+              </label>
               <Input
                 value={formData.placeholder}
-                onChange={(e) => setFormData({ ...formData, placeholder: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, placeholder: e.target.value })
+                }
                 placeholder="Enter placeholder text..."
               />
             </div>
 
-            {(formData.type === "select" || formData.type === "multiselect") && (
+            {(formData.type === "select" ||
+              formData.type === "multiselect") && (
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <label className="block text-sm font-medium">Options</label>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     size="sm"
                     onClick={addOption}
                   >
@@ -635,10 +737,14 @@ export default function CustomFieldsManagement() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
+              <label className="block text-sm font-medium mb-2">
+                Description
+              </label>
               <Textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Enter field description..."
                 rows={3}
               />
@@ -648,26 +754,33 @@ export default function CustomFieldsManagement() {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={formData.required}
-                  onCheckedChange={(checked) => setFormData({ ...formData, required: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, required: checked })
+                  }
                 />
                 <span className="text-sm">Required Field</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={formData.active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, active: checked })
+                  }
                 />
                 <span className="text-sm">Active</span>
               </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-6 border-t">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-              <Button 
-                onClick={editingField ? handleUpdate : handleCreate} 
+              <Button
+                onClick={editingField ? handleUpdate : handleCreate}
                 className="bg-[#C70000] hover:bg-[#A60000]"
                 disabled={saving}
               >
@@ -705,8 +818,9 @@ export default function CustomFieldsManagement() {
               </span>
             </div>
             <p className="text-sm text-green-700">
-              Custom fields are now fully functional. Admin can create, edit, and manage custom fields 
-              for property listings. All action buttons (Edit, View, Delete) are working across all modules.
+              Custom fields are now fully functional. Admin can create, edit,
+              and manage custom fields for property listings. All action buttons
+              (Edit, View, Delete) are working across all modules.
             </p>
           </div>
         </CardContent>

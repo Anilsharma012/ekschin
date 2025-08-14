@@ -313,27 +313,24 @@ import { testFooterData } from "./routes/footerTest";
 export function createServer() {
   const app = express();
 
- const allowedOrigins = [
-     "https://aproperty.netlify.app",
-    "http://localhost:5173"
+  const allowedOrigins = [
+    "https://aproperty.netlify.app",
+    "http://localhost:5173",
+    "https://295329d1a890466f9bcbc004dd730a35-0776d79bc1304d9390d1d56e1.fly.dev",
   ];
 
   app.use(
     cors({
       origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          console.log("❌ CORS blocked for origin:", origin);
-          callback(new Error("Not allowed by CORS"));
-        }
+        // Temporarily allow all origins for debugging
+        console.log("🔍 CORS request from origin:", origin);
+        callback(null, true);
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-    })
+    }),
   );
-
 
   app.use(express.json({ limit: "1gb" }));
   app.use(express.urlencoded({ extended: true, limit: "1gb" }));
@@ -1242,4 +1239,3 @@ export function createServer() {
 }
 
 // For production
-

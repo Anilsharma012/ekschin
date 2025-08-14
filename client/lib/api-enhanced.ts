@@ -50,9 +50,9 @@ const environment = detectEnvironment();
 
 export const API_CONFIG = {
   baseUrl: API_BASE_URL,
-  timeout: 8000, // Reduced timeout for faster fallback
-  retryAttempts: 2,
-  retryDelay: 1000,
+  timeout: 35000, // Further increased timeout for Fly.dev compatibility
+  retryAttempts: 2, // Reduced retry attempts to prevent long delays
+  retryDelay: 1500, // Reduced initial delay
   environment,
 };
 
@@ -62,10 +62,17 @@ export const createApiUrl = (endpoint: string): string => {
 
   if (API_CONFIG.baseUrl) {
     const fullUrl = `${API_CONFIG.baseUrl}/api/${cleanEndpoint.replace("api/", "")}`;
+    console.log(
+      `🔗 API URL: ${fullUrl} (Environment: ${API_CONFIG.environment})`,
+    );
     return fullUrl;
   }
 
-  return `/api/${cleanEndpoint.replace("api/", "")}`;
+  const relativeUrl = `/api/${cleanEndpoint.replace("api/", "")}`;
+  console.log(
+    `🔗 API URL: ${relativeUrl} (Environment: ${API_CONFIG.environment})`,
+  );
+  return relativeUrl;
 };
 
 // Enhanced fetch with retry and fallback
@@ -82,7 +89,17 @@ export const safeApiRequest = async (
   const url = createApiUrl(endpoint);
   const controller = new AbortController();
 
-  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+  // Use adaptive timeout based on retry count and environment
+  let timeoutId: NodeJS.Timeout | null = null;
+  const adaptiveTimeout =
+    API_CONFIG.environment === "fly"
+      ? Math.min(45000, 30000 + retryCount * 5000) // 30-45s for Fly.dev
+      : Math.min(20000, 10000 + retryCount * 3000); // 10-20s for others
+
+  timeoutId = setTimeout(() => {
+    console.warn(`⏰ Request timeout for ${url} after ${adaptiveTimeout}ms`);
+    controller.abort();
+  }, adaptiveTimeout);
 
   try {
     console.log(
@@ -98,7 +115,9 @@ export const safeApiRequest = async (
       },
     });
 
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     let responseData;
     try {
@@ -131,35 +150,48 @@ export const safeApiRequest = async (
       ok: response.ok,
     };
   } catch (error: any) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     const isRetryableError =
       error.name === "AbortError" ||
       error.message?.includes("Failed to fetch") ||
       error.message?.includes("NetworkError") ||
-      error.message?.includes("timeout");
+      error.message?.includes("timeout") ||
+      error.message?.includes("Load failed") ||
+      error.code === "NETWORK_ERROR" ||
+      error.code === "FETCH_ERROR";
 
-    // Retry logic
+    // Enhanced retry logic with exponential backoff
     if (isRetryableError && retryCount < API_CONFIG.retryAttempts) {
-      console.warn(
-        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${API_CONFIG.retryDelay}ms...`,
+      const backoffDelay = Math.min(
+        API_CONFIG.retryDelay * Math.pow(2, retryCount), // Exponential backoff
+        10000, // Max 10 second delay
       );
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, API_CONFIG.retryDelay * (retryCount + 1)),
+      console.warn(
+        `🔄 Retrying request (${retryCount + 1}/${API_CONFIG.retryAttempts}) in ${backoffDelay}ms...`,
+        { error: error.message, url },
       );
+
+      await new Promise((resolve) => setTimeout(resolve, backoffDelay));
       return safeApiRequest(endpoint, options, retryCount + 1);
     }
 
     // Return fallback data after all retries failed
+    const errorInfo = {
+      error: error.message || "Unknown error",
+      name: error.name || "Error",
+      stack: error.stack?.split("\n")?.[0] || "No stack trace",
+      url,
+      retryCount: retryCount + 1,
+      timestamp: new Date().toISOString(),
+    };
+
     console.error(
       `❌ API request failed after ${retryCount + 1} attempts for ${endpoint}:`,
-      {
-        error: error.message,
-        name: error.name,
-        stack: error.stack?.split("\n")[0],
-        url,
-      },
+      errorInfo,
     );
 
     return {
@@ -171,7 +203,7 @@ export const safeApiRequest = async (
   }
 };
 
-// Fallback data for common endpoints
+// Enhanced fallback data for common endpoints
 const getFallbackData = (endpoint: string) => {
   const cleanEndpoint = endpoint.toLowerCase();
 
@@ -230,8 +262,85 @@ const getFallbackData = (endpoint: string) => {
   if (cleanEndpoint.includes("homepage-sliders")) {
     return {
       success: true,
-      data: [], // Return empty array since we removed Rohtak section
+      data: [],
       message: "No sliders configured",
+      fromFallback: true,
+    };
+  }
+
+  // Footer-specific fallbacks
+  if (cleanEndpoint.includes("footer/links")) {
+    return {
+      success: true,
+      data: [
+        {
+          _id: "fallback-link-1",
+          title: "Quick Buy",
+          url: "/buy",
+          section: "quick_links",
+          order: 1,
+          isActive: true,
+          isExternal: false,
+        },
+        {
+          _id: "fallback-link-2",
+          title: "Quick Sale",
+          url: "/sale",
+          section: "quick_links",
+          order: 2,
+          isActive: true,
+          isExternal: false,
+        },
+        {
+          _id: "fallback-link-3",
+          title: "Contact",
+          url: "/contact",
+          section: "support",
+          order: 1,
+          isActive: true,
+          isExternal: false,
+        },
+      ],
+      message: "Using offline footer links",
+      fromFallback: true,
+    };
+  }
+
+  if (cleanEndpoint.includes("footer/settings")) {
+    return {
+      success: true,
+      data: {
+        companyName: "Aashish Properties",
+        companyDescription:
+          "Your trusted property partner in Rohtak. Find your dream home with verified listings and expert guidance.",
+        companyLogo: "AP",
+        socialLinks: {},
+        contactInfo: {
+          phone: "+91 9876543210",
+          email: "info@aashishproperty.com",
+          address: "Rohtak, Haryana, India",
+        },
+        showLocations: true,
+        locations: [
+          "Model Town",
+          "Sector 14",
+          "Civil Lines",
+          "Old City",
+          "Industrial Area",
+          "Bohar",
+        ],
+        customSections: {},
+      },
+      message: "Using offline footer settings",
+      fromFallback: true,
+    };
+  }
+
+  if (cleanEndpoint.includes("content/pages")) {
+    return {
+      success: true,
+      data: [],
+      message: "No content pages available (offline mode)",
       fromFallback: true,
     };
   }

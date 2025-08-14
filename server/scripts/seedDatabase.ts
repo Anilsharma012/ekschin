@@ -2,10 +2,10 @@ import { MongoClient } from "mongodb";
 import bcrypt from "bcrypt";
 
 const MONGODB_URI =
-  "mongodb+srv://Aashishpropeorty:anilsharma@property.zn2cowc.mongodb.net/";
+  "mongodb+srv://Aashishpropeorty:SATYAKA123@property.zn2cowc.mongodb.net/";
 const DB_NAME = "aashish_property";
 
-// Sample data
+// Sample data with comprehensive categories for property management
 const categories = [
   {
     name: "Residential",
@@ -13,17 +13,66 @@ const categories = [
     icon: "🏠",
     description: "Residential properties for living",
     subcategories: [
-      { id: "1bhk", name: "1 BHK Apartment", slug: "1bhk" },
-      { id: "2bhk", name: "2 BHK Apartment", slug: "2bhk" },
-      { id: "3bhk", name: "3 BHK Apartment", slug: "3bhk" },
-      { id: "4bhk", name: "4 BHK Apartment", slug: "4bhk" },
-      { id: "villa", name: "Villa", slug: "villa" },
+      {
+        id: "1bhk",
+        name: "1 BHK Apartment",
+        slug: "1bhk",
+        description: "Single bedroom apartments",
+      },
+      {
+        id: "2bhk",
+        name: "2 BHK Apartment",
+        slug: "2bhk",
+        description: "Two bedroom apartments",
+      },
+      {
+        id: "3bhk",
+        name: "3 BHK Apartment",
+        slug: "3bhk",
+        description: "Three bedroom apartments",
+      },
+      {
+        id: "4bhk",
+        name: "4 BHK Apartment",
+        slug: "4bhk",
+        description: "Four bedroom apartments",
+      },
+      {
+        id: "villa",
+        name: "Villa",
+        slug: "villa",
+        description: "Independent villas",
+      },
       {
         id: "independent-house",
         name: "Independent House",
         slug: "independent-house",
+        description: "Standalone houses",
       },
-      { id: "builder-floor", name: "Builder Floor", slug: "builder-floor" },
+      {
+        id: "builder-floor",
+        name: "Builder Floor",
+        slug: "builder-floor",
+        description: "Builder floor apartments",
+      },
+      {
+        id: "duplex",
+        name: "Duplex",
+        slug: "duplex",
+        description: "Two-story apartments",
+      },
+      {
+        id: "penthouse",
+        name: "Penthouse",
+        slug: "penthouse",
+        description: "Luxury penthouse apartments",
+      },
+      {
+        id: "studio",
+        name: "Studio Apartment",
+        slug: "studio",
+        description: "Single room apartments",
+      },
     ],
     order: 1,
     active: true,
@@ -34,11 +83,48 @@ const categories = [
     icon: "🏢",
     description: "Commercial properties for business",
     subcategories: [
-      { id: "office", name: "Office Space", slug: "office" },
-      { id: "shop", name: "Shop/Retail", slug: "shop" },
-      { id: "warehouse", name: "Warehouse", slug: "warehouse" },
-      { id: "showroom", name: "Showroom", slug: "showroom" },
-      { id: "restaurant", name: "Restaurant Space", slug: "restaurant" },
+      {
+        id: "office",
+        name: "Office Space",
+        slug: "office",
+        description: "Office spaces for businesses",
+      },
+      {
+        id: "shop",
+        name: "Shop/Retail",
+        slug: "shop",
+        description: "Retail shops and stores",
+      },
+      {
+        id: "warehouse",
+        name: "Warehouse",
+        slug: "warehouse",
+        description: "Storage and warehouse facilities",
+      },
+      {
+        id: "showroom",
+        name: "Showroom",
+        slug: "showroom",
+        description: "Display and showroom spaces",
+      },
+      {
+        id: "restaurant",
+        name: "Restaurant Space",
+        slug: "restaurant",
+        description: "Restaurant and food service spaces",
+      },
+      {
+        id: "factory",
+        name: "Factory",
+        slug: "factory",
+        description: "Manufacturing facilities",
+      },
+      {
+        id: "coworking",
+        name: "Co-working Space",
+        slug: "coworking",
+        description: "Shared workspace facilities",
+      },
     ],
     order: 2,
     active: true,
@@ -53,24 +139,102 @@ const categories = [
         id: "residential-plot",
         name: "Residential Plot",
         slug: "residential-plot",
+        description: "Plots for residential development",
       },
       {
         id: "commercial-plot",
         name: "Commercial Plot",
         slug: "commercial-plot",
+        description: "Plots for commercial development",
       },
       {
         id: "agricultural-land",
         name: "Agricultural Land",
         slug: "agricultural-land",
+        description: "Farming and agricultural land",
       },
       {
         id: "industrial-plot",
         name: "Industrial Plot",
         slug: "industrial-plot",
+        description: "Plots for industrial development",
+      },
+      {
+        id: "farm-house",
+        name: "Farm House",
+        slug: "farm-house",
+        description: "Farm houses with land",
       },
     ],
     order: 3,
+    active: true,
+  },
+  {
+    name: "PG/Hostel",
+    slug: "pg-hostel",
+    icon: "🏨",
+    description: "Paying guest accommodations and hostels",
+    subcategories: [
+      {
+        id: "boys-pg",
+        name: "Boys PG",
+        slug: "boys-pg",
+        description: "PG accommodation for men",
+      },
+      {
+        id: "girls-pg",
+        name: "Girls PG",
+        slug: "girls-pg",
+        description: "PG accommodation for women",
+      },
+      {
+        id: "co-living",
+        name: "Co-living Space",
+        slug: "co-living",
+        description: "Modern co-living arrangements",
+      },
+      {
+        id: "hostel",
+        name: "Hostel",
+        slug: "hostel",
+        description: "Student and working hostel accommodation",
+      },
+    ],
+    order: 4,
+    active: true,
+  },
+  {
+    name: "Rental",
+    slug: "rental",
+    icon: "🔑",
+    description: "Properties available for rent",
+    subcategories: [
+      {
+        id: "house-rent",
+        name: "House for Rent",
+        slug: "house-rent",
+        description: "Independent houses for rent",
+      },
+      {
+        id: "flat-rent",
+        name: "Flat for Rent",
+        slug: "flat-rent",
+        description: "Apartments for rent",
+      },
+      {
+        id: "room-rent",
+        name: "Room for Rent",
+        slug: "room-rent",
+        description: "Single rooms for rent",
+      },
+      {
+        id: "office-rent",
+        name: "Office for Rent",
+        slug: "office-rent",
+        description: "Office spaces for rent",
+      },
+    ],
+    order: 5,
     active: true,
   },
 ];
