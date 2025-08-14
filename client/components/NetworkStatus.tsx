@@ -29,17 +29,22 @@ const NetworkStatusComponent: React.FC = () => {
   const [isChecking, setIsChecking] = useState(false);
 
   const checkConnection = async () => {
+    if (isChecking) return; // Prevent overlapping checks
+
     setIsChecking(true);
-    
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // Increased timeout
 
       const startTime = Date.now();
       const response = await fetch('/api/health', {
         method: 'GET',
         signal: controller.signal,
-        cache: 'no-cache'
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       clearTimeout(timeoutId);
