@@ -107,6 +107,7 @@ export default function CategoryProperties() {
 
       if (category) params.append("propertyType", category);
       if (subcategory) params.append("subCategory", subcategory);
+      if (propertyType) params.append("propertyTypeSlug", propertyType);
 
       // Add filter parameters
       Object.entries(filters).forEach(([key, value]) => {
