@@ -149,6 +149,24 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+// Custom Field Types
+export interface CustomField {
+  _id?: string;
+  name: string;
+  slug: string;
+  type: "text" | "number" | "select" | "multiselect" | "checkbox" | "date" | "textarea";
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  active: boolean;
+  order: number;
+  options?: string[];
+  categories: string[];
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Advertisement Package Types
 export interface AdPackage {
   _id?: string;
