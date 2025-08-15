@@ -269,12 +269,12 @@ export default function OLXStyleListings() {
               {/* Image */}
               <div className="relative aspect-square">
                 <img
-                  src={property.images[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"}
+                  src={property.coverImageUrl ?? property.images?.[0]?.url ?? property.images?.[0] ?? '/placeholder.png'}
                   alt={property.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400";
+                    target.src = "/placeholder.png";
                   }}
                 />
                 
