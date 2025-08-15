@@ -80,6 +80,12 @@ const App = () => (
               <Route path="/lease" element={<Lease />} />
               <Route path="/pg" element={<PG />} />
               <Route path="/services" element={<Services />} />
+              {/* Category/Subcategory Listings */}
+              <Route path="/buy/:slug" element={<CategoryProperties />} />
+              <Route path="/sale/:slug" element={<CategoryProperties />} />
+              <Route path="/rent/:slug" element={<CategoryProperties />} />
+              <Route path="/lease/:slug" element={<CategoryProperties />} />
+              <Route path="/pg/:slug" element={<CategoryProperties />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/my-account" element={<MyAccount />} />
