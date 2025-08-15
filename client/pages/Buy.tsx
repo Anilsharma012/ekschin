@@ -27,7 +27,7 @@ export default function Buy() {
     try {
       setLoading(true);
       // GET /subcategories?category=buy as per requirements
-      const response = await fetch("/api/subcategories/with-counts?category=residential");
+      const response = await fetch("/api/subcategories/with-counts?category=buy");
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
