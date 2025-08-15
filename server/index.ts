@@ -46,6 +46,7 @@ import {
   exportUsers,
   updateUserStatus,
   deleteUser,
+  bulkDeleteUsers,
   getAllProperties,
   initializeAdmin,
   getAdminCategories,
