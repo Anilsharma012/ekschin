@@ -21,6 +21,7 @@ import Chat from "./pages/Chat";
 import MyAccount from "./pages/MyAccount";
 import User from "./pages/User";
 import Seller from "./pages/Seller";
+import Support from "./pages/Support";
 import Agents from "./pages/Agents";
 import Login from "./pages/Login";
 import UserLogin from "./pages/UserLogin";
