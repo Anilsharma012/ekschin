@@ -626,14 +626,21 @@ export default function CategoryProperties() {
                     }`}
                   >
                     <img
-                      src={
-                        property.images?.[0] ||
-                        "https://via.placeholder.com/300x300?text=No+Image"
-                      }
+                      src={property.coverImageUrl ?? property.images?.[0]?.url ?? property.images?.[0] ?? '/placeholder.png'}
                       alt={property.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.png";
+                      }}
                     />
-                    <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle favorites toggle
+                      }}
+                      className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50"
+                    >
                       <Heart className="h-4 w-4 text-gray-600" />
                     </button>
                   </div>
