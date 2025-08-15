@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import { toast } from "../components/ui/use-toast";
 import ChatBot from "../components/ChatBot";
 
 interface Property {
