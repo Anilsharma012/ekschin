@@ -26,7 +26,7 @@ export default function Lease() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/subcategories/with-counts?category=commercial");
+      const response = await fetch("/api/subcategories/with-counts?category=lease");
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
