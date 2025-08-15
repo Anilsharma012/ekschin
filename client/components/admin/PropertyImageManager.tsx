@@ -29,10 +29,10 @@ interface Property {
   title: string;
   images: string[];
   price: number;
-  location: {
+  location?: {
     city: string;
     state: string;
-  };
+  } | null;
 }
 
 export default function PropertyImageManager() {
