@@ -321,6 +321,30 @@ import {
   getActiveCustomFields,
 } from "./routes/custom-fields";
 
+// Subcategories routes
+import {
+  getSubcategories,
+  getSubcategoriesWithCounts,
+} from "./routes/subcategories";
+
+// Favorites routes
+import {
+  getFavorites,
+  addToFavorites,
+  removeFromFavorites,
+  checkFavorite,
+} from "./routes/favorites";
+
+// Tickets (support) routes
+import {
+  createTicket,
+  getUserTickets,
+  getAllTickets,
+  getTicketMessages,
+  addTicketMessage,
+  updateTicketStatus,
+} from "./routes/tickets";
+
 export function createServer() {
   const app = express();
 
