@@ -67,7 +67,7 @@ const mohallas = [
 ];
 
 export default function CategoryProperties() {
-  const { category, subcategory, propertyType } = useParams();
+  const { category, subcategory, propertyType, slug } = useParams();
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,10 +76,21 @@ export default function CategoryProperties() {
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [categoryData, setCategoryData] = useState<any>(null);
 
+  // Get category from URL path
+  const getCurrentCategory = () => {
+    const path = window.location.pathname;
+    if (path.startsWith('/buy/')) return 'buy';
+    if (path.startsWith('/sale/')) return 'sale';
+    if (path.startsWith('/rent/')) return 'rent';
+    if (path.startsWith('/lease/')) return 'lease';
+    if (path.startsWith('/pg/')) return 'pg';
+    return category;
+  };
+
   useEffect(() => {
     fetchCategoryData();
     fetchProperties();
-  }, [category, subcategory]);
+  }, [category, subcategory, slug]);
 
   useEffect(() => {
     fetchProperties();
