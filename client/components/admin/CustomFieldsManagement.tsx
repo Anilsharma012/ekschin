@@ -219,7 +219,7 @@ export default function CustomFieldsManagement() {
       });
 
       if (response.ok) {
-        setFields(fields.filter((field) => field._id !== fieldId));
+        setFields((prevFields) => prevFields?.filter((field) => field?._id !== fieldId) || []);
       } else {
         const data = await response.json();
         setError(data.error || "Failed to delete custom field");
@@ -292,8 +292,8 @@ export default function CustomFieldsManagement() {
       required: field.required,
       active: field.active,
       order: field.order,
-      options: field.options || [],
-      categories: field.categories,
+      options: field?.options || [],
+      categories: field?.categories || [],
       description: field.description || "",
     });
   };
@@ -394,7 +394,7 @@ export default function CustomFieldsManagement() {
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{fields.length}</div>
+            <div className="text-2xl font-bold">{fields?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Custom fields</p>
           </CardContent>
         </Card>
@@ -405,7 +405,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {fields.filter((f) => f.active).length}
+              {fields?.filter((f) => f?.active)?.length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Currently enabled</p>
           </CardContent>
@@ -419,7 +419,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {fields.filter((f) => f.required).length}
+              {fields?.filter((f) => f?.required)?.length || 0}
             </div>
             <p className="text-xs text-muted-foreground">Mandatory fields</p>
           </CardContent>
@@ -431,7 +431,7 @@ export default function CustomFieldsManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(fields.map((f) => f.type)).size}
+              {new Set(fields?.map((f) => f?.type) || []).size}
             </div>
             <p className="text-xs text-muted-foreground">Different types</p>
           </CardContent>
@@ -453,7 +453,7 @@ export default function CustomFieldsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fields.map((field) => (
+              {fields?.map((field) => (
                 <TableRow key={field._id}>
                   <TableCell className="font-medium">
                     <div>
@@ -482,8 +482,8 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      {field.categories.length > 0 ? (
-                        field.categories.slice(0, 2).map((cat, index) => (
+                      {field?.categories?.length > 0 ? (
+                        field?.categories?.slice(0, 2)?.map((cat, index) => (
                           <Badge key={index} variant="outline" className="mr-1">
                             {cat}
                           </Badge>
@@ -491,9 +491,9 @@ export default function CustomFieldsManagement() {
                       ) : (
                         <Badge variant="secondary">All Categories</Badge>
                       )}
-                      {field.categories.length > 2 && (
+                      {field?.categories?.length > 2 && (
                         <Badge variant="outline">
-                          +{field.categories.length - 2} more
+                          +{(field?.categories?.length || 0) - 2} more
                         </Badge>
                       )}
                     </div>
@@ -548,7 +548,7 @@ export default function CustomFieldsManagement() {
                   </TableCell>
                 </TableRow>
               ))}
-              {fields.length === 0 && (
+              {(!fields || fields.length === 0) && (
                 <TableRow>
                   <TableCell
                     colSpan={6}
