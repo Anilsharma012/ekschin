@@ -946,6 +946,8 @@ export default function Admin() {
           return <DatabaseDiagnostics />;
         case "db-test":
           return <DatabaseDiagnostics />;
+        case "other-services":
+          return <OtherServicesManagement />;
         default:
           return renderDashboard();
       }
