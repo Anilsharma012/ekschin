@@ -103,6 +103,8 @@ const App = () => (
               <Route path="/post-property" element={<PostProperty />} />
               <Route path="/seller" element={<Seller />} />
               <Route path="/seller-dashboard" element={<SellerDashboard />} />
+              <Route path="/support/:action" element={<Support />} />
+              <Route path="/support/ticket/:ticketId" element={<Support />} />
               <Route
                 path="/enhanced-seller-dashboard"
                 element={<EnhancedSellerDashboard />}
