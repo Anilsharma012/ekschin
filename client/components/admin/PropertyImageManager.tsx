@@ -215,7 +215,7 @@ export default function PropertyImageManager() {
                 <div>
                   <CardTitle className="text-lg">{property.title}</CardTitle>
                   <p className="text-sm text-gray-500">
-                    ₹{(property.price / 100000).toFixed(1)}L • {property.location.city}, {property.location.state}
+                    ₹{(property.price / 100000).toFixed(1)}L • {property.location?.city || 'Unknown'}, {property.location?.state || 'Unknown'}
                   </p>
                 </div>
                 <Button
