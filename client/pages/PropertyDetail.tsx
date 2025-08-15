@@ -85,8 +85,16 @@ export default function PropertyDetail() {
   const fetchProperty = async () => {
     try {
       setLoading(true);
+
+      // Validate ObjectId format
+      if (!id || id.length !== 24) {
+        setError("Invalid property ID");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`/api/properties/${id}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -94,6 +102,10 @@ export default function PropertyDetail() {
         } else {
           setError(data.error || "Property not found");
         }
+      } else if (response.status === 404) {
+        setError("Property not found");
+      } else if (response.status === 400) {
+        setError("Invalid property ID");
       } else {
         setError("Failed to load property");
       }
