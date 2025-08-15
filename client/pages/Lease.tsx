@@ -27,10 +27,18 @@ export default function Lease() {
     try {
       setLoading(true);
       const response = await fetch("/api/subcategories/with-counts?category=commercial");
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setSubcategories(data.data);
+      } else {
+        throw new Error(data.error || 'Failed to fetch subcategories');
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
