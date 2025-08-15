@@ -256,9 +256,13 @@ export default function PropertyDetail() {
                 <CardContent className="p-0">
                   <div className="relative aspect-video">
                     <img
-                      src={property.images[currentImageIndex]}
+                      src={property.coverImageUrl ?? property.images?.[currentImageIndex]?.url ?? property.images?.[currentImageIndex] ?? '/placeholder.png'}
                       alt={property.title}
                       className="w-full h-full object-cover rounded-t-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.png";
+                      }}
                     />
                     {property.images.length > 1 && (
                       <>
