@@ -178,6 +178,13 @@ export default function CategoryProperties() {
   };
 
   const getCategoryTitle = () => {
+    const currentCategory = getCurrentCategory();
+
+    if (slug) {
+      const subcategoryName = slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      const categoryName = currentCategory?.replace(/\b\w/g, (l) => l.toUpperCase());
+      return `${subcategoryName} for ${categoryName}`;
+    }
     if (propertyType) {
       return propertyType
         .replace(/-/g, " ")
