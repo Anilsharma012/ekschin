@@ -87,6 +87,7 @@ const App = () => (
               <Route path="/rent/:slug" element={<CategoryProperties />} />
               <Route path="/lease/:slug" element={<CategoryProperties />} />
               <Route path="/pg/:slug" element={<CategoryProperties />} />
+              <Route path="/property/:id" element={<PropertyDetail />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/my-account" element={<MyAccount />} />
