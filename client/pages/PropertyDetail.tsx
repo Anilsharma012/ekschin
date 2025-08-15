@@ -140,21 +140,11 @@ export default function PropertyDetail() {
     window.open(url, '_blank');
   };
 
-  const handleStartChat = () => {
-    // Try to navigate to chat page first
+  const handleStartChat = async () => {
     try {
       // Check if user is logged in
       const token = localStorage.getItem('token');
-      if (token) {
-        // Navigate to chat page with property context
-        navigate('/chat', {
-          state: {
-            propertyId: property?._id,
-            sellerId: property?.ownerId,
-            propertyTitle: property?.title
-          }
-        });
-      } else {
+      if (!token) {
         // If not logged in, redirect to login first
         navigate('/login', {
           state: {
@@ -162,15 +152,40 @@ export default function PropertyDetail() {
             message: 'Please login to start chat'
           }
         });
+        return;
+      }
+
+      if (!property?._id) {
+        toast({
+          title: "Error",
+          description: "Property information not available",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Use global API helper to find or create conversation
+      const response = await (window as any).api(`/conversations/find-or-create?propertyId=${property._id}`, {
+        method: 'POST'
+      });
+
+      if (response.success) {
+        // Navigate to chat page with conversation ID
+        navigate(`/chat/${response.data._id}`);
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to start chat",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error starting chat:', error);
-      // Fallback to WhatsApp
-      if (property?.contactInfo.whatsappNumber) {
-        handleWhatsApp(property.contactInfo.whatsappNumber);
-      } else {
-        handleWhatsApp(property.contactInfo.phone);
-      }
+      toast({
+        title: "Error",
+        description: "Failed to start chat. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
