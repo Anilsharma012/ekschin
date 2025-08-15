@@ -1299,6 +1299,24 @@ export function createServer() {
     updateCustomFieldStatus,
   );
 
+  // Subcategories routes
+  app.get("/api/subcategories", getSubcategories);
+  app.get("/api/subcategories/with-counts", getSubcategoriesWithCounts);
+
+  // Favorites routes
+  app.get("/api/favorites/my", authenticateToken, getFavorites);
+  app.post("/api/favorites/:propertyId", authenticateToken, addToFavorites);
+  app.delete("/api/favorites/:propertyId", authenticateToken, removeFromFavorites);
+  app.get("/api/favorites/:propertyId/check", authenticateToken, checkFavorite);
+
+  // Tickets (support) routes
+  app.post("/api/tickets", authenticateToken, createTicket);
+  app.get("/api/tickets/my", authenticateToken, getUserTickets);
+  app.get("/api/admin/tickets", authenticateToken, requireAdmin, getAllTickets);
+  app.get("/api/tickets/:ticketId/messages", authenticateToken, getTicketMessages);
+  app.post("/api/tickets/:ticketId/messages", authenticateToken, addTicketMessage);
+  app.patch("/api/admin/tickets/:ticketId/status", authenticateToken, requireAdmin, updateTicketStatus);
+
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {
     res.json({
