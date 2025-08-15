@@ -116,8 +116,33 @@ export default function CategoryProperties() {
       setLoading(true);
       const params = new URLSearchParams();
 
-      if (category) params.append("propertyType", category);
-      if (subcategory) params.append("subCategory", subcategory);
+      // Always include status=active as per requirements
+      params.append("status", "active");
+
+      // Handle category and subcategory from URL
+      const currentCategory = getCurrentCategory();
+      if (currentCategory) {
+        if (currentCategory === 'buy' || currentCategory === 'sale') {
+          params.append("priceType", "sale");
+        } else if (currentCategory === 'rent') {
+          params.append("priceType", "rent");
+        } else if (currentCategory === 'lease') {
+          params.append("priceType", "lease");
+        } else if (currentCategory === 'pg') {
+          params.append("propertyType", "pg");
+        }
+      }
+
+      // Handle subcategory from slug
+      if (slug) {
+        params.append("subCategory", slug);
+      } else if (subcategory) {
+        params.append("subCategory", subcategory);
+      }
+
+      if (category && !slug) {
+        params.append("propertyType", category);
+      }
       if (propertyType) params.append("propertyTypeSlug", propertyType);
 
       // Add filter parameters
