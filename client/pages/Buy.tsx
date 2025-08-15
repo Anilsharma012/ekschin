@@ -26,8 +26,13 @@ export default function Buy() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      // GET /subcategories?category=buy as per requirements
-      const response = await fetch("/api/subcategories/with-counts?category=buy");
+      // GET /subcategories?category=buy as per requirements with cache-busting
+      const response = await fetch("/api/subcategories/with-counts?category=buy", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
