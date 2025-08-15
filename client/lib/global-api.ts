@@ -1,9 +1,14 @@
 // Global API helper function
 export function api(path: string, options: any = {}) {
   const token = localStorage.getItem('token');
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
-  return fetch(baseUrl + path, {
+  // Use relative URLs (empty base) since we're on the same domain
+  const baseUrl = '';
+
+  // Ensure path starts with /api/
+  const apiPath = path.startsWith('/api/') ? path : `/api${path.startsWith('/') ? path : '/' + path}`;
+
+  return fetch(baseUrl + apiPath, {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
