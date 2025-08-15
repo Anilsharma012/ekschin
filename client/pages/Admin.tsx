@@ -63,6 +63,7 @@ import SystemStatus from "../components/admin/SystemStatus";
 import LoginTestSuite from "../components/LoginTestSuite";
 import SellerVerificationFields from "../components/admin/SellerVerificationFields";
 import PendingPropertiesApproval from "../components/admin/PendingPropertiesApproval";
+import OtherServicesManagement from "../components/admin/OtherServicesManagement";
 import {
   Table,
   TableBody,
