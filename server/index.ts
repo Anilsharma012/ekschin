@@ -1336,6 +1336,16 @@ export function createServer() {
   app.post("/api/tickets/:ticketId/messages", authenticateToken, addTicketMessage);
   app.patch("/api/admin/tickets/:ticketId/status", authenticateToken, requireAdmin, updateTicketStatus);
 
+  // Other Services routes
+  app.get("/api/other-services", getPublicOtherServices); // Public endpoint
+  app.get("/api/other-services/categories", getServiceCategories); // Public categories
+  app.get("/api/admin/other-services", authenticateToken, requireAdmin, getAllOtherServices);
+  app.post("/api/admin/other-services", authenticateToken, requireAdmin, createOtherService);
+  app.put("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, updateOtherService);
+  app.delete("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, deleteOtherService);
+  app.post("/api/admin/other-services/import", authenticateToken, requireAdmin, importOtherServices);
+  app.get("/api/admin/other-services/export", authenticateToken, requireAdmin, exportOtherServices);
+
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {
     res.json({
