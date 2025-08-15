@@ -854,6 +854,7 @@ export function createServer() {
 
   // OLX-style Conversation routes
   app.post("/api/conversations", authenticateToken, createConversation);
+  app.post("/api/conversations/find-or-create", authenticateToken, findOrCreateConversation);
   app.get("/api/conversations/my", authenticateToken, getMyConversations);
   app.get("/api/conversations/:id/messages", authenticateToken, getConversationMessagesNew);
   app.post("/api/conversations/:id/messages", authenticateToken, sendMessageToConversation);
