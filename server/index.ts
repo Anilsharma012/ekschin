@@ -1343,7 +1343,7 @@ export function createServer() {
   app.post("/api/admin/other-services", authenticateToken, requireAdmin, createOtherService);
   app.put("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, updateOtherService);
   app.delete("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, deleteOtherService);
-  app.post("/api/admin/other-services/import", authenticateToken, requireAdmin, importOtherServices);
+  app.post("/api/admin/other-services/import", authenticateToken, requireAdmin, upload.single("file"), importOtherServices);
   app.get("/api/admin/other-services/export", authenticateToken, requireAdmin, exportOtherServices);
 
   // Health check endpoint for network monitoring
