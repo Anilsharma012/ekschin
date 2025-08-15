@@ -239,7 +239,7 @@ export const deleteOtherService: RequestHandler = async (req, res) => {
 export const importOtherServices: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
-    
+
     // Check if file was uploaded
     if (!req.file) {
       return res.status(400).json({
@@ -248,9 +248,10 @@ export const importOtherServices: RequestHandler = async (req, res) => {
       });
     }
 
-    // Parse CSV/XLSX file (simplified implementation)
-    // In a real implementation, you would use libraries like csv-parser or xlsx
-    const fileContent = req.file.buffer.toString('utf-8');
+    // Parse CSV file (simplified implementation)
+    // For production, you would use libraries like csv-parser or xlsx
+    const fs = require('fs');
+    const fileContent = fs.readFileSync(req.file.path, 'utf-8');
     const lines = fileContent.split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
     
