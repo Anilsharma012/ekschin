@@ -600,6 +600,12 @@ export function createServer() {
     requireAdmin,
     deleteUser,
   );
+  app.post(
+    "/api/admin/users/bulk-delete",
+    authenticateToken,
+    requireAdmin,
+    bulkDeleteUsers,
+  );
   app.get(
     "/api/admin/properties",
     authenticateToken,
