@@ -851,6 +851,38 @@ export function createServer() {
   );
   app.get("/api/chat/unread-count", authenticateToken, getUnreadCount);
 
+  // OLX-style Conversation routes
+  app.post("/api/conversations", authenticateToken, createConversation);
+  app.get("/api/conversations/my", authenticateToken, getMyConversations);
+  app.get("/api/conversations/:id/messages", authenticateToken, getConversationMessagesNew);
+  app.post("/api/conversations/:id/messages", authenticateToken, sendMessageToConversation);
+
+  // Admin conversation routes (Support Inbox)
+  app.get(
+    "/api/admin/conversations",
+    authenticateToken,
+    requireAdmin,
+    getAdminConversations
+  );
+  app.post(
+    "/api/admin/conversations/:id/messages",
+    authenticateToken,
+    requireAdmin,
+    adminReplyToConversation
+  );
+  app.get(
+    "/api/admin/conversations/stats",
+    authenticateToken,
+    requireAdmin,
+    getAdminConversationStats
+  );
+  app.put(
+    "/api/admin/conversations/:id/status",
+    authenticateToken,
+    requireAdmin,
+    updateConversationStatus
+  );
+
   // Testimonials routes
   app.get("/api/testimonials", getPublicTestimonials);
   app.get(
