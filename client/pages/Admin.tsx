@@ -932,8 +932,6 @@ export default function Admin() {
           return <AuthDebug />;
         case "system-status":
           return <SystemStatus />;
-        case "login-test":
-          return <LoginTestSuite />;
         case "content-management":
           return <ContentManagement />;
         case "pages":
