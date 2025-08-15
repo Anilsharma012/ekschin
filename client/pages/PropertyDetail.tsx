@@ -449,7 +449,7 @@ export default function PropertyDetail() {
                     onClick={handleStartChat}
                   >
                     <MessageCircle className="h-4 w-4" />
-                    <span>Start Chat</span>
+                    <span>Chat with Owner</span>
                   </Button>
 
                   <Button
