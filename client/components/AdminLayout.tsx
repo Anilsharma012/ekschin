@@ -145,6 +145,15 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    id: "support",
+    label: "Support & Communication",
+    icon: MessageSquare,
+    children: [
+      { id: "support-inbox", label: "Support Inbox", icon: MessageSquare, badge: "new" },
+      { id: "conversation-analytics", label: "Conversation Analytics", icon: BarChart3 },
+    ],
+  },
+  {
     id: "home-screen",
     label: "Home Screen Management",
     icon: Home,
