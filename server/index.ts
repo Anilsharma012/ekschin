@@ -75,6 +75,22 @@ import {
   getUnreadCount,
 } from "./routes/chat";
 
+// OLX-style conversation routes
+import {
+  createConversation,
+  getMyConversations,
+  getConversationMessages as getConversationMessagesNew,
+  sendMessageToConversation,
+} from "./routes/conversations";
+
+// Admin conversation routes
+import {
+  getAdminConversations,
+  adminReplyToConversation,
+  getAdminConversationStats,
+  updateConversationStatus,
+} from "./routes/admin-conversations";
+
 import { handleDemo } from "./routes/demo";
 import { seedDatabase } from "./routes/seed";
 import { initializeSystem } from "./routes/init";
