@@ -1,51 +1,108 @@
 import { RequestHandler } from "express";
 import { getDatabase } from "../db/mongodb";
 
-// Get subcategories by category
+// Get subcategories by category - only shows subcategories with approved properties
 export const getSubcategories: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
     const { category } = req.query;
-    
+
+    // Set no-cache headers to ensure live data
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     // Get categories collection
     const categoriesCollection = db.collection("categories");
-    
+    const propertiesCollection = db.collection("properties");
+
     if (category) {
       // Get specific category with its subcategories
-      const categoryDoc = await categoriesCollection.findOne({ 
+      const categoryDoc = await categoriesCollection.findOne({
         slug: category,
-        active: true 
+        active: true
       });
-      
+
       if (!categoryDoc) {
         return res.status(404).json({
           success: false,
           error: "Category not found"
         });
       }
-      
+
+      // Get live subcategory data by checking which subcategories have approved properties
+      const subcategoriesWithApprovedProperties = await propertiesCollection.distinct(
+        "subCategory",
+        {
+          status: "active",
+          approvalStatus: "approved",
+          propertyType: category,
+          subCategory: { $ne: null, $ne: "" }
+        }
+      );
+
+      // Filter to only include subcategories that have approved properties
+      const availableSubcategories = (categoryDoc.subcategories || [])
+        .filter((sub: any) => subcategoriesWithApprovedProperties.includes(sub.slug))
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
       res.json({
         success: true,
-        data: categoryDoc.subcategories || []
+        data: availableSubcategories
       });
     } else {
-      // Get all categories with their subcategories
-      const categories = await categoriesCollection.find({ 
-        active: true 
+      // Get all categories with their subcategories that have approved properties
+      const categories = await categoriesCollection.find({
+        active: true
       }).sort({ order: 1 }).toArray();
-      
-      // Flatten all subcategories
+
+      // Get all subcategories that have approved properties
+      const allSubcategoriesWithProperties = await propertiesCollection.aggregate([
+        {
+          $match: {
+            status: "active",
+            approvalStatus: "approved",
+            subCategory: { $ne: null, $ne: "" }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              propertyType: "$propertyType",
+              subCategory: "$subCategory"
+            }
+          }
+        }
+      ]).toArray();
+
+      // Create a map of available subcategories by category
+      const availableSubcategoriesMap = new Map();
+      allSubcategoriesWithProperties.forEach((item: any) => {
+        const key = item._id.propertyType;
+        if (!availableSubcategoriesMap.has(key)) {
+          availableSubcategoriesMap.set(key, new Set());
+        }
+        availableSubcategoriesMap.get(key).add(item._id.subCategory);
+      });
+
+      // Filter all subcategories to only include those with approved properties
       const allSubcategories = categories.reduce((acc, cat) => {
-        if (cat.subcategories) {
-          acc.push(...cat.subcategories.map((sub: any) => ({
-            ...sub,
-            categorySlug: cat.slug,
-            categoryName: cat.name
-          })));
+        if (cat.subcategories && availableSubcategoriesMap.has(cat.slug)) {
+          const availableForCategory = availableSubcategoriesMap.get(cat.slug);
+          const filteredSubs = cat.subcategories
+            .filter((sub: any) => availableForCategory.has(sub.slug))
+            .map((sub: any) => ({
+              ...sub,
+              categorySlug: cat.slug,
+              categoryName: cat.name
+            }));
+          acc.push(...filteredSubs);
         }
         return acc;
       }, []);
-      
+
       res.json({
         success: true,
         data: allSubcategories
