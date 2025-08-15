@@ -210,7 +210,7 @@ export default function Admin() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        const response = await fetch("/api/admin/stats", {
+        const response = await fetch(createApiUrl("admin/stats"), {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal,
           cache: "no-cache",
@@ -278,7 +278,7 @@ export default function Admin() {
     // Fetch stats with individual error handling
     try {
       console.log("Fetching admin stats...");
-      const statsResponse = await fetch("/api/admin/stats", {
+      const statsResponse = await fetch(createApiUrl("admin/stats"), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -310,7 +310,7 @@ export default function Admin() {
     // Fetch users with individual error handling
     try {
       console.log("Fetching admin users...");
-      const usersResponse = await fetch("/api/admin/users?limit=10", {
+      const usersResponse = await fetch(createApiUrl("admin/users?limit=10"), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -342,7 +342,7 @@ export default function Admin() {
     // Fetch properties with individual error handling
     try {
       console.log("Fetching admin properties...");
-      const propertiesResponse = await fetch("/api/admin/properties?limit=10", {
+      const propertiesResponse = await fetch(createApiUrl("admin/properties?limit=10"), {
         headers: { Authorization: `Bearer ${token}` },
       });
 
