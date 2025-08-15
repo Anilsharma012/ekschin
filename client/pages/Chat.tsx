@@ -38,6 +38,7 @@ export default function Chat() {
   const [searchParams] = useSearchParams();
   const { user, token, isAuthenticated, loading: authLoading } = useAuth();
   const conversationId = searchParams.get("conversation");
+  const propertyId = searchParams.get("propertyId");
 
   const [conversations, setConversations] = useState<ConversationWithDetails[]>(
     [],
@@ -49,6 +50,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [startingPropertyChat, setStartingPropertyChat] = useState(false);
   const [error, setError] = useState("");
 
   // Fetch conversations from API
