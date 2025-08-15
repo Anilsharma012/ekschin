@@ -46,7 +46,12 @@ export default function Categories() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/categories");
+      const response = await fetch("/api/categories", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -61,7 +66,12 @@ export default function Categories() {
 
   const fetchPropertyCounts = async () => {
     try {
-      const response = await fetch("/api/properties");
+      const response = await fetch("/api/properties", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await response.json();
 
       if (data.success) {
