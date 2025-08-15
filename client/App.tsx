@@ -94,6 +94,7 @@ const App = () => (
               <Route path="/user-login" element={<EnhancedUserLogin />} />
               <Route path="/simple-login" element={<SimpleLogin />} />
               <Route path="/auth" element={<ComprehensiveAuth />} />
+              <Route path="/user" element={<User />} />
               <Route path="/user-dashboard" element={<UserDashboard />} />
               <Route path="/post-property" element={<PostProperty />} />
               <Route path="/seller-dashboard" element={<SellerDashboard />} />
