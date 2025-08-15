@@ -303,12 +303,16 @@ export default function PropertyDetail() {
                       {property.images.map((image, index) => (
                         <img
                           key={index}
-                          src={image}
+                          src={typeof image === 'string' ? image : image?.url ?? '/placeholder.png'}
                           alt={`${property.title} ${index + 1}`}
                           className={`w-20 h-16 object-cover rounded cursor-pointer border-2 ${
                             index === currentImageIndex ? 'border-[#C70000]' : 'border-transparent'
                           }`}
                           onClick={() => setCurrentImageIndex(index)}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder.png";
+                          }}
                         />
                       ))}
                     </div>
