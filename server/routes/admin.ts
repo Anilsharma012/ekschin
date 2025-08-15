@@ -332,6 +332,59 @@ export const deleteUser: RequestHandler = async (req, res) => {
   }
 };
 
+// Bulk delete users
+export const bulkDeleteUsers: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid user IDs array",
+      });
+    }
+
+    // Validate all IDs are valid ObjectIds
+    for (const id of ids) {
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid user ID: ${id}`,
+        });
+      }
+    }
+
+    const objectIds = ids.map(id => new ObjectId(id));
+
+    // Delete associated properties for all users
+    await db.collection("properties").deleteMany({
+      ownerId: { $in: ids }
+    });
+
+    // Delete the users
+    const result = await db
+      .collection("users")
+      .deleteMany({ _id: { $in: objectIds } });
+
+    const response: ApiResponse<{ message: string; deletedCount: number }> = {
+      success: true,
+      data: {
+        message: `${result.deletedCount} users deleted successfully`,
+        deletedCount: result.deletedCount
+      },
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error bulk deleting users:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to bulk delete users",
+    });
+  }
+};
+
 // Get all properties (admin view)
 export const getAllProperties: RequestHandler = async (req, res) => {
   try {
