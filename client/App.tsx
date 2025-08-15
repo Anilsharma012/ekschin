@@ -84,6 +84,7 @@ const App = () => (
               <Route path="/lease" element={<Lease />} />
               <Route path="/pg" element={<PG />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/other-services" element={<OtherServices />} />
               {/* Category/Subcategory Listings */}
               <Route path="/buy/:slug" element={<CategoryProperties />} />
               <Route path="/sale/:slug" element={<CategoryProperties />} />
