@@ -60,50 +60,79 @@ export const getSubcategories: RequestHandler = async (req, res) => {
   }
 };
 
-// Get subcategories with property counts
+// Get subcategories with property counts - only shows subcategories with approved properties
 export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
     const { category } = req.query;
-    
+
+    // Set no-cache headers to ensure live data
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     // Get categories collection
     const categoriesCollection = db.collection("categories");
     const propertiesCollection = db.collection("properties");
-    
+
     if (category) {
       // Get specific category with its subcategories
-      const categoryDoc = await categoriesCollection.findOne({ 
+      const categoryDoc = await categoriesCollection.findOne({
         slug: category,
-        active: true 
+        active: true
       });
-      
+
       if (!categoryDoc) {
         return res.status(404).json({
           success: false,
           error: "Category not found"
         });
       }
-      
-      // Get property counts for each subcategory
-      const subcategoriesWithCounts = await Promise.all(
-        (categoryDoc.subcategories || []).map(async (sub: any) => {
-          const count = await propertiesCollection.countDocuments({
+
+      // Get live subcategory data by aggregating actual approved properties
+      const subcategoriesWithCounts = await propertiesCollection.aggregate([
+        {
+          $match: {
             status: "active",
             approvalStatus: "approved",
-            propertyType: category,
-            subCategory: sub.slug
-          });
-          
-          return {
-            ...sub,
-            count
-          };
+            propertyType: category
+          }
+        },
+        {
+          $group: {
+            _id: "$subCategory",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $match: {
+            _id: { $ne: null, $ne: "" } // Only include subcategories that exist
+          }
+        }
+      ]).toArray();
+
+      // Map to include subcategory details from the category definition
+      const result = subcategoriesWithCounts
+        .map((item: any) => {
+          const subcategorySlug = item._id;
+          const subcategoryDef = categoryDoc.subcategories?.find((sub: any) => sub.slug === subcategorySlug);
+
+          if (subcategoryDef) {
+            return {
+              ...subcategoryDef,
+              count: item.count
+            };
+          }
+          return null;
         })
-      );
-      
+        .filter(Boolean) // Remove null entries
+        .sort((a: any, b: any) => a.name.localeCompare(b.name)); // Sort alphabetically
+
       res.json({
         success: true,
-        data: subcategoriesWithCounts
+        data: result
       });
     } else {
       res.status(400).json({
