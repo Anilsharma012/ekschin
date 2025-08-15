@@ -19,6 +19,7 @@ import PG from "./pages/PG";
 import Services from "./pages/Services";
 import Chat from "./pages/Chat";
 import MyAccount from "./pages/MyAccount";
+import User from "./pages/User";
 import Agents from "./pages/Agents";
 import Login from "./pages/Login";
 import UserLogin from "./pages/UserLogin";
