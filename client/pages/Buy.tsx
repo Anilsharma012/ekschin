@@ -5,8 +5,6 @@ import OLXStyleHeader from "../components/OLXStyleHeader";
 import CategoryBar from "../components/CategoryBar";
 import BottomNavigation from "../components/BottomNavigation";
 import StaticFooter from "../components/StaticFooter";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 
 interface Category {
   _id?: string;
