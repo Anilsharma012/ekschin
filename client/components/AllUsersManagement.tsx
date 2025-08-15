@@ -857,6 +857,78 @@ export default function AllUsersManagement() {
         </DialogContent>
       </Dialog>
 
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog open={showBulkDeleteConfirm} onOpenChange={() => setShowBulkDeleteConfirm(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Selected Users</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <p className="text-red-700 font-medium">Warning: This action cannot be undone!</p>
+              </div>
+              <p className="text-red-600 text-sm mt-2">
+                Deleting these users will also permanently remove all their properties and associated data.
+              </p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="font-medium">
+                You are about to delete {selectedUserIds.size} user{selectedUserIds.size > 1 ? 's' : ''}:
+              </p>
+              <div className="mt-3 max-h-40 overflow-y-auto space-y-2">
+                {users
+                  .filter(user => selectedUserIds.has(user._id))
+                  .map(user => (
+                    <div key={user._id} className="flex items-center space-x-3 p-2 bg-white rounded border">
+                      <div className="w-8 h-8 bg-[#C70000] rounded-full flex items-center justify-center">
+                        <span className="text-xs font-medium text-white">
+                          {user.name?.charAt(0) || 'U'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <span className="text-xs capitalize px-2 py-1 bg-gray-100 rounded">
+                        {user.userType}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <div className="flex space-x-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setShowBulkDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={bulkDeleteUsers}
+                disabled={bulkDeleting}
+              >
+                {bulkDeleting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete {selectedUserIds.size} User{selectedUserIds.size > 1 ? 's' : ''}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* User Management Status */}
       <Card>
         <CardHeader>
