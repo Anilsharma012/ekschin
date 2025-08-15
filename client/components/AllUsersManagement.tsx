@@ -95,6 +95,9 @@ export default function AllUsersManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [confirmDeleteUser, setConfirmDeleteUser] = useState<User | null>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -260,6 +263,59 @@ export default function AllUsersManagement() {
     }
   };
 
+  const bulkDeleteUsers = async () => {
+    if (!token || selectedUserIds.size === 0) return;
+
+    try {
+      setBulkDeleting(true);
+      const response = await fetch('/api/admin/users/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ids: Array.from(selectedUserIds) }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Refresh users list and clear selection
+          fetchUsers();
+          fetchStats();
+          setSelectedUserIds(new Set());
+          setShowBulkDeleteConfirm(false);
+        } else {
+          setError(data.error || 'Failed to delete selected users');
+        }
+      } else {
+        setError('Failed to delete selected users');
+      }
+    } catch (err) {
+      setError('Network error while deleting users');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    const newSelected = new Set(selectedUserIds);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUserIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.size === users.length) {
+      setSelectedUserIds(new Set());
+    } else {
+      setSelectedUserIds(new Set(users.map(user => user._id)));
+    }
+  };
+
   const exportUsers = async () => {
     if (!token) return;
 
@@ -399,10 +455,22 @@ export default function AllUsersManagement() {
           <h3 className="text-lg font-semibold">User Management</h3>
           <p className="text-sm text-gray-600">Manage all registered users on your platform</p>
         </div>
-        <Button onClick={exportUsers} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
+        <div className="flex space-x-2">
+          {selectedUserIds.size > 0 && (
+            <Button
+              onClick={() => setShowBulkDeleteConfirm(true)}
+              variant="destructive"
+              size="sm"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Selected ({selectedUserIds.size})
+            </Button>
+          )}
+          <Button onClick={exportUsers} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -462,6 +530,14 @@ export default function AllUsersManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      checked={users.length > 0 && selectedUserIds.size === users.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-[#C70000] border-gray-300 rounded focus:ring-[#C70000]"
+                    />
+                  </TableHead>
                   <TableHead>User</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
@@ -475,7 +551,15 @@ export default function AllUsersManagement() {
               <TableBody>
                 {users.length > 0 ? (
                   users.map((user) => (
-                    <TableRow key={user._id}>
+                    <TableRow key={user._id} className={selectedUserIds.has(user._id) ? 'bg-blue-50' : ''}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selectedUserIds.has(user._id)}
+                          onChange={() => toggleUserSelection(user._id)}
+                          className="w-4 h-4 text-[#C70000] border-gray-300 rounded focus:ring-[#C70000]"
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-[#C70000] rounded-full flex items-center justify-center">
@@ -561,7 +645,7 @@ export default function AllUsersManagement() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                    <TableCell colSpan={9} className="text-center text-gray-500 py-8">
                       No users found matching your criteria
                     </TableCell>
                   </TableRow>
