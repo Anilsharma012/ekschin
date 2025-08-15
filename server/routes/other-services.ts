@@ -26,12 +26,13 @@ export const getAllOtherServices: RequestHandler = async (req, res) => {
     } catch (dbError) {
       return res.status(503).json({
         success: false,
-        error: "Database connection is being established. Please try again in a moment.",
+        error:
+          "Database connection is being established. Please try again in a moment.",
       });
     }
 
     const { category, search } = req.query;
-    
+
     // Build filter
     const filter: any = {};
     if (category && category !== "all") {
@@ -113,13 +114,15 @@ export const getPublicOtherServices: RequestHandler = async (req, res) => {
 export const createOtherService: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
-    const { category, name, phone, photoUrl, openTime, closeTime, address } = req.body;
+    const { category, name, phone, photoUrl, openTime, closeTime, address } =
+      req.body;
 
     // Validate required fields
     if (!category || !name || !phone || !openTime || !closeTime || !address) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: category, name, phone, openTime, closeTime, address",
+        error:
+          "Missing required fields: category, name, phone, openTime, closeTime, address",
       });
     }
 
@@ -250,19 +253,26 @@ export const importOtherServices: RequestHandler = async (req, res) => {
 
     // Parse CSV file (simplified implementation)
     // For production, you would use libraries like csv-parser or xlsx
-    const fs = require('fs');
-    const fileContent = fs.readFileSync(req.file.path, 'utf-8');
-    const lines = fileContent.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    
+    const fs = require("fs");
+    const fileContent = fs.readFileSync(req.file.path, "utf-8");
+    const lines = fileContent.split("\n");
+    const headers = lines[0].split(",").map((h) => h.trim());
+
     // Validate headers
-    const requiredHeaders = ['category', 'name', 'phone', 'openTime', 'closeTime', 'address'];
-    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-    
+    const requiredHeaders = [
+      "category",
+      "name",
+      "phone",
+      "openTime",
+      "closeTime",
+      "address",
+    ];
+    const missingHeaders = requiredHeaders.filter((h) => !headers.includes(h));
+
     if (missingHeaders.length > 0) {
       return res.status(400).json({
         success: false,
-        error: `Missing required columns: ${missingHeaders.join(', ')}`,
+        error: `Missing required columns: ${missingHeaders.join(", ")}`,
       });
     }
 
@@ -275,25 +285,33 @@ export const importOtherServices: RequestHandler = async (req, res) => {
       const line = lines[i].trim();
       if (!line) continue;
 
-      const values = line.split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-      
+      const values = line
+        .split(",")
+        .map((v) => v.trim().replace(/^["']|["']$/g, ""));
+
       try {
         const serviceData: OtherService = {
-          category: values[headers.indexOf('category')],
-          name: values[headers.indexOf('name')],
-          phone: values[headers.indexOf('phone')],
-          photoUrl: values[headers.indexOf('photoUrl')] || '',
-          openTime: values[headers.indexOf('openTime')],
-          closeTime: values[headers.indexOf('closeTime')],
-          address: values[headers.indexOf('address')],
+          category: values[headers.indexOf("category")],
+          name: values[headers.indexOf("name")],
+          phone: values[headers.indexOf("phone")],
+          photoUrl: values[headers.indexOf("photoUrl")] || "",
+          openTime: values[headers.indexOf("openTime")],
+          closeTime: values[headers.indexOf("closeTime")],
+          address: values[headers.indexOf("address")],
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
         // Validate required fields
-        if (!serviceData.category || !serviceData.name || !serviceData.phone || 
-            !serviceData.openTime || !serviceData.closeTime || !serviceData.address) {
+        if (
+          !serviceData.category ||
+          !serviceData.name ||
+          !serviceData.phone ||
+          !serviceData.openTime ||
+          !serviceData.closeTime ||
+          !serviceData.address
+        ) {
           errorRows++;
           continue;
         }
@@ -310,10 +328,10 @@ export const importOtherServices: RequestHandler = async (req, res) => {
       await db.collection("otherServices").insertMany(services);
     }
 
-    const response: ApiResponse<{ 
-      imported: number; 
-      errors: number; 
-      total: number; 
+    const response: ApiResponse<{
+      imported: number;
+      errors: number;
+      total: number;
     }> = {
       success: true,
       data: {
@@ -360,25 +378,35 @@ export const exportOtherServices: RequestHandler = async (req, res) => {
       .toArray();
 
     // Convert to CSV
-    const csvHeaders = "Category,Name,Phone,Photo URL,Open Time,Close Time,Address,Status,Created At\n";
-    const csvData = services.map((service: any) => {
-      return [
-        service.category || '',
-        service.name || '',
-        service.phone || '',
-        service.photoUrl || '',
-        service.openTime || '',
-        service.closeTime || '',
-        service.address || '',
-        service.isActive ? 'Active' : 'Inactive',
-        service.createdAt ? new Date(service.createdAt).toLocaleDateString() : '',
-      ].map(field => `"${field}"`).join(',');
-    }).join('\n');
+    const csvHeaders =
+      "Category,Name,Phone,Photo URL,Open Time,Close Time,Address,Status,Created At\n";
+    const csvData = services
+      .map((service: any) => {
+        return [
+          service.category || "",
+          service.name || "",
+          service.phone || "",
+          service.photoUrl || "",
+          service.openTime || "",
+          service.closeTime || "",
+          service.address || "",
+          service.isActive ? "Active" : "Inactive",
+          service.createdAt
+            ? new Date(service.createdAt).toLocaleDateString()
+            : "",
+        ]
+          .map((field) => `"${field}"`)
+          .join(",");
+      })
+      .join("\n");
 
     const csv = csvHeaders + csvData;
 
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="other-services-export.csv"');
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="other-services-export.csv"',
+    );
     res.send(csv);
   } catch (error) {
     console.error("Error exporting other services:", error);
@@ -404,7 +432,7 @@ export const getServiceCategories: RequestHandler = async (req, res) => {
             count: { $sum: 1 },
           },
         },
-        { $sort: { "_id": 1 } },
+        { $sort: { _id: 1 } },
       ])
       .toArray();
 

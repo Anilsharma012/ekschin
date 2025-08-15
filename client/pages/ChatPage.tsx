@@ -59,9 +59,10 @@ export default function ChatPage() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,10 @@ export default function ChatPage() {
     if (selectedConversation) {
       fetchMessages(selectedConversation._id);
       // Start polling for new messages every 5 seconds
-      const interval = setInterval(() => fetchMessages(selectedConversation._id), 5000);
+      const interval = setInterval(
+        () => fetchMessages(selectedConversation._id),
+        5000,
+      );
       setPollInterval(interval);
       return () => clearInterval(interval);
     }
@@ -122,14 +126,14 @@ export default function ChatPage() {
         toast({
           title: "Error",
           description: response.error || "Failed to load conversations",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Network error. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -138,7 +142,9 @@ export default function ChatPage() {
 
   const fetchSingleConversation = async (convId: string) => {
     try {
-      const response = await (window as any).api(`/conversations/${convId}/messages`);
+      const response = await (window as any).api(
+        `/conversations/${convId}/messages`,
+      );
       if (response.success) {
         // This will return messages, but we need conversation details
         // Let's refresh the full conversations list
@@ -151,7 +157,9 @@ export default function ChatPage() {
 
   const fetchMessages = async (convId: string) => {
     try {
-      const response = await (window as any).api(`/conversations/${convId}/messages`);
+      const response = await (window as any).api(
+        `/conversations/${convId}/messages`,
+      );
 
       if (response.success) {
         setMessages(response.data);
@@ -163,7 +171,8 @@ export default function ChatPage() {
 
   const sendMessage = async (messageText?: string, imageUrl?: string) => {
     const textToSend = messageText || newMessage;
-    if ((!textToSend.trim() && !imageUrl) || !selectedConversation || sending) return;
+    if ((!textToSend.trim() && !imageUrl) || !selectedConversation || sending)
+      return;
 
     try {
       setSending(true);
@@ -177,39 +186,46 @@ export default function ChatPage() {
         message: textToSend,
         imageUrl,
         messageType: imageUrl ? "image" : "text",
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
-      setMessages(prev => [...prev, tempMessage]);
+      setMessages((prev) => [...prev, tempMessage]);
       setNewMessage("");
 
-      const response = await (window as any).api(`/conversations/${selectedConversation._id}/messages`, {
-        method: "POST",
-        body: { text: textToSend, imageUrl }
-      });
+      const response = await (window as any).api(
+        `/conversations/${selectedConversation._id}/messages`,
+        {
+          method: "POST",
+          body: { text: textToSend, imageUrl },
+        },
+      );
 
       if (response.success) {
         // Replace temp message with real one
-        setMessages(prev => prev.map(msg => 
-          msg._id === tempMessage._id ? response.data : msg
-        ));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMessage._id ? response.data : msg,
+          ),
+        );
         // Refresh conversations to update last message
         fetchConversations();
       } else {
         // Remove temp message and show error
-        setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
+        setMessages((prev) =>
+          prev.filter((msg) => msg._id !== tempMessage._id),
+        );
         toast({
           title: "Error",
           description: response.error || "Failed to send message",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
       // Remove temp message and show error
-      setMessages(prev => prev.filter(msg => msg._id.startsWith('temp-')));
+      setMessages((prev) => prev.filter((msg) => msg._id.startsWith("temp-")));
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setSending(false);
@@ -222,15 +238,15 @@ export default function ChatPage() {
     try {
       setUploadingImage(true);
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append("image", file);
 
       // Upload image
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       const uploadData = await uploadResponse.json();
@@ -241,14 +257,14 @@ export default function ChatPage() {
         toast({
           title: "Error",
           description: "Failed to upload image",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to upload image",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploadingImage(false);
@@ -280,11 +296,15 @@ export default function ChatPage() {
 
   const filteredConversations = conversations.filter((conversation) => {
     const property = conversation.property;
-    const otherParticipants = conversation.participantDetails.filter(p => p._id !== user?.id);
-    
+    const otherParticipants = conversation.participantDetails.filter(
+      (p) => p._id !== user?.id,
+    );
+
     return (
       property?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      otherParticipants.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      otherParticipants.some((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
     );
   });
 
@@ -318,7 +338,7 @@ export default function ChatPage() {
         <div className="w-full lg:w-1/3 bg-white border-r flex flex-col">
           <div className="p-4 border-b">
             <h1 className="text-xl font-bold text-gray-900 mb-4">Messages</h1>
-            
+
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -343,7 +363,8 @@ export default function ChatPage() {
                   No conversations yet
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Start chatting with property owners by visiting property listings.
+                  Start chatting with property owners by visiting property
+                  listings.
                 </p>
                 <Button
                   onClick={() => navigate("/")}
@@ -354,9 +375,13 @@ export default function ChatPage() {
               </div>
             ) : (
               filteredConversations.map((conversation) => {
-                const otherParticipants = conversation.participantDetails.filter(p => p._id !== user?.id);
+                const otherParticipants =
+                  conversation.participantDetails.filter(
+                    (p) => p._id !== user?.id,
+                  );
                 const property = conversation.property;
-                const isSelected = selectedConversation?._id === conversation._id;
+                const isSelected =
+                  selectedConversation?._id === conversation._id;
 
                 return (
                   <div
@@ -382,7 +407,9 @@ export default function ChatPage() {
                         {conversation.unreadCount > 0 && (
                           <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#C70000] rounded-full flex items-center justify-center">
                             <span className="text-white text-xs font-bold">
-                              {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
+                              {conversation.unreadCount > 9
+                                ? "9+"
+                                : conversation.unreadCount}
                             </span>
                           </div>
                         )}
@@ -397,7 +424,7 @@ export default function ChatPage() {
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 truncate">
-                          {otherParticipants.map(p => p.name).join(", ")}
+                          {otherParticipants.map((p) => p.name).join(", ")}
                         </p>
                         <p
                           className={`text-sm truncate ${
@@ -406,7 +433,8 @@ export default function ChatPage() {
                               : "text-gray-500"
                           }`}
                         >
-                          {conversation.lastMessage?.message || "No messages yet"}
+                          {conversation.lastMessage?.message ||
+                            "No messages yet"}
                         </p>
                       </div>
                     </div>
@@ -436,9 +464,10 @@ export default function ChatPage() {
                       {selectedConversation.property?.title}
                     </h2>
                     <p className="text-sm text-gray-600">
-                      with {selectedConversation.participantDetails
-                        .filter(p => p._id !== user?.id)
-                        .map(p => p.name)
+                      with{" "}
+                      {selectedConversation.participantDetails
+                        .filter((p) => p._id !== user?.id)
+                        .map((p) => p.name)
                         .join(", ")}
                     </p>
                   </div>
@@ -455,8 +484,10 @@ export default function ChatPage() {
                 ) : (
                   messages.map((message) => {
                     const isOwn = message.senderId === user?.id;
-                    const isOwner = selectedConversation.participantDetails
-                      .find(p => p._id === message.senderId)?.userType === "seller";
+                    const isOwner =
+                      selectedConversation.participantDetails.find(
+                        (p) => p._id === message.senderId,
+                      )?.userType === "seller";
 
                     return (
                       <div
@@ -468,8 +499,8 @@ export default function ChatPage() {
                             isOwn
                               ? "bg-[#C70000] text-white"
                               : message.senderType === "admin"
-                              ? "bg-blue-100 text-blue-900"
-                              : "bg-gray-100 text-gray-900"
+                                ? "bg-blue-100 text-blue-900"
+                                : "bg-gray-100 text-gray-900"
                           }`}
                         >
                           {!isOwn && (
@@ -491,7 +522,10 @@ export default function ChatPage() {
                           )}
                           {isOwn && (
                             <div className="flex items-center justify-between mb-1">
-                              <Badge variant="secondary" className="text-xs bg-white/20 text-white">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-white/20 text-white"
+                              >
                                 You
                               </Badge>
                             </div>

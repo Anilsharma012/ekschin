@@ -341,9 +341,12 @@ export default function Admin() {
     // Fetch properties with individual error handling
     try {
       console.log("Fetching admin properties...");
-      const propertiesResponse = await fetch(createApiUrl("admin/properties?limit=10"), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const propertiesResponse = await fetch(
+        createApiUrl("admin/properties?limit=10"),
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (propertiesResponse.ok) {
         const propertiesData = await propertiesResponse.json();
@@ -370,12 +373,15 @@ export default function Admin() {
     setApiErrors(errors);
 
     // Check if errors are database connection related
-    const hasDbConnectionErrors = errors.some(error => error.includes("Database connecting"));
+    const hasDbConnectionErrors = errors.some((error) =>
+      error.includes("Database connecting"),
+    );
 
     if (hasDbConnectionErrors) {
       console.log("Database still connecting, retrying in 3 seconds...");
       setTimeout(() => {
-        if (!loading) { // Only retry if not already loading
+        if (!loading) {
+          // Only retry if not already loading
           console.log("Retrying admin data fetch...");
           fetchAdminData();
         }

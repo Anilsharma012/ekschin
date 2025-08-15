@@ -9,9 +9,9 @@ export const getSubcategories: RequestHandler = async (req, res) => {
 
     // Set no-cache headers to ensure live data
     res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
     });
 
     // Get categories collection
@@ -22,60 +22,65 @@ export const getSubcategories: RequestHandler = async (req, res) => {
       // Get specific category with its subcategories
       const categoryDoc = await categoriesCollection.findOne({
         slug: category,
-        active: true
+        active: true,
       });
 
       if (!categoryDoc) {
         return res.status(404).json({
           success: false,
-          error: "Category not found"
+          error: "Category not found",
         });
       }
 
       // Get live subcategory data by checking which subcategories have approved properties
-      const subcategoriesWithApprovedProperties = await propertiesCollection.distinct(
-        "subCategory",
-        {
+      const subcategoriesWithApprovedProperties =
+        await propertiesCollection.distinct("subCategory", {
           status: "active",
           approvalStatus: "approved",
           propertyType: category,
-          subCategory: { $ne: null, $ne: "" }
-        }
-      );
+          subCategory: { $ne: null, $ne: "" },
+        });
 
       // Filter to only include subcategories that have approved properties
       const availableSubcategories = (categoryDoc.subcategories || [])
-        .filter((sub: any) => subcategoriesWithApprovedProperties.includes(sub.slug))
+        .filter((sub: any) =>
+          subcategoriesWithApprovedProperties.includes(sub.slug),
+        )
         .sort((a: any, b: any) => a.name.localeCompare(b.name));
 
       res.json({
         success: true,
-        data: availableSubcategories
+        data: availableSubcategories,
       });
     } else {
       // Get all categories with their subcategories that have approved properties
-      const categories = await categoriesCollection.find({
-        active: true
-      }).sort({ order: 1 }).toArray();
+      const categories = await categoriesCollection
+        .find({
+          active: true,
+        })
+        .sort({ order: 1 })
+        .toArray();
 
       // Get all subcategories that have approved properties
-      const allSubcategoriesWithProperties = await propertiesCollection.aggregate([
-        {
-          $match: {
-            status: "active",
-            approvalStatus: "approved",
-            subCategory: { $ne: null, $ne: "" }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              propertyType: "$propertyType",
-              subCategory: "$subCategory"
-            }
-          }
-        }
-      ]).toArray();
+      const allSubcategoriesWithProperties = await propertiesCollection
+        .aggregate([
+          {
+            $match: {
+              status: "active",
+              approvalStatus: "approved",
+              subCategory: { $ne: null, $ne: "" },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                propertyType: "$propertyType",
+                subCategory: "$subCategory",
+              },
+            },
+          },
+        ])
+        .toArray();
 
       // Create a map of available subcategories by category
       const availableSubcategoriesMap = new Map();
@@ -96,7 +101,7 @@ export const getSubcategories: RequestHandler = async (req, res) => {
             .map((sub: any) => ({
               ...sub,
               categorySlug: cat.slug,
-              categoryName: cat.name
+              categoryName: cat.name,
             }));
           acc.push(...filteredSubs);
         }
@@ -105,14 +110,14 @@ export const getSubcategories: RequestHandler = async (req, res) => {
 
       res.json({
         success: true,
-        data: allSubcategories
+        data: allSubcategories,
       });
     }
   } catch (error) {
     console.error("Error fetching subcategories:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch subcategories"
+      error: "Failed to fetch subcategories",
     });
   }
 };
@@ -125,9 +130,9 @@ export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
 
     // Set no-cache headers to ensure live data
     res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
     });
 
     // Get categories collection
@@ -138,48 +143,52 @@ export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
       // Get specific category with its subcategories
       const categoryDoc = await categoriesCollection.findOne({
         slug: category,
-        active: true
+        active: true,
       });
 
       if (!categoryDoc) {
         return res.status(404).json({
           success: false,
-          error: "Category not found"
+          error: "Category not found",
         });
       }
 
       // Get live subcategory data by aggregating actual approved properties
-      const subcategoriesWithCounts = await propertiesCollection.aggregate([
-        {
-          $match: {
-            status: "active",
-            approvalStatus: "approved",
-            propertyType: category
-          }
-        },
-        {
-          $group: {
-            _id: "$subCategory",
-            count: { $sum: 1 }
-          }
-        },
-        {
-          $match: {
-            _id: { $ne: null, $ne: "" } // Only include subcategories that exist
-          }
-        }
-      ]).toArray();
+      const subcategoriesWithCounts = await propertiesCollection
+        .aggregate([
+          {
+            $match: {
+              status: "active",
+              approvalStatus: "approved",
+              propertyType: category,
+            },
+          },
+          {
+            $group: {
+              _id: "$subCategory",
+              count: { $sum: 1 },
+            },
+          },
+          {
+            $match: {
+              _id: { $ne: null, $ne: "" }, // Only include subcategories that exist
+            },
+          },
+        ])
+        .toArray();
 
       // Map to include subcategory details from the category definition
       const result = subcategoriesWithCounts
         .map((item: any) => {
           const subcategorySlug = item._id;
-          const subcategoryDef = categoryDoc.subcategories?.find((sub: any) => sub.slug === subcategorySlug);
+          const subcategoryDef = categoryDoc.subcategories?.find(
+            (sub: any) => sub.slug === subcategorySlug,
+          );
 
           if (subcategoryDef) {
             return {
               ...subcategoryDef,
-              count: item.count
+              count: item.count,
             };
           }
           return null;
@@ -189,19 +198,19 @@ export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
 
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } else {
       res.status(400).json({
         success: false,
-        error: "Category parameter is required"
+        error: "Category parameter is required",
       });
     }
   } catch (error) {
     console.error("Error fetching subcategories with counts:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch subcategories with counts"
+      error: "Failed to fetch subcategories with counts",
     });
   }
 };

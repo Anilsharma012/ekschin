@@ -105,7 +105,6 @@ const menuItems: MenuItem[] = [
         label: "Feature Advertisement Package",
         icon: Star,
       },
-
     ],
   },
   {
@@ -114,7 +113,12 @@ const menuItems: MenuItem[] = [
     icon: CreditCard,
     children: [
       { id: "transactions", label: "Payment Transactions", icon: CreditCard },
-      { id: "manual-payment-approval", label: "Manual Payment Approval", icon: Shield, badge: "5" },
+      {
+        id: "manual-payment-approval",
+        label: "Manual Payment Approval",
+        icon: Shield,
+        badge: "5",
+      },
       { id: "bank-transfer", label: "Bank Transfer", icon: CreditCard },
     ],
   },
@@ -149,8 +153,17 @@ const menuItems: MenuItem[] = [
     label: "Support & Communication",
     icon: MessageSquare,
     children: [
-      { id: "support-inbox", label: "Support Inbox", icon: MessageSquare, badge: "new" },
-      { id: "conversation-analytics", label: "Conversation Analytics", icon: BarChart3 },
+      {
+        id: "support-inbox",
+        label: "Support Inbox",
+        icon: MessageSquare,
+        badge: "new",
+      },
+      {
+        id: "conversation-analytics",
+        label: "Conversation Analytics",
+        icon: BarChart3,
+      },
     ],
   },
   {

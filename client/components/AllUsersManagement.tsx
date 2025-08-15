@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 import {
   Users,
   Search,
@@ -23,10 +23,10 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
-} from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
+} from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Badge } from "./ui/badge";
 import {
   Table,
   TableBody,
@@ -34,42 +34,37 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from "./ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from './ui/card';
+} from "./ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from "./ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
-import { cn } from '../lib/utils';
+} from "./ui/dialog";
+import { cn } from "../lib/utils";
 
 interface User {
   _id: string;
   name: string;
   email: string;
   phone?: string;
-  userType: 'buyer' | 'seller' | 'agent' | 'admin';
-  status?: 'active' | 'inactive' | 'suspended' | 'pending';
+  userType: "buyer" | "seller" | "agent" | "admin";
+  status?: "active" | "inactive" | "suspended" | "pending";
   createdAt: string;
   lastLogin?: string;
   address?: {
@@ -86,16 +81,18 @@ export default function AllUsersManagement() {
   const { token } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUserType, setSelectedUserType] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUserType, setSelectedUserType] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [confirmDeleteUser, setConfirmDeleteUser] = useState<User | null>(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [stats, setStats] = useState({
@@ -108,7 +105,7 @@ export default function AllUsersManagement() {
   const usersPerPage = 10;
 
   useEffect(() => {
-    console.log('AllUsersManagement component mounted, token:', !!token);
+    console.log("AllUsersManagement component mounted, token:", !!token);
     if (token) {
       fetchUsers();
       fetchStats();
@@ -117,54 +114,54 @@ export default function AllUsersManagement() {
 
   const fetchUsers = async () => {
     if (!token) {
-      console.log('No token available for fetchUsers');
-      setError('Authentication required');
+      console.log("No token available for fetchUsers");
+      setError("Authentication required");
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      setError('');
-      console.log('Fetching users with token:', token.substring(0, 20) + '...');
+      setError("");
+      console.log("Fetching users with token:", token.substring(0, 20) + "...");
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
-        userType: selectedUserType !== 'all' ? selectedUserType : '',
-        status: selectedStatus !== 'all' ? selectedStatus : '',
+        userType: selectedUserType !== "all" ? selectedUserType : "",
+        status: selectedStatus !== "all" ? selectedStatus : "",
         search: searchTerm,
       });
 
       const url = `/api/admin/users?${params}`;
-      console.log('Fetching from URL:', url);
+      console.log("Fetching from URL:", url);
 
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log('Users API response status:', response.status);
+      console.log("Users API response status:", response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Users API response data:', data);
+        console.log("Users API response data:", data);
 
         if (data.success) {
           setUsers(data.data.users || []);
           setTotalUsers(data.data.total || 0);
-          console.log('Set users:', data.data.users?.length || 0);
+          console.log("Set users:", data.data.users?.length || 0);
         } else {
-          console.error('API returned success: false', data.error);
-          setError(data.error || 'Failed to fetch users');
+          console.error("API returned success: false", data.error);
+          setError(data.error || "Failed to fetch users");
         }
       } else {
         const errorData = await response.text();
-        console.error('API request failed:', response.status, errorData);
+        console.error("API request failed:", response.status, errorData);
         setError(`Failed to fetch users (${response.status})`);
       }
     } catch (err) {
-      console.error('Network error in fetchUsers:', err);
-      setError('Network error while fetching users');
+      console.error("Network error in fetchUsers:", err);
+      setError("Network error while fetching users");
     } finally {
       setLoading(false);
     }
@@ -172,32 +169,32 @@ export default function AllUsersManagement() {
 
   const fetchStats = async () => {
     if (!token) {
-      console.log('No token available for fetchStats');
+      console.log("No token available for fetchStats");
       return;
     }
 
     try {
-      console.log('Fetching user stats...');
-      const response = await fetch('/api/admin/user-stats', {
+      console.log("Fetching user stats...");
+      const response = await fetch("/api/admin/user-stats", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log('Stats API response status:', response.status);
+      console.log("Stats API response status:", response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Stats API response data:', data);
+        console.log("Stats API response data:", data);
 
         if (data.success) {
           setStats(data.data);
         } else {
-          console.error('Stats API returned success: false', data.error);
+          console.error("Stats API returned success: false", data.error);
         }
       } else {
-        console.error('Stats API request failed:', response.status);
+        console.error("Stats API request failed:", response.status);
       }
     } catch (err) {
-      console.error('Failed to fetch user stats:', err);
+      console.error("Failed to fetch user stats:", err);
     }
   };
 
@@ -206,9 +203,9 @@ export default function AllUsersManagement() {
 
     try {
       const response = await fetch(`/api/admin/users/${userId}/status`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
@@ -221,13 +218,13 @@ export default function AllUsersManagement() {
           fetchUsers();
           fetchStats();
         } else {
-          setError(data.error || 'Failed to update user status');
+          setError(data.error || "Failed to update user status");
         }
       } else {
-        setError('Failed to update user status');
+        setError("Failed to update user status");
       }
     } catch (err) {
-      setError('Network error while updating user status');
+      setError("Network error while updating user status");
     }
   };
 
@@ -237,7 +234,7 @@ export default function AllUsersManagement() {
     try {
       setDeletingUserId(userId);
       const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -251,13 +248,13 @@ export default function AllUsersManagement() {
           fetchStats();
           setConfirmDeleteUser(null);
         } else {
-          setError(data.error || 'Failed to delete user');
+          setError(data.error || "Failed to delete user");
         }
       } else {
-        setError('Failed to delete user');
+        setError("Failed to delete user");
       }
     } catch (err) {
-      setError('Network error while deleting user');
+      setError("Network error while deleting user");
     } finally {
       setDeletingUserId(null);
     }
@@ -268,10 +265,10 @@ export default function AllUsersManagement() {
 
     try {
       setBulkDeleting(true);
-      const response = await fetch('/api/admin/users/bulk-delete', {
-        method: 'POST',
+      const response = await fetch("/api/admin/users/bulk-delete", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ ids: Array.from(selectedUserIds) }),
@@ -286,13 +283,13 @@ export default function AllUsersManagement() {
           setSelectedUserIds(new Set());
           setShowBulkDeleteConfirm(false);
         } else {
-          setError(data.error || 'Failed to delete selected users');
+          setError(data.error || "Failed to delete selected users");
         }
       } else {
-        setError('Failed to delete selected users');
+        setError("Failed to delete selected users");
       }
     } catch (err) {
-      setError('Network error while deleting users');
+      setError("Network error while deleting users");
     } finally {
       setBulkDeleting(false);
     }
@@ -312,7 +309,7 @@ export default function AllUsersManagement() {
     if (selectedUserIds.size === users.length) {
       setSelectedUserIds(new Set());
     } else {
-      setSelectedUserIds(new Set(users.map(user => user._id)));
+      setSelectedUserIds(new Set(users.map((user) => user._id)));
     }
   };
 
@@ -321,8 +318,8 @@ export default function AllUsersManagement() {
 
     try {
       const params = new URLSearchParams({
-        userType: selectedUserType !== 'all' ? selectedUserType : '',
-        status: selectedStatus !== 'all' ? selectedStatus : '',
+        userType: selectedUserType !== "all" ? selectedUserType : "",
+        status: selectedStatus !== "all" ? selectedStatus : "",
         search: searchTerm,
       });
 
@@ -333,28 +330,28 @@ export default function AllUsersManagement() {
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = 'users-export.csv';
+        link.download = "users-export.csv";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       } else {
-        setError('Failed to export users');
+        setError("Failed to export users");
       }
     } catch (err) {
-      setError('Network error while exporting users');
+      setError("Network error while exporting users");
     }
   };
 
   const getUserTypeIcon = (userType: string) => {
     switch (userType) {
-      case 'admin':
+      case "admin":
         return <Crown className="h-4 w-4" />;
-      case 'agent':
+      case "agent":
         return <Shield className="h-4 w-4" />;
-      case 'seller':
+      case "seller":
         return <UserCheck className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
@@ -362,15 +359,29 @@ export default function AllUsersManagement() {
   };
 
   const getStatusBadge = (status: string | undefined) => {
-    const normalizedStatus = status || 'active';
+    const normalizedStatus = status || "active";
     const statusConfig = {
-      active: { variant: 'default' as const, className: 'bg-green-100 text-green-800' },
-      inactive: { variant: 'secondary' as const, className: 'bg-gray-100 text-gray-800' },
-      suspended: { variant: 'destructive' as const, className: 'bg-red-100 text-red-800' },
-      pending: { variant: 'outline' as const, className: 'bg-yellow-100 text-yellow-800' },
+      active: {
+        variant: "default" as const,
+        className: "bg-green-100 text-green-800",
+      },
+      inactive: {
+        variant: "secondary" as const,
+        className: "bg-gray-100 text-gray-800",
+      },
+      suspended: {
+        variant: "destructive" as const,
+        className: "bg-red-100 text-red-800",
+      },
+      pending: {
+        variant: "outline" as const,
+        className: "bg-yellow-100 text-yellow-800",
+      },
     };
 
-    const config = statusConfig[normalizedStatus as keyof typeof statusConfig] || statusConfig.active;
+    const config =
+      statusConfig[normalizedStatus as keyof typeof statusConfig] ||
+      statusConfig.active;
 
     return (
       <Badge variant={config.variant} className={config.className}>
@@ -394,7 +405,7 @@ export default function AllUsersManagement() {
             variant="outline"
             size="sm"
             onClick={() => {
-              setError('');
+              setError("");
               fetchUsers();
             }}
             className="mt-2"
@@ -414,7 +425,9 @@ export default function AllUsersManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">All registered users</p>
+            <p className="text-xs text-muted-foreground">
+              All registered users
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -439,7 +452,9 @@ export default function AllUsersManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Verified Users
+            </CardTitle>
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
@@ -453,7 +468,9 @@ export default function AllUsersManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-lg font-semibold">User Management</h3>
-          <p className="text-sm text-gray-600">Manage all registered users on your platform</p>
+          <p className="text-sm text-gray-600">
+            Manage all registered users on your platform
+          </p>
         </div>
         <div className="flex space-x-2">
           {selectedUserIds.size > 0 && (
@@ -507,12 +524,15 @@ export default function AllUsersManagement() {
             <SelectItem value="pending">Pending</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" onClick={() => {
-          setSearchTerm('');
-          setSelectedUserType('all');
-          setSelectedStatus('all');
-          setCurrentPage(1);
-        }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSearchTerm("");
+            setSelectedUserType("all");
+            setSelectedStatus("all");
+            setCurrentPage(1);
+          }}
+        >
           <Filter className="h-4 w-4 mr-2" />
           Clear Filters
         </Button>
@@ -533,7 +553,10 @@ export default function AllUsersManagement() {
                   <TableHead className="w-12">
                     <input
                       type="checkbox"
-                      checked={users.length > 0 && selectedUserIds.size === users.length}
+                      checked={
+                        users.length > 0 &&
+                        selectedUserIds.size === users.length
+                      }
                       onChange={toggleSelectAll}
                       className="w-4 h-4 text-[#C70000] border-gray-300 rounded focus:ring-[#C70000]"
                     />
@@ -551,7 +574,12 @@ export default function AllUsersManagement() {
               <TableBody>
                 {users.length > 0 ? (
                   users.map((user) => (
-                    <TableRow key={user._id} className={selectedUserIds.has(user._id) ? 'bg-blue-50' : ''}>
+                    <TableRow
+                      key={user._id}
+                      className={
+                        selectedUserIds.has(user._id) ? "bg-blue-50" : ""
+                      }
+                    >
                       <TableCell>
                         <input
                           type="checkbox"
@@ -564,14 +592,18 @@ export default function AllUsersManagement() {
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-[#C70000] rounded-full flex items-center justify-center">
                             <span className="text-sm font-medium text-white">
-                              {user.name?.charAt(0) || 'U'}
+                              {user.name?.charAt(0) || "U"}
                             </span>
                           </div>
                           <div>
                             <p className="font-medium">{user.name}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                            <p className="text-sm text-gray-500">
+                              {user.email}
+                            </p>
                             {user.phone && (
-                              <p className="text-xs text-gray-400">{user.phone}</p>
+                              <p className="text-xs text-gray-400">
+                                {user.phone}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -596,7 +628,7 @@ export default function AllUsersManagement() {
                       <TableCell>
                         {user.lastLogin
                           ? new Date(user.lastLogin).toLocaleDateString()
-                          : 'Never'}
+                          : "Never"}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -611,21 +643,38 @@ export default function AllUsersManagement() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSelectedUser(user)}>
+                            <DropdownMenuItem
+                              onClick={() => setSelectedUser(user)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => updateUserStatus(user._id, user.status === 'active' ? 'inactive' : 'active')}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateUserStatus(
+                                  user._id,
+                                  user.status === "active"
+                                    ? "inactive"
+                                    : "active",
+                                )
+                              }
                             >
-                              {user.status === 'active' ? (
-                                <><UserX className="h-4 w-4 mr-2" />Deactivate</>
+                              {user.status === "active" ? (
+                                <>
+                                  <UserX className="h-4 w-4 mr-2" />
+                                  Deactivate
+                                </>
                               ) : (
-                                <><UserCheck className="h-4 w-4 mr-2" />Activate</>
+                                <>
+                                  <UserCheck className="h-4 w-4 mr-2" />
+                                  Activate
+                                </>
                               )}
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateUserStatus(user._id, 'suspended')}
+                              onClick={() =>
+                                updateUserStatus(user._id, "suspended")
+                              }
                               className="text-red-600"
                             >
                               <XCircle className="h-4 w-4 mr-2" />
@@ -645,7 +694,10 @@ export default function AllUsersManagement() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                    <TableCell
+                      colSpan={9}
+                      className="text-center text-gray-500 py-8"
+                    >
                       No users found matching your criteria
                     </TableCell>
                   </TableRow>
@@ -660,8 +712,9 @@ export default function AllUsersManagement() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * usersPerPage + 1} to{' '}
-            {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
+            Showing {(currentPage - 1) * usersPerPage + 1} to{" "}
+            {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers}{" "}
+            users
           </p>
           <div className="flex space-x-2">
             <Button
@@ -698,7 +751,7 @@ export default function AllUsersManagement() {
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-[#C70000] rounded-full flex items-center justify-center">
                   <span className="text-xl font-medium text-white">
-                    {selectedUser.name?.charAt(0) || 'U'}
+                    {selectedUser.name?.charAt(0) || "U"}
                   </span>
                 </div>
                 <div>
@@ -713,7 +766,9 @@ export default function AllUsersManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Email
+                  </label>
                   <div className="flex items-center space-x-2 mt-1">
                     <Mail className="h-4 w-4 text-gray-400" />
                     <span>{selectedUser.email}</span>
@@ -721,7 +776,9 @@ export default function AllUsersManagement() {
                 </div>
                 {selectedUser.phone && (
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Phone</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Phone
+                    </label>
                     <div className="flex items-center space-x-2 mt-1">
                       <Phone className="h-4 w-4 text-gray-400" />
                       <span>{selectedUser.phone}</span>
@@ -729,18 +786,26 @@ export default function AllUsersManagement() {
                   </div>
                 )}
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Joined</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Joined
+                  </label>
                   <div className="flex items-center space-x-2 mt-1">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <span>{new Date(selectedUser.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      {new Date(selectedUser.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
                 {selectedUser.lastLogin && (
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Last Login</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Last Login
+                    </label>
                     <div className="flex items-center space-x-2 mt-1">
                       <Calendar className="h-4 w-4 text-gray-400" />
-                      <span>{new Date(selectedUser.lastLogin).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(selectedUser.lastLogin).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -748,7 +813,9 @@ export default function AllUsersManagement() {
 
               {selectedUser.address && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Location</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Location
+                  </label>
                   <div className="flex items-center space-x-2 mt-1">
                     <MapPin className="h-4 w-4 text-gray-400" />
                     <span>
@@ -758,7 +825,7 @@ export default function AllUsersManagement() {
                         selectedUser.address.country,
                       ]
                         .filter(Boolean)
-                        .join(', ')}
+                        .join(", ")}
                     </span>
                   </div>
                 </div>
@@ -770,16 +837,18 @@ export default function AllUsersManagement() {
                   onClick={() =>
                     updateUserStatus(
                       selectedUser._id,
-                      selectedUser.status === 'active' ? 'inactive' : 'active'
+                      selectedUser.status === "active" ? "inactive" : "active",
                     )
                   }
                 >
-                  {selectedUser.status === 'active' ? 'Deactivate' : 'Activate'}
+                  {selectedUser.status === "active" ? "Deactivate" : "Activate"}
                 </Button>
                 <Button
                   variant="outline"
                   className="text-red-600"
-                  onClick={() => updateUserStatus(selectedUser._id, 'suspended')}
+                  onClick={() =>
+                    updateUserStatus(selectedUser._id, "suspended")
+                  }
                 >
                   Suspend User
                 </Button>
@@ -790,7 +859,10 @@ export default function AllUsersManagement() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!confirmDeleteUser} onOpenChange={() => setConfirmDeleteUser(null)}>
+      <Dialog
+        open={!!confirmDeleteUser}
+        onOpenChange={() => setConfirmDeleteUser(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
@@ -800,10 +872,13 @@ export default function AllUsersManagement() {
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
-                  <p className="text-red-700 font-medium">Warning: This action cannot be undone!</p>
+                  <p className="text-red-700 font-medium">
+                    Warning: This action cannot be undone!
+                  </p>
                 </div>
                 <p className="text-red-600 text-sm mt-2">
-                  Deleting this user will also permanently remove all their properties and associated data.
+                  Deleting this user will also permanently remove all their
+                  properties and associated data.
                 </p>
               </div>
 
@@ -812,15 +887,19 @@ export default function AllUsersManagement() {
                 <div className="mt-2 flex items-center space-x-3">
                   <div className="w-10 h-10 bg-[#C70000] rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
-                      {confirmDeleteUser.name?.charAt(0) || 'U'}
+                      {confirmDeleteUser.name?.charAt(0) || "U"}
                     </span>
                   </div>
                   <div>
                     <p className="font-medium">{confirmDeleteUser.name}</p>
-                    <p className="text-sm text-gray-500">{confirmDeleteUser.email}</p>
+                    <p className="text-sm text-gray-500">
+                      {confirmDeleteUser.email}
+                    </p>
                     <div className="flex items-center space-x-2 mt-1">
                       {getUserTypeIcon(confirmDeleteUser.userType)}
-                      <span className="text-xs capitalize">{confirmDeleteUser.userType}</span>
+                      <span className="text-xs capitalize">
+                        {confirmDeleteUser.userType}
+                      </span>
                       {getStatusBadge(confirmDeleteUser.status)}
                     </div>
                   </div>
@@ -858,7 +937,10 @@ export default function AllUsersManagement() {
       </Dialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <Dialog open={showBulkDeleteConfirm} onOpenChange={() => setShowBulkDeleteConfirm(false)}>
+      <Dialog
+        open={showBulkDeleteConfirm}
+        onOpenChange={() => setShowBulkDeleteConfirm(false)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Selected Users</DialogTitle>
@@ -867,25 +949,32 @@ export default function AllUsersManagement() {
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                <p className="text-red-700 font-medium">Warning: This action cannot be undone!</p>
+                <p className="text-red-700 font-medium">
+                  Warning: This action cannot be undone!
+                </p>
               </div>
               <p className="text-red-600 text-sm mt-2">
-                Deleting these users will also permanently remove all their properties and associated data.
+                Deleting these users will also permanently remove all their
+                properties and associated data.
               </p>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="font-medium">
-                You are about to delete {selectedUserIds.size} user{selectedUserIds.size > 1 ? 's' : ''}:
+                You are about to delete {selectedUserIds.size} user
+                {selectedUserIds.size > 1 ? "s" : ""}:
               </p>
               <div className="mt-3 max-h-40 overflow-y-auto space-y-2">
                 {users
-                  .filter(user => selectedUserIds.has(user._id))
-                  .map(user => (
-                    <div key={user._id} className="flex items-center space-x-3 p-2 bg-white rounded border">
+                  .filter((user) => selectedUserIds.has(user._id))
+                  .map((user) => (
+                    <div
+                      key={user._id}
+                      className="flex items-center space-x-3 p-2 bg-white rounded border"
+                    >
                       <div className="w-8 h-8 bg-[#C70000] rounded-full flex items-center justify-center">
                         <span className="text-xs font-medium text-white">
-                          {user.name?.charAt(0) || 'U'}
+                          {user.name?.charAt(0) || "U"}
                         </span>
                       </div>
                       <div className="flex-1">
@@ -920,7 +1009,8 @@ export default function AllUsersManagement() {
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete {selectedUserIds.size} User{selectedUserIds.size > 1 ? 's' : ''}
+                    Delete {selectedUserIds.size} User
+                    {selectedUserIds.size > 1 ? "s" : ""}
                   </>
                 )}
               </Button>
@@ -947,8 +1037,9 @@ export default function AllUsersManagement() {
                 </span>
               </div>
               <p className="text-sm text-green-700">
-                Admin can suspend, activate, and deactivate users through the dropdown menu.
-                Status changes are immediately saved to database and reflected in the interface.
+                Admin can suspend, activate, and deactivate users through the
+                dropdown menu. Status changes are immediately saved to database
+                and reflected in the interface.
               </p>
             </div>
 
@@ -960,8 +1051,9 @@ export default function AllUsersManagement() {
                 </span>
               </div>
               <p className="text-sm text-blue-700">
-                User analytics module tracks user growth, activity, and type distribution.
-                All data is dynamically calculated from the database.
+                User analytics module tracks user growth, activity, and type
+                distribution. All data is dynamically calculated from the
+                database.
               </p>
             </div>
           </div>

@@ -72,7 +72,8 @@ interface ConversationStats {
 export default function AdminSupportInbox() {
   const { token } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -99,12 +100,12 @@ export default function AdminSupportInbox() {
       if (statusFilter !== "all") {
         queryParams.append("status", statusFilter);
       }
-      
+
       const response = await fetch(
         createApiUrl(`admin/conversations?${queryParams.toString()}`),
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.ok) {
@@ -143,7 +144,7 @@ export default function AdminSupportInbox() {
         createApiUrl(`conversations/${conversationId}/messages`),
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.ok) {
@@ -163,7 +164,9 @@ export default function AdminSupportInbox() {
     try {
       setSending(true);
       const response = await fetch(
-        createApiUrl(`admin/conversations/${selectedConversation._id}/messages`),
+        createApiUrl(
+          `admin/conversations/${selectedConversation._id}/messages`,
+        ),
         {
           method: "POST",
           headers: {
@@ -171,7 +174,7 @@ export default function AdminSupportInbox() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: newMessage }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -189,7 +192,10 @@ export default function AdminSupportInbox() {
     }
   };
 
-  const updateConversationStatus = async (conversationId: string, status: string) => {
+  const updateConversationStatus = async (
+    conversationId: string,
+    status: string,
+  ) => {
     try {
       const response = await fetch(
         createApiUrl(`admin/conversations/${conversationId}/status`),
@@ -200,13 +206,16 @@ export default function AdminSupportInbox() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ status }),
-        }
+        },
       );
 
       if (response.ok) {
         fetchConversations();
         if (selectedConversation?._id === conversationId) {
-          setSelectedConversation({ ...selectedConversation, status: status as any });
+          setSelectedConversation({
+            ...selectedConversation,
+            status: status as any,
+          });
         }
       }
     } catch (error) {
@@ -215,10 +224,12 @@ export default function AdminSupportInbox() {
   };
 
   const filteredConversations = conversations.filter((conv) => {
-    const matchesSearch = 
+    const matchesSearch =
       conv.property?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.participantDetails.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      conv.participantDetails.some((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+
     return matchesSearch;
   });
 
@@ -238,10 +249,14 @@ export default function AdminSupportInbox() {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case "open": return "bg-green-100 text-green-800";
-      case "closed": return "bg-gray-100 text-gray-800";
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-blue-100 text-blue-800";
+      case "open":
+        return "bg-green-100 text-green-800";
+      case "closed":
+        return "bg-gray-100 text-gray-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-blue-100 text-blue-800";
     }
   };
 
@@ -264,7 +279,9 @@ export default function AdminSupportInbox() {
                 <MessageSquare className="h-5 w-5 text-blue-600" />
                 <div>
                   <p className="text-sm text-gray-600">Total Conversations</p>
-                  <p className="text-2xl font-bold">{stats.totalConversations}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.totalConversations}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -275,7 +292,9 @@ export default function AdminSupportInbox() {
                 <Calendar className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm text-gray-600">Today</p>
-                  <p className="text-2xl font-bold">{stats.conversationsToday}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.conversationsToday}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -286,7 +305,9 @@ export default function AdminSupportInbox() {
                 <Clock className="h-5 w-5 text-orange-600" />
                 <div>
                   <p className="text-sm text-gray-600">This Week</p>
-                  <p className="text-2xl font-bold">{stats.conversationsThisWeek}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.conversationsThisWeek}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -297,7 +318,9 @@ export default function AdminSupportInbox() {
                 <CheckCircle className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="text-sm text-gray-600">Active (24h)</p>
-                  <p className="text-2xl font-bold">{stats.activeConversations}</p>
+                  <p className="text-2xl font-bold">
+                    {stats.activeConversations}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -351,7 +374,9 @@ export default function AdminSupportInbox() {
                     key={conv._id}
                     onClick={() => setSelectedConversation(conv)}
                     className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                      selectedConversation?._id === conv._id ? "bg-blue-50 border-blue-200" : ""
+                      selectedConversation?._id === conv._id
+                        ? "bg-blue-50 border-blue-200"
+                        : ""
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -361,8 +386,8 @@ export default function AdminSupportInbox() {
                         </h4>
                         <p className="text-xs text-gray-500">
                           {conv.participantDetails
-                            .filter(p => p.userType !== "admin")
-                            .map(p => p.name)
+                            .filter((p) => p.userType !== "admin")
+                            .map((p) => p.name)
                             .join(", ")}
                         </p>
                       </div>
@@ -379,7 +404,9 @@ export default function AdminSupportInbox() {
                       <p className="text-xs text-gray-600 truncate flex-1">
                         {conv.lastMessage?.message || "No messages yet"}
                       </p>
-                      <Badge className={`ml-2 text-xs ${getStatusColor(conv.status)}`}>
+                      <Badge
+                        className={`ml-2 text-xs ${getStatusColor(conv.status)}`}
+                      >
                         {conv.status || "open"}
                       </Badge>
                     </div>
@@ -401,25 +428,34 @@ export default function AdminSupportInbox() {
                       {selectedConversation.property?.title}
                     </CardTitle>
                     <p className="text-sm text-gray-600">
-                      with {selectedConversation.participantDetails
-                        .filter(p => p.userType !== "admin")
-                        .map(p => p.name)
+                      with{" "}
+                      {selectedConversation.participantDetails
+                        .filter((p) => p.userType !== "admin")
+                        .map((p) => p.name)
                         .join(", ")}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(selectedConversation.status)}>
+                    <Badge
+                      className={getStatusColor(selectedConversation.status)}
+                    >
                       {selectedConversation.status || "open"}
                     </Badge>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateConversationStatus(
-                        selectedConversation._id,
-                        selectedConversation.status === "closed" ? "open" : "closed"
-                      )}
+                      onClick={() =>
+                        updateConversationStatus(
+                          selectedConversation._id,
+                          selectedConversation.status === "closed"
+                            ? "open"
+                            : "closed",
+                        )
+                      }
                     >
-                      {selectedConversation.status === "closed" ? "Reopen" : "Close"}
+                      {selectedConversation.status === "closed"
+                        ? "Reopen"
+                        : "Close"}
                     </Button>
                   </div>
                 </div>
@@ -432,7 +468,9 @@ export default function AdminSupportInbox() {
                     <div
                       key={message._id}
                       className={`flex ${
-                        message.senderType === "admin" ? "justify-end" : "justify-start"
+                        message.senderType === "admin"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
                       <div
@@ -495,7 +533,9 @@ export default function AdminSupportInbox() {
             <CardContent className="flex items-center justify-center h-96">
               <div className="text-center">
                 <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Select a conversation to start chatting</p>
+                <p className="text-gray-500">
+                  Select a conversation to start chatting
+                </p>
               </div>
             </CardContent>
           )}

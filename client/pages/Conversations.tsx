@@ -58,9 +58,10 @@ export default function Conversations() {
   const [searchParams] = useSearchParams();
   const { user, token, isAuthenticated } = useAuth();
   const conversationId = searchParams.get("id");
-  
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -92,7 +93,10 @@ export default function Conversations() {
     if (selectedConversation) {
       fetchMessages(selectedConversation._id);
       // Start polling for new messages every 5 seconds
-      const interval = setInterval(() => fetchMessages(selectedConversation._id), 5000);
+      const interval = setInterval(
+        () => fetchMessages(selectedConversation._id),
+        5000,
+      );
       setPollInterval(interval);
       return () => clearInterval(interval);
     }
@@ -142,7 +146,7 @@ export default function Conversations() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -157,7 +161,8 @@ export default function Conversations() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation || sending || !token) return;
+    if (!newMessage.trim() || !selectedConversation || sending || !token)
+      return;
 
     try {
       setSending(true);
@@ -170,7 +175,7 @@ export default function Conversations() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: newMessage }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -225,12 +230,18 @@ export default function Conversations() {
 
   const filteredConversations = conversations.filter((conversation) => {
     const property = conversation.property;
-    const otherParticipants = conversation.participantDetails.filter(p => p._id !== user?.id);
-    
+    const otherParticipants = conversation.participantDetails.filter(
+      (p) => p._id !== user?.id,
+    );
+
     return (
       property?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      otherParticipants.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      conversation.lastMessage?.message.toLowerCase().includes(searchQuery.toLowerCase())
+      otherParticipants.some((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ) ||
+      conversation.lastMessage?.message
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
     );
   });
 
@@ -241,7 +252,9 @@ export default function Conversations() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">Please login to access your conversations</p>
+            <p className="text-gray-600 mb-4">
+              Please login to access your conversations
+            </p>
             <Button
               onClick={() => (window.location.href = "/login")}
               className="bg-[#C70000] hover:bg-[#A60000]"
@@ -272,7 +285,9 @@ export default function Conversations() {
 
   // Individual conversation view
   if (selectedConversation) {
-    const otherParticipants = selectedConversation.participantDetails.filter(p => p._id !== user?.id);
+    const otherParticipants = selectedConversation.participantDetails.filter(
+      (p) => p._id !== user?.id,
+    );
     const property = selectedConversation.property;
 
     return (
@@ -289,11 +304,9 @@ export default function Conversations() {
           </Button>
           <div className="flex-1">
             <h1 className="font-semibold text-gray-900">
-              {otherParticipants.map(p => p.name).join(", ")}
+              {otherParticipants.map((p) => p.name).join(", ")}
             </h1>
-            <p className="text-sm text-gray-600 truncate">
-              {property?.title}
-            </p>
+            <p className="text-sm text-gray-600 truncate">{property?.title}</p>
           </div>
         </header>
 
@@ -309,7 +322,9 @@ export default function Conversations() {
                 />
               )}
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate">{property.title}</h3>
+                <h3 className="font-medium text-gray-900 truncate">
+                  {property.title}
+                </h3>
                 <p className="text-lg font-semibold text-[#C70000]">
                   ₹{property.price?.toLocaleString()}
                 </p>
@@ -335,7 +350,9 @@ export default function Conversations() {
               <div
                 key={message._id}
                 className={`flex ${
-                  message.senderId === user?.id ? "justify-end" : "justify-start"
+                  message.senderId === user?.id
+                    ? "justify-end"
+                    : "justify-start"
                 }`}
               >
                 <div
@@ -343,8 +360,8 @@ export default function Conversations() {
                     message.senderId === user?.id
                       ? "bg-[#C70000] text-white"
                       : message.senderType === "admin"
-                      ? "bg-blue-100 text-blue-900"
-                      : "bg-white border border-gray-200"
+                        ? "bg-blue-100 text-blue-900"
+                        : "bg-white border border-gray-200"
                   }`}
                 >
                   {message.senderId !== user?.id && (
@@ -418,7 +435,7 @@ export default function Conversations() {
 
       <div className="bg-white border-b p-4">
         <h1 className="text-xl font-bold text-gray-900 mb-4">Messages</h1>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -460,7 +477,9 @@ export default function Conversations() {
         ) : (
           <div className="space-y-1">
             {filteredConversations.map((conversation) => {
-              const otherParticipants = conversation.participantDetails.filter(p => p._id !== user?.id);
+              const otherParticipants = conversation.participantDetails.filter(
+                (p) => p._id !== user?.id,
+              );
               const property = conversation.property;
 
               return (
@@ -485,7 +504,9 @@ export default function Conversations() {
                       {conversation.unreadCount > 0 && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#C70000] rounded-full flex items-center justify-center">
                           <span className="text-white text-xs font-bold">
-                            {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
+                            {conversation.unreadCount > 9
+                              ? "9+"
+                              : conversation.unreadCount}
                           </span>
                         </div>
                       )}
@@ -493,7 +514,7 @@ export default function Conversations() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium text-gray-900 truncate">
-                          {otherParticipants.map(p => p.name).join(", ")}
+                          {otherParticipants.map((p) => p.name).join(", ")}
                         </h3>
                         <span className="text-xs text-gray-500">
                           {formatTime(conversation.lastMessageAt)}

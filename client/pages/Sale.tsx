@@ -26,12 +26,15 @@ export default function Sale() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/subcategories/with-counts?category=sale", {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const response = await fetch(
+        "/api/subcategories/with-counts?category=sale",
+        {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
+      );
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
@@ -43,19 +46,67 @@ export default function Sale() {
       if (data.success) {
         setSubcategories(data.data);
       } else {
-        throw new Error(data.error || 'Failed to fetch subcategories');
+        throw new Error(data.error || "Failed to fetch subcategories");
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       setSubcategories([
-        { id: "1bhk", name: "1 BHK", slug: "1bhk", description: "Single bedroom apartments", count: 45 },
-        { id: "2bhk", name: "2 BHK", slug: "2bhk", description: "Two bedroom apartments", count: 78 },
-        { id: "3bhk", name: "3 BHK", slug: "3bhk", description: "Three bedroom apartments", count: 52 },
-        { id: "4bhk", name: "4+ BHK", slug: "4bhk", description: "Four or more bedrooms", count: 23 },
-        { id: "villa", name: "Villa", slug: "villa", description: "Independent villas", count: 15 },
-        { id: "house", name: "Independent House", slug: "house", description: "Independent houses", count: 34 },
-        { id: "plot", name: "Plot/Land", slug: "plot", description: "Plots and land", count: 28 },
-        { id: "commercial", name: "Commercial", slug: "commercial", description: "Commercial properties", count: 19 }
+        {
+          id: "1bhk",
+          name: "1 BHK",
+          slug: "1bhk",
+          description: "Single bedroom apartments",
+          count: 45,
+        },
+        {
+          id: "2bhk",
+          name: "2 BHK",
+          slug: "2bhk",
+          description: "Two bedroom apartments",
+          count: 78,
+        },
+        {
+          id: "3bhk",
+          name: "3 BHK",
+          slug: "3bhk",
+          description: "Three bedroom apartments",
+          count: 52,
+        },
+        {
+          id: "4bhk",
+          name: "4+ BHK",
+          slug: "4bhk",
+          description: "Four or more bedrooms",
+          count: 23,
+        },
+        {
+          id: "villa",
+          name: "Villa",
+          slug: "villa",
+          description: "Independent villas",
+          count: 15,
+        },
+        {
+          id: "house",
+          name: "Independent House",
+          slug: "house",
+          description: "Independent houses",
+          count: 34,
+        },
+        {
+          id: "plot",
+          name: "Plot/Land",
+          slug: "plot",
+          description: "Plots and land",
+          count: 28,
+        },
+        {
+          id: "commercial",
+          name: "Commercial",
+          slug: "commercial",
+          description: "Commercial properties",
+          count: 19,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -93,9 +144,7 @@ export default function Sale() {
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Sale Properties
             </h1>
-            <p className="text-gray-600">
-              Choose a property type to sell
-            </p>
+            <p className="text-gray-600">Choose a property type to sell</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

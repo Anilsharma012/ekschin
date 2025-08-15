@@ -148,7 +148,7 @@ export default function PropertyChat({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -176,7 +176,7 @@ export default function PropertyChat({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: newMessage }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -241,10 +241,14 @@ export default function PropertyChat({
             <MessageSquare className="h-5 w-5" />
             <div>
               <CardTitle className="text-sm">
-                {property?.title ? `Chat about ${property.title.substring(0, 30)}${property.title.length > 30 ? '...' : ''}` : "Property Chat"}
+                {property?.title
+                  ? `Chat about ${property.title.substring(0, 30)}${property.title.length > 30 ? "..." : ""}`
+                  : "Property Chat"}
               </CardTitle>
               {property?.contactInfo?.name && (
-                <p className="text-xs opacity-90">with {property.contactInfo.name}</p>
+                <p className="text-xs opacity-90">
+                  with {property.contactInfo.name}
+                </p>
               )}
             </div>
           </div>
@@ -286,9 +290,15 @@ export default function PropertyChat({
                 />
               )}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium truncate">{property.title}</h4>
-                <p className="text-xs text-gray-600">₹{property.price?.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 truncate">{property.location?.address}</p>
+                <h4 className="text-sm font-medium truncate">
+                  {property.title}
+                </h4>
+                <p className="text-xs text-gray-600">
+                  ₹{property.price?.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {property.location?.address}
+                </p>
               </div>
             </div>
           </div>
@@ -313,7 +323,9 @@ export default function PropertyChat({
               <div
                 key={message._id}
                 className={`flex ${
-                  message.senderId === user?.id ? "justify-end" : "justify-start"
+                  message.senderId === user?.id
+                    ? "justify-end"
+                    : "justify-start"
                 }`}
               >
                 <div
@@ -321,15 +333,20 @@ export default function PropertyChat({
                     message.senderId === user?.id
                       ? "bg-[#C70000] text-white"
                       : message.senderType === "admin"
-                      ? "bg-blue-100 text-blue-900"
-                      : "bg-gray-100 text-gray-900"
+                        ? "bg-blue-100 text-blue-900"
+                        : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   {message.senderId !== user?.id && (
                     <div className="flex items-center space-x-1 mb-1">
-                      <span className="text-xs font-medium">{message.senderName}</span>
+                      <span className="text-xs font-medium">
+                        {message.senderName}
+                      </span>
                       {message.senderType === "admin" && (
-                        <Badge variant="secondary" className="text-xs px-1 py-0">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs px-1 py-0"
+                        >
                           Support
                         </Badge>
                       )}

@@ -48,9 +48,9 @@ export default function Categories() {
       setLoading(true);
       const response = await fetch("/api/categories", {
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
       const data = await response.json();
 
@@ -68,9 +68,9 @@ export default function Categories() {
     try {
       const response = await fetch("/api/properties", {
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
       const data = await response.json();
 

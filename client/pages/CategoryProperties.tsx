@@ -79,11 +79,11 @@ export default function CategoryProperties() {
   // Get category from URL path
   const getCurrentCategory = () => {
     const path = window.location.pathname;
-    if (path.startsWith('/buy/')) return 'buy';
-    if (path.startsWith('/sale/')) return 'sale';
-    if (path.startsWith('/rent/')) return 'rent';
-    if (path.startsWith('/lease/')) return 'lease';
-    if (path.startsWith('/pg/')) return 'pg';
+    if (path.startsWith("/buy/")) return "buy";
+    if (path.startsWith("/sale/")) return "sale";
+    if (path.startsWith("/rent/")) return "rent";
+    if (path.startsWith("/lease/")) return "lease";
+    if (path.startsWith("/pg/")) return "pg";
     return category;
   };
 
@@ -122,13 +122,13 @@ export default function CategoryProperties() {
       // Handle category and subcategory from URL
       const currentCategory = getCurrentCategory();
       if (currentCategory) {
-        if (currentCategory === 'buy' || currentCategory === 'sale') {
+        if (currentCategory === "buy" || currentCategory === "sale") {
           params.append("priceType", "sale");
-        } else if (currentCategory === 'rent') {
+        } else if (currentCategory === "rent") {
           params.append("priceType", "rent");
-        } else if (currentCategory === 'lease') {
+        } else if (currentCategory === "lease") {
           params.append("priceType", "lease");
-        } else if (currentCategory === 'pg') {
+        } else if (currentCategory === "pg") {
           params.append("propertyType", "pg");
         }
       }
@@ -181,8 +181,12 @@ export default function CategoryProperties() {
     const currentCategory = getCurrentCategory();
 
     if (slug) {
-      const subcategoryName = slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-      const categoryName = currentCategory?.replace(/\b\w/g, (l) => l.toUpperCase());
+      const subcategoryName = slug
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
+      const categoryName = currentCategory?.replace(/\b\w/g, (l) =>
+        l.toUpperCase(),
+      );
       return `${subcategoryName} for ${categoryName}`;
     }
     if (propertyType) {
@@ -626,7 +630,12 @@ export default function CategoryProperties() {
                     }`}
                   >
                     <img
-                      src={property.coverImageUrl ?? property.images?.[0]?.url ?? property.images?.[0] ?? '/placeholder.png'}
+                      src={
+                        property.coverImageUrl ??
+                        property.images?.[0]?.url ??
+                        property.images?.[0] ??
+                        "/placeholder.png"
+                      }
                       alt={property.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {

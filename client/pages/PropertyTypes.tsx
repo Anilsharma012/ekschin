@@ -42,9 +42,9 @@ export default function PropertyTypes() {
       setLoading(true);
       const response = await fetch("/api/categories", {
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
       const data = await response.json();
 

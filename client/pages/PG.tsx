@@ -26,12 +26,15 @@ export default function PG() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/subcategories/with-counts?category=pg", {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const response = await fetch(
+        "/api/subcategories/with-counts?category=pg",
+        {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
+      );
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
@@ -43,17 +46,53 @@ export default function PG() {
       if (data.success) {
         setSubcategories(data.data);
       } else {
-        throw new Error(data.error || 'Failed to fetch subcategories');
+        throw new Error(data.error || "Failed to fetch subcategories");
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       setSubcategories([
-        { id: "boys-pg", name: "Boys PG", slug: "boys-pg", description: "PG accommodation for boys", count: 45 },
-        { id: "girls-pg", name: "Girls PG", slug: "girls-pg", description: "PG accommodation for girls", count: 38 },
-        { id: "co-living", name: "Co-living", slug: "co-living", description: "Co-living spaces", count: 22 },
-        { id: "hostel", name: "Hostel", slug: "hostel", description: "Hostel accommodation", count: 15 },
-        { id: "shared-room", name: "Shared Room", slug: "shared-room", description: "Shared room accommodation", count: 52 },
-        { id: "single-room", name: "Single Room", slug: "single-room", description: "Single room accommodation", count: 34 }
+        {
+          id: "boys-pg",
+          name: "Boys PG",
+          slug: "boys-pg",
+          description: "PG accommodation for boys",
+          count: 45,
+        },
+        {
+          id: "girls-pg",
+          name: "Girls PG",
+          slug: "girls-pg",
+          description: "PG accommodation for girls",
+          count: 38,
+        },
+        {
+          id: "co-living",
+          name: "Co-living",
+          slug: "co-living",
+          description: "Co-living spaces",
+          count: 22,
+        },
+        {
+          id: "hostel",
+          name: "Hostel",
+          slug: "hostel",
+          description: "Hostel accommodation",
+          count: 15,
+        },
+        {
+          id: "shared-room",
+          name: "Shared Room",
+          slug: "shared-room",
+          description: "Shared room accommodation",
+          count: 52,
+        },
+        {
+          id: "single-room",
+          name: "Single Room",
+          slug: "single-room",
+          description: "Single room accommodation",
+          count: 34,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -91,9 +130,7 @@ export default function PG() {
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               PG & Hostel
             </h1>
-            <p className="text-gray-600">
-              Choose accommodation type
-            </p>
+            <p className="text-gray-600">Choose accommodation type</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

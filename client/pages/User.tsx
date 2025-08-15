@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, MessageSquare, User, LogOut, Phone, Mail, Calendar, Plus } from "lucide-react";
+import {
+  Heart,
+  MessageSquare,
+  User,
+  LogOut,
+  Phone,
+  Mail,
+  Calendar,
+  Plus,
+} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import OLXStyleHeader from "../components/OLXStyleHeader";
 import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
 
 interface Property {
   _id: string;
@@ -41,7 +60,7 @@ export default function User() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
     fetchFavorites();
@@ -50,11 +69,11 @@ export default function User() {
 
   const fetchFavorites = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch('/api/favorites/my', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch("/api/favorites/my", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 
@@ -62,17 +81,17 @@ export default function User() {
         setFavorites(data.data);
       }
     } catch (error) {
-      console.error('Error fetching favorites:', error);
+      console.error("Error fetching favorites:", error);
     }
   };
 
   const fetchTickets = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch('/api/tickets/my', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch("/api/tickets/my", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 
@@ -80,7 +99,7 @@ export default function User() {
         setTickets(data.data);
       }
     } catch (error) {
-      console.error('Error fetching tickets:', error);
+      console.error("Error fetching tickets:", error);
     } finally {
       setLoading(false);
     }
@@ -88,19 +107,19 @@ export default function User() {
 
   const removeFavorite = async (propertyId: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
       const response = await fetch(`/api/favorites/${propertyId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
-        setFavorites(favorites.filter(fav => fav.propertyId !== propertyId));
+        setFavorites(favorites.filter((fav) => fav.propertyId !== propertyId));
       }
     } catch (error) {
-      console.error('Error removing favorite:', error);
+      console.error("Error removing favorite:", error);
     }
   };
 
@@ -113,12 +132,12 @@ export default function User() {
   };
 
   const createNewTicket = () => {
-    navigate('/support/new');
+    navigate("/support/new");
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (loading) {
@@ -151,7 +170,9 @@ export default function User() {
                     <User className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-900">{user?.name}</h1>
+                    <h1 className="text-xl font-bold text-gray-900">
+                      {user?.name}
+                    </h1>
                     <p className="text-gray-600">{user?.email}</p>
                     {user?.phone && (
                       <p className="text-gray-600 flex items-center">
@@ -161,8 +182,8 @@ export default function User() {
                     )}
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleLogout}
                   className="border-red-200 text-red-600 hover:bg-red-50"
                 >
@@ -196,9 +217,16 @@ export default function User() {
                 <Card>
                   <CardContent className="p-8 text-center">
                     <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No favorites yet</h3>
-                    <p className="text-gray-600 mb-4">Start browsing properties and add them to your favorites</p>
-                    <Button onClick={() => navigate('/buy')} className="bg-[#C70000] hover:bg-[#A60000]">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No favorites yet
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Start browsing properties and add them to your favorites
+                    </p>
+                    <Button
+                      onClick={() => navigate("/buy")}
+                      className="bg-[#C70000] hover:bg-[#A60000]"
+                    >
                       Browse Properties
                     </Button>
                   </CardContent>
@@ -211,24 +239,35 @@ export default function User() {
                         <div className="flex">
                           <div className="w-32 h-32 flex-shrink-0">
                             <img
-                              src={favorite.property?.coverImageUrl ?? favorite.property?.images?.[0]?.url ?? favorite.property?.images?.[0] ?? '/placeholder.png'}
+                              src={
+                                favorite.property?.coverImageUrl ??
+                                favorite.property?.images?.[0]?.url ??
+                                favorite.property?.images?.[0] ??
+                                "/placeholder.png"
+                              }
                               alt={favorite.property?.title}
                               className="w-full h-full object-cover"
-                              onClick={() => handlePropertyClick(favorite.propertyId)}
+                              onClick={() =>
+                                handlePropertyClick(favorite.propertyId)
+                              }
                             />
                           </div>
                           <div className="flex-1 p-4">
                             <div className="flex justify-between items-start mb-2">
-                              <h3 
+                              <h3
                                 className="font-semibold text-gray-900 cursor-pointer hover:text-[#C70000]"
-                                onClick={() => handlePropertyClick(favorite.propertyId)}
+                                onClick={() =>
+                                  handlePropertyClick(favorite.propertyId)
+                                }
                               >
                                 {favorite.property?.title}
                               </h3>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => removeFavorite(favorite.propertyId)}
+                                onClick={() =>
+                                  removeFavorite(favorite.propertyId)
+                                }
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
                                 <Heart className="h-4 w-4 fill-current" />
@@ -240,11 +279,15 @@ export default function User() {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-bold text-[#C70000]">
                                 ₹{favorite.property?.price?.toLocaleString()}
-                                {favorite.property?.priceType === 'rent' && '/month'}
+                                {favorite.property?.priceType === "rent" &&
+                                  "/month"}
                               </span>
                               <span className="text-xs text-gray-400 flex items-center">
                                 <Calendar className="h-3 w-3 mr-1" />
-                                Added {new Date(favorite.addedAt).toLocaleDateString()}
+                                Added{" "}
+                                {new Date(
+                                  favorite.addedAt,
+                                ).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
@@ -260,7 +303,7 @@ export default function User() {
             <TabsContent value="support" className="mt-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Support Tickets</h2>
-                <Button 
+                <Button
                   onClick={createNewTicket}
                   className="bg-[#C70000] hover:bg-[#A60000]"
                 >
@@ -273,9 +316,13 @@ export default function User() {
                 <Card>
                   <CardContent className="p-8 text-center">
                     <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No support tickets</h3>
-                    <p className="text-gray-600 mb-4">Need help? Create a support ticket and we'll assist you</p>
-                    <Button 
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No support tickets
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Need help? Create a support ticket and we'll assist you
+                    </p>
+                    <Button
                       onClick={createNewTicket}
                       className="bg-[#C70000] hover:bg-[#A60000]"
                     >
@@ -286,29 +333,44 @@ export default function User() {
               ) : (
                 <div className="space-y-4">
                   {tickets.map((ticket) => (
-                    <Card key={ticket._id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardContent 
+                    <Card
+                      key={ticket._id}
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                    >
+                      <CardContent
                         className="p-4"
                         onClick={() => handleTicketClick(ticket._id)}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h3 className="font-semibold text-gray-900">{ticket.subject}</h3>
-                            <p className="text-sm text-gray-600">#{ticket.ticketNumber}</p>
+                            <h3 className="font-semibold text-gray-900">
+                              {ticket.subject}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              #{ticket.ticketNumber}
+                            </p>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              ticket.status === 'open' ? 'bg-green-100 text-green-800' :
-                              ticket.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                ticket.status === "open"
+                                  ? "bg-green-100 text-green-800"
+                                  : ticket.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
                               {ticket.status}
                             </span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              ticket.priority === 'high' ? 'bg-red-100 text-red-800' :
-                              ticket.priority === 'medium' ? 'bg-orange-100 text-orange-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                ticket.priority === "high"
+                                  ? "bg-red-100 text-red-800"
+                                  : ticket.priority === "medium"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
                               {ticket.priority}
                             </span>
                           </div>
@@ -318,7 +380,9 @@ export default function User() {
                         </p>
                         <div className="flex justify-between items-center text-xs text-gray-400">
                           <span>{ticket.messageCount} messages</span>
-                          <span>{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>

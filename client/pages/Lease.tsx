@@ -26,12 +26,15 @@ export default function Lease() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/subcategories/with-counts?category=lease", {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
+      const response = await fetch(
+        "/api/subcategories/with-counts?category=lease",
+        {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
+      );
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
@@ -43,17 +46,53 @@ export default function Lease() {
       if (data.success) {
         setSubcategories(data.data);
       } else {
-        throw new Error(data.error || 'Failed to fetch subcategories');
+        throw new Error(data.error || "Failed to fetch subcategories");
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       setSubcategories([
-        { id: "office", name: "Office Space", slug: "office", description: "Commercial office space", count: 35 },
-        { id: "retail", name: "Retail Space", slug: "retail", description: "Shops and showrooms", count: 28 },
-        { id: "warehouse", name: "Warehouse", slug: "warehouse", description: "Storage and warehouse", count: 12 },
-        { id: "industrial", name: "Industrial", slug: "industrial", description: "Industrial properties", count: 8 },
-        { id: "restaurant", name: "Restaurant Space", slug: "restaurant", description: "Restaurant and food space", count: 15 },
-        { id: "hotel", name: "Hotel/Lodge", slug: "hotel", description: "Hospitality properties", count: 6 }
+        {
+          id: "office",
+          name: "Office Space",
+          slug: "office",
+          description: "Commercial office space",
+          count: 35,
+        },
+        {
+          id: "retail",
+          name: "Retail Space",
+          slug: "retail",
+          description: "Shops and showrooms",
+          count: 28,
+        },
+        {
+          id: "warehouse",
+          name: "Warehouse",
+          slug: "warehouse",
+          description: "Storage and warehouse",
+          count: 12,
+        },
+        {
+          id: "industrial",
+          name: "Industrial",
+          slug: "industrial",
+          description: "Industrial properties",
+          count: 8,
+        },
+        {
+          id: "restaurant",
+          name: "Restaurant Space",
+          slug: "restaurant",
+          description: "Restaurant and food space",
+          count: 15,
+        },
+        {
+          id: "hotel",
+          name: "Hotel/Lodge",
+          slug: "hotel",
+          description: "Hospitality properties",
+          count: 6,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -91,9 +130,7 @@ export default function Lease() {
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Lease Properties
             </h1>
-            <p className="text-gray-600">
-              Choose a property type for lease
-            </p>
+            <p className="text-gray-600">Choose a property type for lease</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

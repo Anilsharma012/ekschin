@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, MessageSquare, Clock, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  MessageSquare,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import OLXStyleHeader from "../components/OLXStyleHeader";
 import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 
 interface Message {
@@ -50,7 +61,7 @@ export default function Support() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
@@ -64,11 +75,11 @@ export default function Support() {
   const fetchTicketMessages = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
       const response = await fetch(`/api/tickets/${ticketId}/messages`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 
@@ -76,11 +87,11 @@ export default function Support() {
         setTicket(data.data.ticket);
         setMessages(data.data.messages);
       } else {
-        navigate('/user');
+        navigate("/user");
       }
     } catch (error) {
-      console.error('Error fetching ticket:', error);
-      navigate('/user');
+      console.error("Error fetching ticket:", error);
+      navigate("/user");
     } finally {
       setLoading(false);
     }
@@ -91,21 +102,21 @@ export default function Support() {
 
     try {
       setCreating(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch('/api/tickets', {
-        method: 'POST',
+      const response = await fetch("/api/tickets", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           subject: subject.trim(),
           message: description.trim(),
           category,
-          priority
-        })
+          priority,
+        }),
       });
 
       const data = await response.json();
@@ -114,7 +125,7 @@ export default function Support() {
         navigate(`/support/ticket/${data.data._id}`);
       }
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      console.error("Error creating ticket:", error);
     } finally {
       setCreating(false);
     }
@@ -125,34 +136,37 @@ export default function Support() {
 
     try {
       setSending(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
 
       const response = await fetch(`/api/tickets/${ticketId}/messages`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          message: newMessage.trim()
-        })
+          message: newMessage.trim(),
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setMessages([...messages, {
-          _id: data.data._id,
-          message: data.data.message,
-          senderType: data.data.senderType,
-          senderName: user?.name || "You",
-          createdAt: data.data.createdAt
-        }]);
+        setMessages([
+          ...messages,
+          {
+            _id: data.data._id,
+            message: data.data.message,
+            senderType: data.data.senderType,
+            senderName: user?.name || "You",
+            createdAt: data.data.createdAt,
+          },
+        ]);
         setNewMessage("");
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     } finally {
       setSending(false);
     }
@@ -160,19 +174,27 @@ export default function Support() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "open":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "closed":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-orange-100 text-orange-800';
-      case 'low': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-orange-100 text-orange-800";
+      case "low":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -202,12 +224,14 @@ export default function Support() {
             <div className="flex items-center mb-6">
               <Button
                 variant="ghost"
-                onClick={() => navigate('/user')}
+                onClick={() => navigate("/user")}
                 className="mr-4 p-2"
               >
                 <ArrowLeft className="h-6 w-6" />
               </Button>
-              <h1 className="text-xl font-bold text-gray-900">Create Support Ticket</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                Create Support Ticket
+              </h1>
             </div>
 
             <Card>
@@ -219,7 +243,9 @@ export default function Support() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Subject *
+                  </label>
                   <Input
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
@@ -230,7 +256,9 @@ export default function Support() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Category</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Category
+                    </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
@@ -244,7 +272,9 @@ export default function Support() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Priority</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Priority
+                    </label>
                     <select
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
@@ -258,7 +288,9 @@ export default function Support() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Description *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Description *
+                  </label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -266,7 +298,9 @@ export default function Support() {
                     rows={6}
                     maxLength={1000}
                   />
-                  <p className="text-xs text-gray-500 mt-1">{description.length}/1000 characters</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {description.length}/1000 characters
+                  </p>
                 </div>
 
                 <Button
@@ -307,20 +341,22 @@ export default function Support() {
           <div className="flex items-center mb-6">
             <Button
               variant="ghost"
-              onClick={() => navigate('/user')}
+              onClick={() => navigate("/user")}
               className="mr-4 p-2"
             >
               <ArrowLeft className="h-6 w-6" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900">{ticket?.subject}</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                {ticket?.subject}
+              </h1>
               <p className="text-sm text-gray-600">#{ticket?.ticketNumber}</p>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(ticket?.status || '')}>
+              <Badge className={getStatusColor(ticket?.status || "")}>
                 {ticket?.status}
               </Badge>
-              <Badge className={getPriorityColor(ticket?.priority || '')}>
+              <Badge className={getPriorityColor(ticket?.priority || "")}>
                 {ticket?.priority}
               </Badge>
             </div>
@@ -331,31 +367,35 @@ export default function Support() {
             {messages.map((message) => (
               <div
                 key={message._id}
-                className={`flex ${message.senderType === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.senderType === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                    message.senderType === 'user'
-                      ? 'bg-[#C70000] text-white'
-                      : 'bg-white border border-gray-200'
+                    message.senderType === "user"
+                      ? "bg-[#C70000] text-white"
+                      : "bg-white border border-gray-200"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium">
                       {message.senderName}
                     </span>
-                    <span className={`text-xs ${message.senderType === 'user' ? 'text-red-100' : 'text-gray-500'}`}>
+                    <span
+                      className={`text-xs ${message.senderType === "user" ? "text-red-100" : "text-gray-500"}`}
+                    >
                       {new Date(message.createdAt).toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.message}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Reply Box */}
-          {ticket?.status !== 'closed' && (
+          {ticket?.status !== "closed" && (
             <Card>
               <CardContent className="p-4">
                 <div className="flex space-x-2">
@@ -363,7 +403,9 @@ export default function Support() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
-                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && !e.shiftKey && sendMessage()
+                    }
                     disabled={sending}
                   />
                   <Button
@@ -382,7 +424,7 @@ export default function Support() {
             </Card>
           )}
 
-          {ticket?.status === 'closed' && (
+          {ticket?.status === "closed" && (
             <Card>
               <CardContent className="p-4 text-center">
                 <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />

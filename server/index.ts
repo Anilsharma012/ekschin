@@ -854,35 +854,47 @@ export function createServer() {
 
   // OLX-style Conversation routes
   app.post("/api/conversations", authenticateToken, createConversation);
-  app.post("/api/conversations/find-or-create", authenticateToken, findOrCreateConversation);
+  app.post(
+    "/api/conversations/find-or-create",
+    authenticateToken,
+    findOrCreateConversation,
+  );
   app.get("/api/conversations/my", authenticateToken, getMyConversations);
-  app.get("/api/conversations/:id/messages", authenticateToken, getConversationMessagesNew);
-  app.post("/api/conversations/:id/messages", authenticateToken, sendMessageToConversation);
+  app.get(
+    "/api/conversations/:id/messages",
+    authenticateToken,
+    getConversationMessagesNew,
+  );
+  app.post(
+    "/api/conversations/:id/messages",
+    authenticateToken,
+    sendMessageToConversation,
+  );
 
   // Admin conversation routes (Support Inbox)
   app.get(
     "/api/admin/conversations",
     authenticateToken,
     requireAdmin,
-    getAdminConversations
+    getAdminConversations,
   );
   app.post(
     "/api/admin/conversations/:id/messages",
     authenticateToken,
     requireAdmin,
-    adminReplyToConversation
+    adminReplyToConversation,
   );
   app.get(
     "/api/admin/conversations/stats",
     authenticateToken,
     requireAdmin,
-    getAdminConversationStats
+    getAdminConversationStats,
   );
   app.put(
     "/api/admin/conversations/:id/status",
     authenticateToken,
     requireAdmin,
-    updateConversationStatus
+    updateConversationStatus,
   );
 
   // Testimonials routes
@@ -1375,26 +1387,74 @@ export function createServer() {
   // Favorites routes
   app.get("/api/favorites/my", authenticateToken, getFavorites);
   app.post("/api/favorites/:propertyId", authenticateToken, addToFavorites);
-  app.delete("/api/favorites/:propertyId", authenticateToken, removeFromFavorites);
+  app.delete(
+    "/api/favorites/:propertyId",
+    authenticateToken,
+    removeFromFavorites,
+  );
   app.get("/api/favorites/:propertyId/check", authenticateToken, checkFavorite);
 
   // Tickets (support) routes
   app.post("/api/tickets", authenticateToken, createTicket);
   app.get("/api/tickets/my", authenticateToken, getUserTickets);
   app.get("/api/admin/tickets", authenticateToken, requireAdmin, getAllTickets);
-  app.get("/api/tickets/:ticketId/messages", authenticateToken, getTicketMessages);
-  app.post("/api/tickets/:ticketId/messages", authenticateToken, addTicketMessage);
-  app.patch("/api/admin/tickets/:ticketId/status", authenticateToken, requireAdmin, updateTicketStatus);
+  app.get(
+    "/api/tickets/:ticketId/messages",
+    authenticateToken,
+    getTicketMessages,
+  );
+  app.post(
+    "/api/tickets/:ticketId/messages",
+    authenticateToken,
+    addTicketMessage,
+  );
+  app.patch(
+    "/api/admin/tickets/:ticketId/status",
+    authenticateToken,
+    requireAdmin,
+    updateTicketStatus,
+  );
 
   // Other Services routes
   app.get("/api/other-services", getPublicOtherServices); // Public endpoint
   app.get("/api/other-services/categories", getServiceCategories); // Public categories
-  app.get("/api/admin/other-services", authenticateToken, requireAdmin, getAllOtherServices);
-  app.post("/api/admin/other-services", authenticateToken, requireAdmin, createOtherService);
-  app.put("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, updateOtherService);
-  app.delete("/api/admin/other-services/:serviceId", authenticateToken, requireAdmin, deleteOtherService);
-  app.post("/api/admin/other-services/import", authenticateToken, requireAdmin, upload.single("file"), importOtherServices);
-  app.get("/api/admin/other-services/export", authenticateToken, requireAdmin, exportOtherServices);
+  app.get(
+    "/api/admin/other-services",
+    authenticateToken,
+    requireAdmin,
+    getAllOtherServices,
+  );
+  app.post(
+    "/api/admin/other-services",
+    authenticateToken,
+    requireAdmin,
+    createOtherService,
+  );
+  app.put(
+    "/api/admin/other-services/:serviceId",
+    authenticateToken,
+    requireAdmin,
+    updateOtherService,
+  );
+  app.delete(
+    "/api/admin/other-services/:serviceId",
+    authenticateToken,
+    requireAdmin,
+    deleteOtherService,
+  );
+  app.post(
+    "/api/admin/other-services/import",
+    authenticateToken,
+    requireAdmin,
+    upload.single("file"),
+    importOtherServices,
+  );
+  app.get(
+    "/api/admin/other-services/export",
+    authenticateToken,
+    requireAdmin,
+    exportOtherServices,
+  );
 
   // Health check endpoint for network monitoring
   app.get("/api/health", (req, res) => {

@@ -219,7 +219,10 @@ export default function CustomFieldsManagement() {
       });
 
       if (response.ok) {
-        setFields((prevFields) => prevFields?.filter((field) => field?._id !== fieldId) || []);
+        setFields(
+          (prevFields) =>
+            prevFields?.filter((field) => field?._id !== fieldId) || [],
+        );
       } else {
         const data = await response.json();
         setError(data.error || "Failed to delete custom field");

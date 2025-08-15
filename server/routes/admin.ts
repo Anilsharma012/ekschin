@@ -14,7 +14,8 @@ export const getAllUsers: RequestHandler = async (req, res) => {
       // Database not initialized yet
       return res.status(503).json({
         success: false,
-        error: "Database connection is being established. Please try again in a moment.",
+        error:
+          "Database connection is being established. Please try again in a moment.",
       });
     }
     const { page = "1", limit = "20", userType, search } = req.query;
@@ -89,26 +90,23 @@ export const getUserManagementStats: RequestHandler = async (req, res) => {
       // Database not initialized yet
       return res.status(503).json({
         success: false,
-        error: "Database connection is being established. Please try again in a moment.",
+        error:
+          "Database connection is being established. Please try again in a moment.",
       });
     }
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [
-      totalUsers,
-      activeUsers,
-      newUsers,
-      verifiedUsers,
-    ] = await Promise.all([
-      db.collection("users").countDocuments(),
-      db.collection("users").countDocuments({ status: "active" }),
-      db.collection("users").countDocuments({
-        createdAt: { $gte: thirtyDaysAgo }
-      }),
-      db.collection("users").countDocuments({ isVerified: true })
-    ]);
+    const [totalUsers, activeUsers, newUsers, verifiedUsers] =
+      await Promise.all([
+        db.collection("users").countDocuments(),
+        db.collection("users").countDocuments({ status: "active" }),
+        db.collection("users").countDocuments({
+          createdAt: { $gte: thirtyDaysAgo },
+        }),
+        db.collection("users").countDocuments({ isVerified: true }),
+      ]);
 
     const response: ApiResponse<{
       totalUsers: number;
@@ -164,24 +162,34 @@ export const exportUsers: RequestHandler = async (req, res) => {
       .toArray();
 
     // Convert to CSV
-    const csvHeaders = "Name,Email,Phone,User Type,Status,Join Date,Last Login,Verified\n";
-    const csvData = users.map((user: any) => {
-      return [
-        user.name || '',
-        user.email || '',
-        user.phone || '',
-        user.userType || '',
-        user.status || 'active',
-        user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
-        user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
-        user.isVerified ? 'Yes' : 'No'
-      ].map(field => `"${field}"`).join(',');
-    }).join('\n');
+    const csvHeaders =
+      "Name,Email,Phone,User Type,Status,Join Date,Last Login,Verified\n";
+    const csvData = users
+      .map((user: any) => {
+        return [
+          user.name || "",
+          user.email || "",
+          user.phone || "",
+          user.userType || "",
+          user.status || "active",
+          user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "",
+          user.lastLogin
+            ? new Date(user.lastLogin).toLocaleDateString()
+            : "Never",
+          user.isVerified ? "Yes" : "No",
+        ]
+          .map((field) => `"${field}"`)
+          .join(",");
+      })
+      .join("\n");
 
     const csv = csvHeaders + csvData;
 
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="users-export.csv"');
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="users-export.csv"',
+    );
     res.send(csv);
   } catch (error) {
     console.error("Error exporting users:", error);
@@ -355,11 +363,11 @@ export const bulkDeleteUsers: RequestHandler = async (req, res) => {
       }
     }
 
-    const objectIds = ids.map(id => new ObjectId(id));
+    const objectIds = ids.map((id) => new ObjectId(id));
 
     // Delete associated properties for all users
     await db.collection("properties").deleteMany({
-      ownerId: { $in: ids }
+      ownerId: { $in: ids },
     });
 
     // Delete the users
@@ -371,7 +379,7 @@ export const bulkDeleteUsers: RequestHandler = async (req, res) => {
       success: true,
       data: {
         message: `${result.deletedCount} users deleted successfully`,
-        deletedCount: result.deletedCount
+        deletedCount: result.deletedCount,
       },
     };
 
@@ -404,10 +412,7 @@ export const getAllProperties: RequestHandler = async (req, res) => {
       if (promotion === "paid") {
         filter.premium = true;
       } else if (promotion === "free") {
-        filter.$or = [
-          { premium: { $exists: false } },
-          { premium: false }
-        ];
+        filter.$or = [{ premium: { $exists: false } }, { premium: false }];
       } else if (promotion === "featured") {
         filter.featured = true;
       }
@@ -421,10 +426,7 @@ export const getAllProperties: RequestHandler = async (req, res) => {
 
       if (filter.$or) {
         // If promotion filter already added $or, combine with search
-        filter.$and = [
-          { $or: filter.$or },
-          { $or: searchConditions }
-        ];
+        filter.$and = [{ $or: filter.$or }, { $or: searchConditions }];
         delete filter.$or;
       } else {
         filter.$or = searchConditions;
@@ -441,12 +443,14 @@ export const getAllProperties: RequestHandler = async (req, res) => {
 
     const total = await db.collection("properties").countDocuments(filter);
 
-    console.log(`📊 Found ${properties.length} properties out of ${total} total`);
+    console.log(
+      `📊 Found ${properties.length} properties out of ${total} total`,
+    );
     if (properties.length > 0) {
       console.log(`📊 First property:`, {
         _id: properties[0]._id,
         title: properties[0].title,
-        approvalStatus: properties[0].approvalStatus
+        approvalStatus: properties[0].approvalStatus,
       });
     }
 
@@ -752,13 +756,15 @@ export const updateProperty: RequestHandler = async (req, res) => {
     }
 
     // Parse JSON fields if they come as strings
-    const location = typeof req.body.location === "string"
-      ? JSON.parse(req.body.location)
-      : req.body.location;
+    const location =
+      typeof req.body.location === "string"
+        ? JSON.parse(req.body.location)
+        : req.body.location;
 
-    const contactInfo = typeof req.body.contactInfo === "string"
-      ? JSON.parse(req.body.contactInfo)
-      : req.body.contactInfo;
+    const contactInfo =
+      typeof req.body.contactInfo === "string"
+        ? JSON.parse(req.body.contactInfo)
+        : req.body.contactInfo;
 
     // Get existing property to preserve existing images
     const existingProperty = await db
@@ -822,13 +828,15 @@ export const createProperty: RequestHandler = async (req, res) => {
     }
 
     // Parse JSON fields if they come as strings
-    const location = typeof req.body.location === "string"
-      ? JSON.parse(req.body.location)
-      : req.body.location;
+    const location =
+      typeof req.body.location === "string"
+        ? JSON.parse(req.body.location)
+        : req.body.location;
 
-    const contactInfo = typeof req.body.contactInfo === "string"
-      ? JSON.parse(req.body.contactInfo)
-      : req.body.contactInfo;
+    const contactInfo =
+      typeof req.body.contactInfo === "string"
+        ? JSON.parse(req.body.contactInfo)
+        : req.body.contactInfo;
 
     const propertyData = {
       title: req.body.title,
@@ -868,7 +876,9 @@ export const createProperty: RequestHandler = async (req, res) => {
     const result = await db.collection("properties").insertOne(propertyData);
 
     // Get the created property
-    const createdProperty = await db.collection("properties").findOne({ _id: result.insertedId });
+    const createdProperty = await db
+      .collection("properties")
+      .findOne({ _id: result.insertedId });
 
     const response: ApiResponse<any> = {
       success: true,
@@ -1033,45 +1043,55 @@ export const getUserAnalytics: RequestHandler = async (req, res) => {
 
     // Get basic user counts
     const totalUsers = await db.collection("users").countDocuments();
-    const activeUsers = await db.collection("users").countDocuments({ status: "active" });
-    const verifiedUsers = await db.collection("users").countDocuments({ isVerified: true });
+    const activeUsers = await db
+      .collection("users")
+      .countDocuments({ status: "active" });
+    const verifiedUsers = await db
+      .collection("users")
+      .countDocuments({ isVerified: true });
     const newUsers = await db.collection("users").countDocuments({
-      createdAt: { $gte: fromDate }
+      createdAt: { $gte: fromDate },
     });
 
     // Get users by type
-    const usersByType = await db.collection("users").aggregate([
-      {
-        $group: {
-          _id: "$userType",
-          count: { $sum: 1 }
-        }
-      }
-    ]).toArray();
+    const usersByType = await db
+      .collection("users")
+      .aggregate([
+        {
+          $group: {
+            _id: "$userType",
+            count: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray();
 
     // Get user growth over time (last 30 days)
-    const userGrowth = await db.collection("users").aggregate([
-      {
-        $match: {
-          createdAt: { $gte: fromDate }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+    const userGrowth = await db
+      .collection("users")
+      .aggregate([
+        {
+          $match: {
+            createdAt: { $gte: fromDate },
           },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { "_id": 1 } }
-    ]).toArray();
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+      .toArray();
 
     // Generate user activity data (mock for now - could track login data)
-    const userActivity = userGrowth.map(item => ({
+    const userActivity = userGrowth.map((item) => ({
       date: item._id,
       active: Math.floor(item.count * 0.7), // Mock active users
-      new: item.count
+      new: item.count,
     }));
 
     const response: ApiResponse<{
@@ -1090,7 +1110,10 @@ export const getUserAnalytics: RequestHandler = async (req, res) => {
         activeUsers,
         verifiedUsers,
         usersByType,
-        userGrowth: userGrowth.map(item => ({ date: item._id, count: item.count })),
+        userGrowth: userGrowth.map((item) => ({
+          date: item._id,
+          count: item.count,
+        })),
         userActivity,
       },
     };
@@ -1112,17 +1135,15 @@ export const updatePropertyPromotion: RequestHandler = async (req, res) => {
     const { propertyId } = req.params;
     const updates = req.body;
 
-    const result = await db
-      .collection("properties")
-      .updateOne(
-        { _id: new ObjectId(propertyId) },
-        {
-          $set: {
-            ...updates,
-            updatedAt: new Date(),
-          }
-        }
-      );
+    const result = await db.collection("properties").updateOne(
+      { _id: new ObjectId(propertyId) },
+      {
+        $set: {
+          ...updates,
+          updatedAt: new Date(),
+        },
+      },
+    );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({
@@ -1154,32 +1175,39 @@ export const debugProperties: RequestHandler = async (req, res) => {
     console.log("🔍 Debugging database properties...");
 
     const totalProperties = await db.collection("properties").countDocuments();
-    const properties = await db.collection("properties").find({}).limit(5).toArray();
+    const properties = await db
+      .collection("properties")
+      .find({})
+      .limit(5)
+      .toArray();
 
     console.log(`📊 Total properties in database: ${totalProperties}`);
-    console.log(`📊 Sample properties:`, properties.map(p => ({
-      _id: p._id,
-      title: p.title,
-      approvalStatus: p.approvalStatus
-    })));
+    console.log(
+      `📊 Sample properties:`,
+      properties.map((p) => ({
+        _id: p._id,
+        title: p.title,
+        approvalStatus: p.approvalStatus,
+      })),
+    );
 
     res.json({
       success: true,
       data: {
         totalProperties,
-        sampleProperties: properties.map(p => ({
+        sampleProperties: properties.map((p) => ({
           _id: p._id,
           title: p.title,
           approvalStatus: p.approvalStatus,
-          hasAllFields: !!(p._id && p.title && p.approvalStatus)
-        }))
-      }
+          hasAllFields: !!(p._id && p.title && p.approvalStatus),
+        })),
+      },
     });
   } catch (error) {
     console.error("Error debugging properties:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to debug properties"
+      error: "Failed to debug properties",
     });
   }
 };
@@ -1193,7 +1221,8 @@ export const createTestProperty: RequestHandler = async (req, res) => {
 
     const testProperty = {
       title: "Test Property for Approval - " + new Date().toLocaleString(),
-      description: "This is a test property created to test the approval system",
+      description:
+        "This is a test property created to test the approval system",
       price: 2500000,
       priceType: "sale",
       propertyType: "residential",
@@ -1204,7 +1233,7 @@ export const createTestProperty: RequestHandler = async (req, res) => {
         city: "Rohtak",
         state: "Haryana",
         address: "Sector 14, Rohtak, Haryana",
-        coordinates: { lat: 28.8955, lng: 76.6066 }
+        coordinates: { lat: 28.8955, lng: 76.6066 },
       },
       specifications: {
         bedrooms: 2,
@@ -1214,7 +1243,7 @@ export const createTestProperty: RequestHandler = async (req, res) => {
         floor: 3,
         totalFloors: 5,
         parking: true,
-        furnished: "semi-furnished"
+        furnished: "semi-furnished",
       },
       images: ["/placeholder.svg"],
       amenities: ["Power Backup", "Lift", "Security", "Parking"],
@@ -1223,7 +1252,7 @@ export const createTestProperty: RequestHandler = async (req, res) => {
       contactInfo: {
         name: "Admin Test",
         phone: "9876543210",
-        email: "admin@rohtakolx.com"
+        email: "admin@rohtakolx.com",
       },
       status: "active",
       featured: false,
@@ -1231,7 +1260,7 @@ export const createTestProperty: RequestHandler = async (req, res) => {
       approvalStatus: "pending",
       approvedAt: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     const result = await db.collection("properties").insertOne(testProperty);
@@ -1244,7 +1273,7 @@ export const createTestProperty: RequestHandler = async (req, res) => {
         title: "Second Test Property - Pending Approval",
         price: 3500000,
         subCategory: "3bhk",
-        approvalStatus: "pending"
+        approvalStatus: "pending",
       },
       {
         ...testProperty,
@@ -1252,26 +1281,34 @@ export const createTestProperty: RequestHandler = async (req, res) => {
         price: 4500000,
         subCategory: "4bhk",
         approvalStatus: "approved",
-        approvedAt: new Date()
-      }
+        approvedAt: new Date(),
+      },
     ];
 
-    const moreResults = await db.collection("properties").insertMany(moreTestProperties);
-    console.log("✅ Additional test properties created:", moreResults.insertedIds);
+    const moreResults = await db
+      .collection("properties")
+      .insertMany(moreTestProperties);
+    console.log(
+      "✅ Additional test properties created:",
+      moreResults.insertedIds,
+    );
 
     res.json({
       success: true,
       data: {
         message: `${moreTestProperties.length + 1} test properties created successfully`,
-        propertyIds: [result.insertedId, ...Object.values(moreResults.insertedIds)],
-        mainProperty: { ...testProperty, _id: result.insertedId }
-      }
+        propertyIds: [
+          result.insertedId,
+          ...Object.values(moreResults.insertedIds),
+        ],
+        mainProperty: { ...testProperty, _id: result.insertedId },
+      },
     });
   } catch (error) {
     console.error("Error creating test property:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to create test property"
+      error: "Failed to create test property",
     });
   }
 };
@@ -1322,8 +1359,13 @@ export const updatePropertyApproval: RequestHandler = async (req, res) => {
 
     if (!existingProperty) {
       console.error(`❌ Property not found: ${propertyId}`);
-      console.log(`🔍 Available properties in DB:`,
-        await db.collection("properties").find({}, { projection: { _id: 1, title: 1 } }).limit(5).toArray()
+      console.log(
+        `🔍 Available properties in DB:`,
+        await db
+          .collection("properties")
+          .find({}, { projection: { _id: 1, title: 1 } })
+          .limit(5)
+          .toArray(),
       );
       return res.status(404).json({
         success: false,
@@ -1333,20 +1375,20 @@ export const updatePropertyApproval: RequestHandler = async (req, res) => {
 
     console.log(`✅ Found property: ${existingProperty.title}`);
 
-    const result = await db
-      .collection("properties")
-      .updateOne(
-        { _id: new ObjectId(propertyId) },
-        {
-          $set: {
-            approvalStatus,
-            approvedAt: approvalStatus === "approved" ? new Date() : null,
-            updatedAt: new Date(),
-          }
-        }
-      );
+    const result = await db.collection("properties").updateOne(
+      { _id: new ObjectId(propertyId) },
+      {
+        $set: {
+          approvalStatus,
+          approvedAt: approvalStatus === "approved" ? new Date() : null,
+          updatedAt: new Date(),
+        },
+      },
+    );
 
-    console.log(`✅ Property approval updated: ${result.modifiedCount} documents modified`);
+    console.log(
+      `✅ Property approval updated: ${result.modifiedCount} documents modified`,
+    );
 
     const response: ApiResponse<{ message: string }> = {
       success: true,

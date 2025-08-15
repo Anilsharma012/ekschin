@@ -34,18 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 
 interface OtherService {
@@ -64,7 +54,7 @@ interface OtherService {
 
 const SERVICE_CATEGORIES = [
   "Plumber",
-  "Electrician", 
+  "Electrician",
   "Carpenter",
   "Painter",
   "Cleaner",
@@ -78,7 +68,7 @@ const SERVICE_CATEGORIES = [
   "Movers & Packers",
   "Real Estate Agent",
   "Legal Services",
-  "Other"
+  "Other",
 ];
 
 export default function OtherServicesManagement() {
@@ -92,7 +82,9 @@ export default function OtherServicesManagement() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
-  const [selectedService, setSelectedService] = useState<OtherService | null>(null);
+  const [selectedService, setSelectedService] = useState<OtherService | null>(
+    null,
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -138,12 +130,14 @@ export default function OtherServicesManagement() {
       }
     } catch (error: any) {
       console.error("Error fetching services:", error);
-      
+
       if (
         error.message?.includes("Unexpected token") ||
         error.message?.includes("<!doctype")
       ) {
-        console.warn("Other services API endpoint not implemented - received HTML instead of JSON");
+        console.warn(
+          "Other services API endpoint not implemented - received HTML instead of JSON",
+        );
         setServices([]);
       } else {
         setError("Failed to fetch services");
@@ -178,7 +172,9 @@ export default function OtherServicesManagement() {
           setError(data.error || "Failed to create service");
         }
       } else if (response.status === 404) {
-        setError("Other services API not yet implemented. Contact administrator.");
+        setError(
+          "Other services API not yet implemented. Contact administrator.",
+        );
       } else {
         setError("Failed to create service");
       }
@@ -188,7 +184,9 @@ export default function OtherServicesManagement() {
         error.message?.includes("Unexpected token") ||
         error.message?.includes("<!doctype")
       ) {
-        setError("Other services API not yet implemented. Contact administrator.");
+        setError(
+          "Other services API not yet implemented. Contact administrator.",
+        );
       } else {
         setError("Failed to create service");
       }
@@ -203,14 +201,17 @@ export default function OtherServicesManagement() {
     try {
       setSaving(true);
 
-      const response = await fetch(`/api/admin/other-services/${selectedService._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `/api/admin/other-services/${selectedService._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -234,7 +235,8 @@ export default function OtherServicesManagement() {
   };
 
   const handleDelete = async (serviceId: string) => {
-    if (!token || !confirm("Are you sure you want to delete this service?")) return;
+    if (!token || !confirm("Are you sure you want to delete this service?"))
+      return;
 
     try {
       const response = await fetch(`/api/admin/other-services/${serviceId}`, {
@@ -243,7 +245,7 @@ export default function OtherServicesManagement() {
       });
 
       if (response.ok) {
-        setServices(services.filter(service => service._id !== serviceId));
+        setServices(services.filter((service) => service._id !== serviceId));
       } else {
         const data = await response.json();
         setError(data.error || "Failed to delete service");
@@ -259,7 +261,7 @@ export default function OtherServicesManagement() {
 
     try {
       setUploading(true);
-      
+
       const formData = new FormData();
       formData.append("file", selectedFile);
 
@@ -327,43 +329,49 @@ export default function OtherServicesManagement() {
 
     try {
       const params = new URLSearchParams();
-      if (selectedCategory !== "all") params.append("category", selectedCategory);
+      if (selectedCategory !== "all")
+        params.append("category", selectedCategory);
       if (searchTerm) params.append("search", searchTerm);
 
-      const response = await fetch(`/api/admin/other-services/export?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `/api/admin/other-services/export?${params}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = 'other-services-export.csv';
+        link.download = "other-services-export.csv";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       } else {
-        setError('Failed to export services');
+        setError("Failed to export services");
       }
     } catch (error) {
-      setError('Network error while exporting services');
+      setError("Network error while exporting services");
     }
   };
 
-  const filteredServices = services.filter(service => {
-    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.phone.includes(searchTerm) ||
-                         service.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || service.category === selectedCategory;
+  const filteredServices = services.filter((service) => {
+    const matchesSearch =
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.phone.includes(searchTerm) ||
+      service.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || service.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const stats = {
     totalServices: services.length,
-    activeServices: services.filter(s => s.isActive).length,
-    categoriesCount: new Set(services.map(s => s.category)).size,
+    activeServices: services.filter((s) => s.isActive).length,
+    categoriesCount: new Set(services.map((s) => s.category)).size,
   };
 
   if (loading) {
@@ -398,8 +406,12 @@ export default function OtherServicesManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Other Services Management</h3>
-          <p className="text-gray-600">Manage service providers and bulk upload from CSV/XLSX</p>
+          <h3 className="text-2xl font-bold text-gray-900">
+            Other Services Management
+          </h3>
+          <p className="text-gray-600">
+            Manage service providers and bulk upload from CSV/XLSX
+          </p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -409,10 +421,7 @@ export default function OtherServicesManagement() {
             <Upload className="h-4 w-4 mr-2" />
             Bulk Upload
           </Button>
-          <Button
-            onClick={exportServices}
-            variant="outline"
-          >
+          <Button onClick={exportServices} variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
@@ -430,7 +439,9 @@ export default function OtherServicesManagement() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Services</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Services
+            </CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -440,11 +451,15 @@ export default function OtherServicesManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Services</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Services
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.activeServices}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.activeServices}
+            </div>
             <p className="text-xs text-muted-foreground">Currently active</p>
           </CardContent>
         </Card>
@@ -454,7 +469,9 @@ export default function OtherServicesManagement() {
             <Filter className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.categoriesCount}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.categoriesCount}
+            </div>
             <p className="text-xs text-muted-foreground">Service types</p>
           </CardContent>
         </Card>
@@ -474,8 +491,10 @@ export default function OtherServicesManagement() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {SERVICE_CATEGORIES.map(category => (
-              <SelectItem key={category} value={category}>{category}</SelectItem>
+            {SERVICE_CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -514,7 +533,9 @@ export default function OtherServicesManagement() {
                       )}
                       <div>
                         <p className="font-semibold">{service.name}</p>
-                        <p className="text-sm text-gray-500">{service.category}</p>
+                        <p className="text-sm text-gray-500">
+                          {service.category}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
@@ -530,13 +551,17 @@ export default function OtherServicesManagement() {
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <Clock className="h-3 w-3 text-gray-400" />
-                      <span className="text-sm">{service.openTime} - {service.closeTime}</span>
+                      <span className="text-sm">
+                        {service.openTime} - {service.closeTime}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-1">
                       <MapPin className="h-3 w-3 text-gray-400" />
-                      <span className="text-sm truncate max-w-[150px]">{service.address}</span>
+                      <span className="text-sm truncate max-w-[150px]">
+                        {service.address}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -581,11 +606,15 @@ export default function OtherServicesManagement() {
               ))}
               {filteredServices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-gray-500 py-8"
+                  >
                     <div className="space-y-2">
                       <p>No services found.</p>
                       <p className="text-xs text-gray-400">
-                        Other services API is not yet implemented. This feature will be available in a future update.
+                        Other services API is not yet implemented. This feature
+                        will be available in a future update.
                       </p>
                     </div>
                   </TableCell>
@@ -605,22 +634,35 @@ export default function OtherServicesManagement() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Service Name *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Service Name *
+                </label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Enter service provider name..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Category *</label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                <label className="block text-sm font-medium mb-2">
+                  Category *
+                </label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SERVICE_CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    {SERVICE_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -629,18 +671,26 @@ export default function OtherServicesManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Phone Number *
+                </label>
                 <Input
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   placeholder="Enter phone number..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Photo URL</label>
+                <label className="block text-sm font-medium mb-2">
+                  Photo URL
+                </label>
                 <Input
                   value={formData.photoUrl}
-                  onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, photoUrl: e.target.value })
+                  }
                   placeholder="Enter photo URL..."
                 />
               </div>
@@ -648,39 +698,54 @@ export default function OtherServicesManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Opening Time</label>
+                <label className="block text-sm font-medium mb-2">
+                  Opening Time
+                </label>
                 <Input
                   type="time"
                   value={formData.openTime}
-                  onChange={(e) => setFormData({ ...formData, openTime: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, openTime: e.target.value })
+                  }
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Closing Time</label>
+                <label className="block text-sm font-medium mb-2">
+                  Closing Time
+                </label>
                 <Input
                   type="time"
                   value={formData.closeTime}
-                  onChange={(e) => setFormData({ ...formData, closeTime: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, closeTime: e.target.value })
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Address *</label>
+              <label className="block text-sm font-medium mb-2">
+                Address *
+              </label>
               <Textarea
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
                 placeholder="Enter full address..."
                 rows={3}
               />
             </div>
 
             <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button 
-                onClick={handleCreate} 
+              <Button
+                onClick={handleCreate}
                 className="bg-[#C70000] hover:bg-[#A60000]"
                 disabled={saving}
               >
@@ -701,22 +766,35 @@ export default function OtherServicesManagement() {
             {/* Same form fields as create dialog */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Service Name *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Service Name *
+                </label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Enter service provider name..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Category *</label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                <label className="block text-sm font-medium mb-2">
+                  Category *
+                </label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SERVICE_CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    {SERVICE_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -724,11 +802,14 @@ export default function OtherServicesManagement() {
             </div>
 
             <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button 
-                onClick={handleUpdate} 
+              <Button
+                onClick={handleUpdate}
                 className="bg-[#C70000] hover:bg-[#A60000]"
                 disabled={saving}
               >
@@ -756,30 +837,40 @@ export default function OtherServicesManagement() {
                   />
                 )}
                 <div>
-                  <h4 className="text-lg font-semibold">{selectedService.name}</h4>
+                  <h4 className="text-lg font-semibold">
+                    {selectedService.name}
+                  </h4>
                   <Badge variant="outline">{selectedService.category}</Badge>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Phone</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Phone
+                  </label>
                   <p className="flex items-center space-x-1">
                     <Phone className="h-4 w-4 text-gray-400" />
                     <span>{selectedService.phone}</span>
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Hours</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Hours
+                  </label>
                   <p className="flex items-center space-x-1">
                     <Clock className="h-4 w-4 text-gray-400" />
-                    <span>{selectedService.openTime} - {selectedService.closeTime}</span>
+                    <span>
+                      {selectedService.openTime} - {selectedService.closeTime}
+                    </span>
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-600">Address</label>
+                <label className="text-sm font-medium text-gray-600">
+                  Address
+                </label>
                 <p className="flex items-start space-x-1 mt-1">
                   <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
                   <span>{selectedService.address}</span>
@@ -791,22 +882,31 @@ export default function OtherServicesManagement() {
       </Dialog>
 
       {/* Bulk Upload Dialog */}
-      <Dialog open={showBulkUploadDialog} onOpenChange={setShowBulkUploadDialog}>
+      <Dialog
+        open={showBulkUploadDialog}
+        onOpenChange={setShowBulkUploadDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Bulk Upload Services</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 mb-2">CSV/XLSX Format</h4>
-              <p className="text-sm text-blue-700 mb-3">Your file should contain the following columns:</p>
+              <h4 className="font-medium text-blue-900 mb-2">
+                CSV/XLSX Format
+              </h4>
+              <p className="text-sm text-blue-700 mb-3">
+                Your file should contain the following columns:
+              </p>
               <div className="text-xs font-mono bg-white p-2 rounded border">
                 category, name, phone, photoUrl, openTime, closeTime, address
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Select File</label>
+              <label className="block text-sm font-medium mb-2">
+                Select File
+              </label>
               <Input
                 type="file"
                 accept=".csv,.xlsx,.xls"
@@ -820,10 +920,13 @@ export default function OtherServicesManagement() {
             </div>
 
             <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowBulkUploadDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowBulkUploadDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleBulkUpload}
                 className="bg-[#C70000] hover:bg-[#A60000]"
                 disabled={uploading || !selectedFile}
@@ -852,8 +955,9 @@ export default function OtherServicesManagement() {
               </span>
             </div>
             <p className="text-sm text-orange-700">
-              Frontend interface is ready with CRUD operations, bulk upload functionality, and export features. 
-              Backend API endpoints need to be implemented to make this fully functional.
+              Frontend interface is ready with CRUD operations, bulk upload
+              functionality, and export features. Backend API endpoints need to
+              be implemented to make this fully functional.
             </p>
           </div>
         </CardContent>

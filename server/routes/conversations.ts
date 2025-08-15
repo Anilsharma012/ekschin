@@ -13,26 +13,26 @@ export const findOrCreateConversation: RequestHandler = async (req, res) => {
     if (!propertyId) {
       return res.status(400).json({
         success: false,
-        error: "propertyId is required"
+        error: "propertyId is required",
       });
     }
 
     if (!ObjectId.isValid(propertyId as string)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid property ID"
+        error: "Invalid property ID",
       });
     }
 
     // Get property to find owner
     const property = await db.collection("properties").findOne({
-      _id: new ObjectId(propertyId as string)
+      _id: new ObjectId(propertyId as string),
     });
 
     if (!property) {
       return res.status(404).json({
         success: false,
-        error: "Property not found"
+        error: "Property not found",
       });
     }
 
@@ -40,21 +40,21 @@ export const findOrCreateConversation: RequestHandler = async (req, res) => {
     if (!ownerId) {
       return res.status(400).json({
         success: false,
-        error: "Property has no owner"
+        error: "Property has no owner",
       });
     }
 
     if (ownerId === userId) {
       return res.status(400).json({
         success: false,
-        error: "Cannot create conversation with yourself"
+        error: "Cannot create conversation with yourself",
       });
     }
 
     // Check if conversation already exists
     const existingConversation = await db.collection("conversations").findOne({
       propertyId: propertyId as string,
-      participants: { $all: [userId, ownerId] }
+      participants: { $all: [userId, ownerId] },
     });
 
     if (existingConversation) {
@@ -65,8 +65,8 @@ export const findOrCreateConversation: RequestHandler = async (req, res) => {
           propertyId: existingConversation.propertyId,
           participants: existingConversation.participants,
           createdAt: existingConversation.createdAt,
-          lastMessageAt: existingConversation.lastMessageAt
-        }
+          lastMessageAt: existingConversation.lastMessageAt,
+        },
       });
     }
 
@@ -76,17 +76,19 @@ export const findOrCreateConversation: RequestHandler = async (req, res) => {
       participants: [userId, ownerId],
       createdAt: new Date(),
       lastMessageAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
-    const result = await db.collection("conversations").insertOne(newConversation);
+    const result = await db
+      .collection("conversations")
+      .insertOne(newConversation);
 
     const response: ApiResponse<any> = {
       success: true,
       data: {
         _id: result.insertedId,
-        ...newConversation
-      }
+        ...newConversation,
+      },
     };
 
     res.status(201).json(response);
@@ -94,7 +96,7 @@ export const findOrCreateConversation: RequestHandler = async (req, res) => {
     console.error("Error finding/creating conversation:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to find or create conversation"
+      error: "Failed to find or create conversation",
     });
   }
 };
@@ -109,7 +111,7 @@ export const createConversation: RequestHandler = async (req, res) => {
     if (!propertyId || !participants || !Array.isArray(participants)) {
       return res.status(400).json({
         success: false,
-        error: "propertyId and participants array are required"
+        error: "propertyId and participants array are required",
       });
     }
 
@@ -120,25 +122,25 @@ export const createConversation: RequestHandler = async (req, res) => {
     if (!ObjectId.isValid(propertyId)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid property ID"
+        error: "Invalid property ID",
       });
     }
 
     const property = await db.collection("properties").findOne({
-      _id: new ObjectId(propertyId)
+      _id: new ObjectId(propertyId),
     });
 
     if (!property) {
       return res.status(404).json({
         success: false,
-        error: "Property not found"
+        error: "Property not found",
       });
     }
 
     // Check if conversation already exists for this property and participants
     const existingConversation = await db.collection("conversations").findOne({
       propertyId: propertyId,
-      participants: { $all: allParticipants }
+      participants: { $all: allParticipants },
     });
 
     if (existingConversation) {
@@ -149,8 +151,8 @@ export const createConversation: RequestHandler = async (req, res) => {
           propertyId: existingConversation.propertyId,
           participants: existingConversation.participants,
           createdAt: existingConversation.createdAt,
-          lastMessageAt: existingConversation.lastMessageAt
-        }
+          lastMessageAt: existingConversation.lastMessageAt,
+        },
       });
     }
 
@@ -160,17 +162,19 @@ export const createConversation: RequestHandler = async (req, res) => {
       participants: allParticipants,
       createdAt: new Date(),
       lastMessageAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
-    const result = await db.collection("conversations").insertOne(newConversation);
+    const result = await db
+      .collection("conversations")
+      .insertOne(newConversation);
 
     const response: ApiResponse<any> = {
       success: true,
       data: {
         _id: result.insertedId,
-        ...newConversation
-      }
+        ...newConversation,
+      },
     };
 
     res.status(201).json(response);
@@ -178,7 +182,7 @@ export const createConversation: RequestHandler = async (req, res) => {
     console.error("Error creating conversation:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to create conversation"
+      error: "Failed to create conversation",
     });
   }
 };
@@ -194,32 +198,32 @@ export const getMyConversations: RequestHandler = async (req, res) => {
       .aggregate([
         {
           $match: {
-            participants: userId
-          }
+            participants: userId,
+          },
         },
         {
           $lookup: {
             from: "properties",
             localField: "propertyId",
             foreignField: "_id",
-            as: "property"
-          }
+            as: "property",
+          },
         },
         {
           $lookup: {
             from: "users",
             localField: "participants",
             foreignField: "_id",
-            as: "participantDetails"
-          }
+            as: "participantDetails",
+          },
         },
         {
           $lookup: {
             from: "messages",
             localField: "_id",
             foreignField: "conversationId",
-            as: "messages"
-          }
+            as: "messages",
+          },
         },
         {
           $addFields: {
@@ -228,11 +232,11 @@ export const getMyConversations: RequestHandler = async (req, res) => {
                 {
                   $sortArray: {
                     input: "$messages",
-                    sortBy: { createdAt: -1 }
-                  }
+                    sortBy: { createdAt: -1 },
+                  },
                 },
-                0
-              ]
+                0,
+              ],
             },
             unreadCount: {
               $size: {
@@ -249,18 +253,18 @@ export const getMyConversations: RequestHandler = async (req, res) => {
                               $map: {
                                 input: "$$this.readBy",
                                 as: "reader",
-                                in: "$$reader.userId"
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
+                                in: "$$reader.userId",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
         },
         {
           $project: {
@@ -271,18 +275,18 @@ export const getMyConversations: RequestHandler = async (req, res) => {
             property: { $arrayElemAt: ["$property", 0] },
             participantDetails: 1,
             lastMessage: 1,
-            unreadCount: 1
-          }
+            unreadCount: 1,
+          },
         },
         {
-          $sort: { lastMessageAt: -1 }
-        }
+          $sort: { lastMessageAt: -1 },
+        },
       ])
       .toArray();
 
     const response: ApiResponse<any[]> = {
       success: true,
-      data: conversations
+      data: conversations,
     };
 
     res.json(response);
@@ -290,7 +294,7 @@ export const getMyConversations: RequestHandler = async (req, res) => {
     console.error("Error fetching conversations:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch conversations"
+      error: "Failed to fetch conversations",
     });
   }
 };
@@ -310,20 +314,20 @@ export const getConversationMessages: RequestHandler = async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid conversation ID"
+        error: "Invalid conversation ID",
       });
     }
 
     // Check if user is participant in conversation
     const conversation = await db.collection("conversations").findOne({
       _id: new ObjectId(id),
-      participants: userId
+      participants: userId,
     });
 
     if (!conversation) {
       return res.status(403).json({
         success: false,
-        error: "Access denied"
+        error: "Access denied",
       });
     }
 
@@ -340,21 +344,21 @@ export const getConversationMessages: RequestHandler = async (req, res) => {
       {
         conversationId: id,
         senderId: { $ne: userId },
-        "readBy.userId": { $ne: userId }
+        "readBy.userId": { $ne: userId },
       },
       {
         $push: {
           readBy: {
             userId: userId,
-            readAt: new Date()
-          }
-        }
-      }
+            readAt: new Date(),
+          },
+        },
+      },
     );
 
     const response: ApiResponse<any[]> = {
       success: true,
-      data: messages.reverse() // Return in chronological order
+      data: messages.reverse(), // Return in chronological order
     };
 
     res.json(response);
@@ -362,7 +366,7 @@ export const getConversationMessages: RequestHandler = async (req, res) => {
     console.error("Error fetching messages:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch messages"
+      error: "Failed to fetch messages",
     });
   }
 };
@@ -378,27 +382,27 @@ export const sendMessageToConversation: RequestHandler = async (req, res) => {
     if (!text && !imageUrl) {
       return res.status(400).json({
         success: false,
-        error: "Either text or imageUrl is required"
+        error: "Either text or imageUrl is required",
       });
     }
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid conversation ID"
+        error: "Invalid conversation ID",
       });
     }
 
     // Check if user is participant in conversation
     const conversation = await db.collection("conversations").findOne({
       _id: new ObjectId(id),
-      participants: userId
+      participants: userId,
     });
 
     if (!conversation) {
       return res.status(403).json({
         success: false,
-        error: "Access denied"
+        error: "Access denied",
       });
     }
 
@@ -407,7 +411,7 @@ export const sendMessageToConversation: RequestHandler = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: "User not found"
+        error: "User not found",
       });
     }
 
@@ -423,10 +427,10 @@ export const sendMessageToConversation: RequestHandler = async (req, res) => {
       readBy: [
         {
           userId: userId,
-          readAt: new Date()
-        }
+          readAt: new Date(),
+        },
       ],
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     const messageResult = await db.collection("messages").insertOne(newMessage);
@@ -437,17 +441,17 @@ export const sendMessageToConversation: RequestHandler = async (req, res) => {
       {
         $set: {
           lastMessageAt: new Date(),
-          updatedAt: new Date()
-        }
-      }
+          updatedAt: new Date(),
+        },
+      },
     );
 
     const response: ApiResponse<any> = {
       success: true,
       data: {
         _id: messageResult.insertedId,
-        ...newMessage
-      }
+        ...newMessage,
+      },
     };
 
     res.status(201).json(response);
@@ -455,7 +459,7 @@ export const sendMessageToConversation: RequestHandler = async (req, res) => {
     console.error("Error sending message:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to send message"
+      error: "Failed to send message",
     });
   }
 };

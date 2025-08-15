@@ -10,12 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +35,9 @@ export default function PropertyImageManager() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null,
+  );
   const [newImageUrl, setNewImageUrl] = useState("");
 
   // Free stock images for properties
@@ -73,7 +70,7 @@ export default function PropertyImageManager() {
       setLoading(true);
       setError("");
 
-      const { api } = await import('../../lib/api');
+      const { api } = await import("../../lib/api");
       const response = await api.get("admin/properties", token);
       if (response.data.success) {
         setProperties(response.data.data.properties || []);
@@ -92,16 +89,22 @@ export default function PropertyImageManager() {
     if (!token || !imageUrl.trim()) return;
 
     try {
-      const property = properties.find(p => p._id === propertyId);
+      const property = properties.find((p) => p._id === propertyId);
       if (!property) return;
 
       const updatedImages = [...property.images, imageUrl];
 
-      const { api } = await import('../../lib/api');
-      await api.put(`admin/properties/${propertyId}`, { images: updatedImages }, token);
-      setProperties(properties.map(p =>
-        p._id === propertyId ? { ...p, images: updatedImages } : p
-      ));
+      const { api } = await import("../../lib/api");
+      await api.put(
+        `admin/properties/${propertyId}`,
+        { images: updatedImages },
+        token,
+      );
+      setProperties(
+        properties.map((p) =>
+          p._id === propertyId ? { ...p, images: updatedImages } : p,
+        ),
+      );
       setNewImageUrl("");
     } catch (error) {
       console.error("Error adding image:", error);
@@ -109,27 +112,41 @@ export default function PropertyImageManager() {
     }
   };
 
-  const removeImageFromProperty = async (propertyId: string, imageIndex: number) => {
+  const removeImageFromProperty = async (
+    propertyId: string,
+    imageIndex: number,
+  ) => {
     if (!token) return;
 
     try {
-      const property = properties.find(p => p._id === propertyId);
+      const property = properties.find((p) => p._id === propertyId);
       if (!property) return;
 
-      const updatedImages = property.images.filter((_, index) => index !== imageIndex);
+      const updatedImages = property.images.filter(
+        (_, index) => index !== imageIndex,
+      );
 
-      const { api } = await import('../../lib/api');
-      await api.put(`admin/properties/${propertyId}`, { images: updatedImages }, token);
-      setProperties(properties.map(p =>
-        p._id === propertyId ? { ...p, images: updatedImages } : p
-      ));
+      const { api } = await import("../../lib/api");
+      await api.put(
+        `admin/properties/${propertyId}`,
+        { images: updatedImages },
+        token,
+      );
+      setProperties(
+        properties.map((p) =>
+          p._id === propertyId ? { ...p, images: updatedImages } : p,
+        ),
+      );
     } catch (error) {
       console.error("Error removing image:", error);
       setError("Failed to remove image");
     }
   };
 
-  const addStockImageToProperty = (propertyId: string, stockImageUrl: string) => {
+  const addStockImageToProperty = (
+    propertyId: string,
+    stockImageUrl: string,
+  ) => {
     addImageToProperty(propertyId, stockImageUrl);
   };
 
@@ -164,8 +181,12 @@ export default function PropertyImageManager() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Property Image Manager</h3>
-          <p className="text-gray-600">Add and manage images for property listings</p>
+          <h3 className="text-2xl font-bold text-gray-900">
+            Property Image Manager
+          </h3>
+          <p className="text-gray-600">
+            Add and manage images for property listings
+          </p>
         </div>
       </div>
 
@@ -201,7 +222,9 @@ export default function PropertyImageManager() {
             ))}
           </div>
           <p className="text-sm text-gray-500 mt-3">
-            {selectedProperty ? `Click any image to add to "${selectedProperty.title}"` : "Select a property first to add images"}
+            {selectedProperty
+              ? `Click any image to add to "${selectedProperty.title}"`
+              : "Select a property first to add images"}
           </p>
         </CardContent>
       </Card>
@@ -209,21 +232,32 @@ export default function PropertyImageManager() {
       {/* Properties List */}
       <div className="grid grid-cols-1 gap-6">
         {properties.map((property) => (
-          <Card key={property._id} className={`${selectedProperty?._id === property._id ? 'ring-2 ring-[#C70000]' : ''}`}>
+          <Card
+            key={property._id}
+            className={`${selectedProperty?._id === property._id ? "ring-2 ring-[#C70000]" : ""}`}
+          >
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle className="text-lg">{property.title}</CardTitle>
                   <p className="text-sm text-gray-500">
-                    ₹{(property.price / 100000).toFixed(1)}L • {property.location?.city || 'Unknown'}, {property.location?.state || 'Unknown'}
+                    ₹{(property.price / 100000).toFixed(1)}L •{" "}
+                    {property.location?.city || "Unknown"},{" "}
+                    {property.location?.state || "Unknown"}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   onClick={() => setSelectedProperty(property)}
-                  className={selectedProperty?._id === property._id ? 'bg-[#C70000] text-white' : ''}
+                  className={
+                    selectedProperty?._id === property._id
+                      ? "bg-[#C70000] text-white"
+                      : ""
+                  }
                 >
-                  {selectedProperty?._id === property._id ? 'Selected' : 'Select'}
+                  {selectedProperty?._id === property._id
+                    ? "Selected"
+                    : "Select"}
                 </Button>
               </div>
             </CardHeader>
@@ -231,7 +265,9 @@ export default function PropertyImageManager() {
               <div className="space-y-4">
                 {/* Current Images */}
                 <div>
-                  <h4 className="font-medium mb-2">Current Images ({property.images.length})</h4>
+                  <h4 className="font-medium mb-2">
+                    Current Images ({property.images.length})
+                  </h4>
                   {property.images.length > 0 ? (
                     <div className="grid grid-cols-4 gap-3">
                       {property.images.map((imageUrl, index) => (
@@ -254,7 +290,9 @@ export default function PropertyImageManager() {
                                 size="sm"
                                 variant="outline"
                                 className="bg-white text-red-600"
-                                onClick={() => removeImageFromProperty(property._id, index)}
+                                onClick={() =>
+                                  removeImageFromProperty(property._id, index)
+                                }
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -275,7 +313,9 @@ export default function PropertyImageManager() {
                 <div className="flex space-x-2">
                   <Input
                     placeholder="Enter image URL..."
-                    value={selectedProperty?._id === property._id ? newImageUrl : ""}
+                    value={
+                      selectedProperty?._id === property._id ? newImageUrl : ""
+                    }
                     onChange={(e) => {
                       if (selectedProperty?._id === property._id) {
                         setNewImageUrl(e.target.value);
@@ -284,8 +324,13 @@ export default function PropertyImageManager() {
                     disabled={selectedProperty?._id !== property._id}
                   />
                   <Button
-                    onClick={() => addImageToProperty(property._id, newImageUrl)}
-                    disabled={!newImageUrl.trim() || selectedProperty?._id !== property._id}
+                    onClick={() =>
+                      addImageToProperty(property._id, newImageUrl)
+                    }
+                    disabled={
+                      !newImageUrl.trim() ||
+                      selectedProperty?._id !== property._id
+                    }
                     className="bg-[#C70000] hover:bg-[#A60000]"
                   >
                     <Plus className="h-4 w-4 mr-1" />

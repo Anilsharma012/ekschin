@@ -28,24 +28,24 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
             from: "properties",
             localField: "propertyId",
             foreignField: "_id",
-            as: "property"
-          }
+            as: "property",
+          },
         },
         {
           $lookup: {
             from: "users",
             localField: "participants",
             foreignField: "_id",
-            as: "participantDetails"
-          }
+            as: "participantDetails",
+          },
         },
         {
           $lookup: {
             from: "messages",
             localField: "_id",
             foreignField: "conversationId",
-            as: "messages"
-          }
+            as: "messages",
+          },
         },
         {
           $addFields: {
@@ -54,11 +54,11 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
                 {
                   $sortArray: {
                     input: "$messages",
-                    sortBy: { createdAt: -1 }
-                  }
+                    sortBy: { createdAt: -1 },
+                  },
                 },
-                0
-              ]
+                0,
+              ],
             },
             messageCount: { $size: "$messages" },
             hasUnreadAdminMessages: {
@@ -78,21 +78,21 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
                                   $map: {
                                     input: "$$this.readBy",
                                     as: "reader",
-                                    in: "$$reader.userId"
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
+                                    in: "$$reader.userId",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
                 },
-                0
-              ]
-            }
-          }
+                0,
+              ],
+            },
+          },
         },
         {
           $project: {
@@ -104,14 +104,14 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
             participantDetails: 1,
             lastMessage: 1,
             messageCount: 1,
-            hasUnreadAdminMessages: 1
-          }
+            hasUnreadAdminMessages: 1,
+          },
         },
         {
-          $sort: { lastMessageAt: -1 }
+          $sort: { lastMessageAt: -1 },
         },
         { $skip: skip },
-        { $limit: limitNum }
+        { $limit: limitNum },
       ])
       .toArray();
 
@@ -128,8 +128,8 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
         conversations,
         total,
         page: pageNum,
-        totalPages: Math.ceil(total / limitNum)
-      }
+        totalPages: Math.ceil(total / limitNum),
+      },
     };
 
     res.json(response);
@@ -137,7 +137,7 @@ export const getAdminConversations: RequestHandler = async (req, res) => {
     console.error("Error fetching admin conversations:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch conversations"
+      error: "Failed to fetch conversations",
     });
   }
 };
@@ -153,26 +153,26 @@ export const adminReplyToConversation: RequestHandler = async (req, res) => {
     if (!text && !imageUrl) {
       return res.status(400).json({
         success: false,
-        error: "Either text or imageUrl is required"
+        error: "Either text or imageUrl is required",
       });
     }
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid conversation ID"
+        error: "Invalid conversation ID",
       });
     }
 
     // Check if conversation exists
     const conversation = await db.collection("conversations").findOne({
-      _id: new ObjectId(id)
+      _id: new ObjectId(id),
     });
 
     if (!conversation) {
       return res.status(404).json({
         success: false,
-        error: "Conversation not found"
+        error: "Conversation not found",
       });
     }
 
@@ -181,7 +181,7 @@ export const adminReplyToConversation: RequestHandler = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         success: false,
-        error: "Admin user not found"
+        error: "Admin user not found",
       });
     }
 
@@ -197,10 +197,10 @@ export const adminReplyToConversation: RequestHandler = async (req, res) => {
       readBy: [
         {
           userId: adminId,
-          readAt: new Date()
-        }
+          readAt: new Date(),
+        },
       ],
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     const messageResult = await db.collection("messages").insertOne(newMessage);
@@ -211,17 +211,17 @@ export const adminReplyToConversation: RequestHandler = async (req, res) => {
       {
         $set: {
           lastMessageAt: new Date(),
-          updatedAt: new Date()
-        }
-      }
+          updatedAt: new Date(),
+        },
+      },
     );
 
     const response: ApiResponse<any> = {
       success: true,
       data: {
         _id: messageResult.insertedId,
-        ...newMessage
-      }
+        ...newMessage,
+      },
     };
 
     res.status(201).json(response);
@@ -229,7 +229,7 @@ export const adminReplyToConversation: RequestHandler = async (req, res) => {
     console.error("Error sending admin message:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to send message"
+      error: "Failed to send message",
     });
   }
 };
@@ -239,43 +239,46 @@ export const getAdminConversationStats: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
 
-    const stats = await db.collection("conversations").aggregate([
-      {
-        $facet: {
-          totalConversations: [{ $count: "count" }],
-          conversationsToday: [
-            {
-              $match: {
-                createdAt: {
-                  $gte: new Date(new Date().setHours(0, 0, 0, 0))
-                }
-              }
-            },
-            { $count: "count" }
-          ],
-          conversationsThisWeek: [
-            {
-              $match: {
-                createdAt: {
-                  $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                }
-              }
-            },
-            { $count: "count" }
-          ],
-          activeConversations: [
-            {
-              $match: {
-                lastMessageAt: {
-                  $gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
-                }
-              }
-            },
-            { $count: "count" }
-          ]
-        }
-      }
-    ]).toArray();
+    const stats = await db
+      .collection("conversations")
+      .aggregate([
+        {
+          $facet: {
+            totalConversations: [{ $count: "count" }],
+            conversationsToday: [
+              {
+                $match: {
+                  createdAt: {
+                    $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                  },
+                },
+              },
+              { $count: "count" },
+            ],
+            conversationsThisWeek: [
+              {
+                $match: {
+                  createdAt: {
+                    $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                  },
+                },
+              },
+              { $count: "count" },
+            ],
+            activeConversations: [
+              {
+                $match: {
+                  lastMessageAt: {
+                    $gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                  },
+                },
+              },
+              { $count: "count" },
+            ],
+          },
+        },
+      ])
+      .toArray();
 
     const result = stats[0];
     const response: ApiResponse<any> = {
@@ -284,8 +287,8 @@ export const getAdminConversationStats: RequestHandler = async (req, res) => {
         totalConversations: result.totalConversations[0]?.count || 0,
         conversationsToday: result.conversationsToday[0]?.count || 0,
         conversationsThisWeek: result.conversationsThisWeek[0]?.count || 0,
-        activeConversations: result.activeConversations[0]?.count || 0
-      }
+        activeConversations: result.activeConversations[0]?.count || 0,
+      },
     };
 
     res.json(response);
@@ -293,7 +296,7 @@ export const getAdminConversationStats: RequestHandler = async (req, res) => {
     console.error("Error fetching admin conversation stats:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch statistics"
+      error: "Failed to fetch statistics",
     });
   }
 };
@@ -308,14 +311,14 @@ export const updateConversationStatus: RequestHandler = async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid conversation ID"
+        error: "Invalid conversation ID",
       });
     }
 
     if (!["open", "closed", "pending"].includes(status)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid status. Must be: open, closed, or pending"
+        error: "Invalid status. Must be: open, closed, or pending",
       });
     }
 
@@ -324,21 +327,21 @@ export const updateConversationStatus: RequestHandler = async (req, res) => {
       {
         $set: {
           status: status,
-          updatedAt: new Date()
-        }
-      }
+          updatedAt: new Date(),
+        },
+      },
     );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({
         success: false,
-        error: "Conversation not found"
+        error: "Conversation not found",
       });
     }
 
     const response: ApiResponse<{ message: string }> = {
       success: true,
-      data: { message: `Conversation status updated to ${status}` }
+      data: { message: `Conversation status updated to ${status}` },
     };
 
     res.json(response);
@@ -346,7 +349,7 @@ export const updateConversationStatus: RequestHandler = async (req, res) => {
     console.error("Error updating conversation status:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to update conversation status"
+      error: "Failed to update conversation status",
     });
   }
 };
