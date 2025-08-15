@@ -3,6 +3,102 @@ import { getDatabase } from "../db/mongodb";
 import { ObjectId } from "mongodb";
 import { ApiResponse } from "@shared/types";
 
+// POST /conversations/find-or-create - Find existing or create new conversation
+export const findOrCreateConversation: RequestHandler = async (req, res) => {
+  try {
+    const db = getDatabase();
+    const userId = (req as any).userId;
+    const { propertyId } = req.query;
+
+    if (!propertyId) {
+      return res.status(400).json({
+        success: false,
+        error: "propertyId is required"
+      });
+    }
+
+    if (!ObjectId.isValid(propertyId as string)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid property ID"
+      });
+    }
+
+    // Get property to find owner
+    const property = await db.collection("properties").findOne({
+      _id: new ObjectId(propertyId as string)
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        error: "Property not found"
+      });
+    }
+
+    const ownerId = property.ownerId || property.sellerId;
+    if (!ownerId) {
+      return res.status(400).json({
+        success: false,
+        error: "Property has no owner"
+      });
+    }
+
+    if (ownerId === userId) {
+      return res.status(400).json({
+        success: false,
+        error: "Cannot create conversation with yourself"
+      });
+    }
+
+    // Check if conversation already exists
+    const existingConversation = await db.collection("conversations").findOne({
+      propertyId: propertyId as string,
+      participants: { $all: [userId, ownerId] }
+    });
+
+    if (existingConversation) {
+      return res.json({
+        success: true,
+        data: {
+          _id: existingConversation._id,
+          propertyId: existingConversation.propertyId,
+          participants: existingConversation.participants,
+          createdAt: existingConversation.createdAt,
+          lastMessageAt: existingConversation.lastMessageAt
+        }
+      });
+    }
+
+    // Create new conversation
+    const newConversation = {
+      propertyId: propertyId as string,
+      participants: [userId, ownerId],
+      createdAt: new Date(),
+      lastMessageAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const result = await db.collection("conversations").insertOne(newConversation);
+
+    const response: ApiResponse<any> = {
+      success: true,
+      data: {
+        _id: result.insertedId,
+        ...newConversation
+      }
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    console.error("Error finding/creating conversation:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to find or create conversation"
+    });
+  }
+};
+
 // POST /conversations - Create new conversation
 export const createConversation: RequestHandler = async (req, res) => {
   try {
