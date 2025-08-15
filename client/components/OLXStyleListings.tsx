@@ -33,9 +33,9 @@ export default function OLXStyleListings() {
 
   const fetchProperties = async () => {
     try {
-      const { enhancedApi } = await import('../lib/api-enhanced');
-      const response = await enhancedApi.get("properties?limit=20");
-      const data = response.data;
+      // Fetch "Fresh" properties as per requirements: GET /properties?status=active&limit=10
+      const response = await fetch("/api/properties?status=active&limit=10");
+      const data = await response.json();
 
       if (data.success && data.data.properties && data.data.properties.length > 0) {
         setProperties(data.data.properties);
