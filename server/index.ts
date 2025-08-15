@@ -346,6 +346,18 @@ import {
   updateTicketStatus,
 } from "./routes/tickets";
 
+// Other Services routes
+import {
+  getAllOtherServices,
+  getPublicOtherServices,
+  createOtherService,
+  updateOtherService,
+  deleteOtherService,
+  importOtherServices,
+  exportOtherServices,
+  getServiceCategories,
+} from "./routes/other-services";
+
 export function createServer() {
   const app = express();
 
